@@ -1,0 +1,87 @@
+# ============ Dependencies ============
+node_modules/
+.pnp
+.pnp.js
+.pnpm-store/
+jspm_packages/
+
+# ============ Build outputs ============
+dist/
+build/
+out/
+release/
+*.tsbuildinfo
+next-env.d.ts
+
+# ============ Next.js ============
+.next/
+.vercel/
+.netlify/
+.swc/
+
+# ============ Testing ============
+coverage/
+.nyc_output/
+*.lcov
+lib-cov/
+
+# ============ Environment & secrets ============
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+
+# ============ Databases & local infra ============
+*.db
+*.sqlite
+*.db-journal
+postgres-data/
+pgdata/
+docker-compose.override.yml
+
+# ============ Uploads / runtime data ============
+public/uploads/
+storage/app/public/
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+
+# ============ Logs ============
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ============ Caches / tooling ============
+.cache/
+.parcel-cache/
+.turbo/
+.eslintcache
+.stylelintcache
+node-compile-cache/
+
+# ============ IDE / editor ============
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.sublime-workspace
+
+# ============ OS ============
+.DS_Store
+.Spotlight-V100
+.Trashes
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
