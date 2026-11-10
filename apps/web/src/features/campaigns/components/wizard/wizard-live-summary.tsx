@@ -1,0 +1,177 @@
+'use client';
+
+import React from 'react';
+import { formatPersianDate } from '@/lib/persian-date';
+import { CampaignFormData } from '../../types';
+import {
+  Wallet,
+  AlertTriangle,
+  CheckCircle2,
+  PieChart,
+  Calendar,
+  Layers,
+} from 'lucide-react';
+
+interface WizardLiveSummaryProps {
+  formData: CampaignFormData;
+}
+
+export function WizardLiveSummary({ formData }: WizardLiveSummaryProps) {
+  const totalBudget = Number(formData.budget) || 0;
+
+  // محاسبه مجموع بودجه تخصیص‌یافته به پلتفرم‌های فعال
+  const allocatedBudget = (formData.platforms || [])
+    .filter((p) => p.enabled)
+    .reduce((sum, p) => sum + (Number(p.allocatedBudget) || 0), 0);
+
+  const remainingBudget = totalBudget - allocatedBudget;
+  const isBudgetExceeded = remainingBudget < 0;
+  const isBudgetMatched = totalBudget > 0 && remainingBudget === 0;
+  const percentage =
+    totalBudget > 0
+      ? Math.min(100, Math.round((allocatedBudget / totalBudget) * 100))
+      : 0;
+
+  return (
+    <aside className="bg-white rounded-2xl border border-gray-200/80 p-5 shadow-sm space-y-5 sticky top-6">
+      {/* هدر سایدبار */}
+      <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+        <div className="flex items-center gap-2 text-gray-900 font-bold text-sm">
+          <PieChart size={18} className="text-blue-600" />
+          <span>خلاصه زنده بودجه و پلتفرم‌ها</span>
+        </div>
+        <span className="text-xs bg-blue-50 text-blue-700 font-medium px-2 py-0.5 rounded-full">
+          مرحله {formData.currentStep} از ۶
+        </span>
+      </div>
+
+      {/* کارت بودجه کل */}
+      <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs text-gray-500">
+            <Wallet size={15} className="text-gray-400" />
+            <span>بودجه کل کمپین:</span>
+          </div>
+          <span className="text-sm font-bold text-gray-900">
+            {totalBudget.toLocaleString('fa-IR')} تومان
+          </span>
+        </div>
+
+        {/* نوار پیشرفت درصد تخصیص */}
+        <div>
+          <div className="flex justify-between text-[11px] mb-1 font-medium">
+            <span className="text-gray-500">تخصیص پلتفرم‌ها</span>
+            <span
+              className={
+                isBudgetExceeded
+                  ? 'text-red-600 font-bold'
+                  : 'text-blue-600 font-semibold'
+              }
+            >
+              {percentage.toLocaleString('fa-IR')}٪
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-300 ${
+                isBudgetExceeded
+                  ? 'bg-red-500'
+                  : isBudgetMatched
+                  ? 'bg-emerald-500'
+                  : 'bg-blue-600'
+              }`}
+              style={{
+                width: `${Math.min(100, isBudgetExceeded ? 100 : percentage)}%`,
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between text-xs pt-1 border-t border-gray-200/60">
+          <span className="text-gray-500">مجموع تخصیص‌یافته:</span>
+          <span className="font-semibold text-gray-800">
+            {allocatedBudget.toLocaleString('fa-IR')} تومان
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-gray-500">باقیمانده:</span>
+          <span
+            className={`font-bold ${
+              isBudgetExceeded
+                ? 'text-red-600'
+                : isBudgetMatched
+                ? 'text-emerald-600'
+                : 'text-amber-600'
+            }`}
+          >
+            {Math.abs(remainingBudget).toLocaleString('fa-IR')} تومان
+            {isBudgetExceeded && ' (مازاد)'}
+          </span>
+        </div>
+      </div>
+
+      {/* پیام‌های هشدار یا تایید هوشمند بودجه */}
+      {isBudgetExceeded && (
+        <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-xs">
+          <AlertTriangle size={16} className="shrink-0 mt-0.5 text-red-600" />
+          <span>
+            مجموع بودجه پلتفرم‌ها بیشتر از بودجه کل کمپین است. لطفاً مبالغ پلتفرم‌ها
+            را تعدیل کنید.
+          </span>
+        </div>
+      )}
+
+      {isBudgetMatched && (
+        <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 p-3 rounded-xl text-xs">
+          <CheckCircle2 size={16} className="shrink-0 text-emerald-600" />
+          <span>بودجه تمام پلتفرم‌ها با بودجه کل تطابق ۱۰۰٪ دارد.</span>
+        </div>
+      )}
+
+      {/* پلتفرم‌های فعال */}
+      <div className="space-y-2">
+        <h5 className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+          <Layers size={14} className="text-gray-400" />
+          <span>کانال‌های تبلیغاتی فعال ({formData.platforms.filter((p) => p.enabled).length})</span>
+        </h5>
+        <div className="space-y-1.5">
+          {formData.platforms
+            .filter((p) => p.enabled)
+            .map((p) => (
+              <div
+                key={p.platformId}
+                className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg text-xs"
+              >
+                <span className="text-gray-700 font-medium">{p.name}</span>
+                <span className="text-gray-500 text-[11px]">
+                  {p.allocatedBudget > 0
+                    ? `${p.allocatedBudget.toLocaleString('fa-IR')} ت`
+                    : 'بدون بودجه'}
+                </span>
+              </div>
+            ))}
+        </div>
+      </div>
+
+      {/* اطلاعات کلیدی کمپین */}
+      <div className="pt-2 border-t border-gray-100 text-xs text-gray-500 space-y-1.5">
+        <div className="flex items-center justify-between">
+          <span>نام کمپین:</span>
+          <span className="font-medium text-gray-800 truncate max-w-[140px]">
+            {formData.name || 'نامشخص'}
+          </span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="flex items-center gap-1">
+            <Calendar size={12} />
+            <span>بازه زمانی:</span>
+          </span>
+          <span className="font-medium text-gray-800 text-[11px]">
+            {formatPersianDate(formData.startDate)} تا {formatPersianDate(formData.endDate)}
+          </span>
+        </div>
+      </div>
+    </aside>
+  );
+}
