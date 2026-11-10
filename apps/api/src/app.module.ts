@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 import { configuration } from './config/configuration';
 import { validateEnv } from './config/env.validation';
 import { CampaignsModule } from './modules/campaigns/campaigns.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { LeadsModule } from './modules/leads/leads.module';
+import { CostsModule } from './modules/costs/costs.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { DatabaseModule } from './database/database.module';
 
 @Module({
@@ -14,26 +17,12 @@ import { DatabaseModule } from './database/database.module';
       validate: validateEnv,
       expandVariables: true,
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('database.host'),
-        port: configService.get<number>('database.port'),
-        username: configService.get<string>('database.username'),
-        password: configService.get<string>('database.password'),
-        database: configService.get<string>('database.database'),
-        synchronize: configService.get<boolean>('database.synchronize'),
-        logging: configService.get<boolean>('database.logging'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        migrations: [__dirname + '/../migrations/*{.ts,.js}'],
-        migrationsRun: configService.get<boolean>('database.migrationsRun'),
-        autoLoadEntities: true,
-      }),
-      inject: [ConfigService],
-    }),
-    CampaignsModule,
     DatabaseModule,
+    AuthModule,
+    CampaignsModule,
+    LeadsModule,
+    CostsModule,
+    DashboardModule,
   ],
   controllers: [],
   providers: [],

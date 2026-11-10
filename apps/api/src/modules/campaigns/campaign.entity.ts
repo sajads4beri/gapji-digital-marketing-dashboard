@@ -1,54 +1,147 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum CampaignStatus {
   DRAFT = 'draft',
+  PLANNED = 'planned',
   ACTIVE = 'active',
   PAUSED = 'paused',
   COMPLETED = 'completed',
   ARCHIVED = 'archived',
 }
 
-@Entity('campaigns')
+export enum CampaignHealth {
+  HEALTHY = 'healthy',
+  NEEDS_ATTENTION = 'needs_attention',
+  CRITICAL = 'critical',
+}
+
 export class Campaign {
-  @PrimaryGeneratedColumn('uuid')
+  @ApiProperty({
+    description: 'Unique identifier (UUID)',
+    example: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+  })
   id: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @ApiProperty({
+    description: 'Tenant organization identifier (UUID)',
+    example: '00000000-0000-0000-0000-000000000001',
+  })
+  organizationId: string;
+
+  @ApiProperty({
+    description: 'Campaign name',
+    example: 'Summer Sale 2026',
+  })
   name: string;
 
-  @Column({ type: 'text', nullable: true })
+  @ApiPropertyOptional({
+    description: 'Detailed campaign description',
+    example: 'Summer discount campaign on Instagram',
+    nullable: true,
+  })
   description: string | null;
 
-  @Column({ type: 'varchar', length: 100 })
-  channel: string; // e.g. instagram, telegram, google_ads, email
+  @ApiProperty({
+    description: 'Marketing channel',
+    example: 'instagram',
+  })
+  channel: string;
 
-  @Column({ type: 'enum', enum: CampaignStatus, default: CampaignStatus.DRAFT })
+  @ApiPropertyOptional({
+    description: 'Campaign type / category',
+    example: 'lead_generation',
+    nullable: true,
+  })
+  type?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Strategic objective',
+    example: 'increase_sales',
+    nullable: true,
+  })
+  objective?: string | null;
+
+  @ApiProperty({
+    enum: CampaignStatus,
+    default: CampaignStatus.DRAFT,
+    description: 'Current campaign status',
+  })
   status: CampaignStatus;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
+  @ApiPropertyOptional({
+    enum: CampaignHealth,
+    default: CampaignHealth.HEALTHY,
+    description: 'Campaign health indicator',
+  })
+  health?: CampaignHealth;
+
+  @ApiProperty({
+    description: 'Allocated budget (integer JSON number)',
+    example: 50000000,
+  })
   budget: number;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
+  @ApiProperty({
+    description: 'Total spend so far (integer JSON number)',
+    example: 12500000,
+  })
   spend: number;
 
-  @Column({ type: 'int', default: 0 })
+  @ApiProperty({
+    description: 'Impression count',
+    example: 150000,
+  })
   impressions: number;
 
-  @Column({ type: 'int', default: 0 })
+  @ApiProperty({
+    description: 'Click count',
+    example: 3200,
+  })
   clicks: number;
 
-  @Column({ type: 'int', default: 0 })
+  @ApiProperty({
+    description: 'Conversion count',
+    example: 180,
+  })
   conversions: number;
 
-  @CreateDateColumn()
+  @ApiPropertyOptional({
+    description: 'Campaign start date',
+    nullable: true,
+  })
+  startDate?: Date | null;
+
+  @ApiPropertyOptional({
+    description: 'Campaign end date',
+    nullable: true,
+  })
+  endDate?: Date | null;
+
+  @ApiPropertyOptional({
+    description: 'Target leads count',
+    nullable: true,
+  })
+  targetLeads?: number | null;
+
+  @ApiPropertyOptional({
+    description: 'Target sales count',
+    nullable: true,
+  })
+  targetSales?: number | null;
+
+  @ApiPropertyOptional({
+    description: 'Assigned manager user ID',
+    nullable: true,
+  })
+  ownerId?: string | null;
+
+  @ApiProperty({
+    description: 'Creation timestamp',
+  })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @ApiProperty({
+    description: 'Last update timestamp',
+  })
   updatedAt: Date;
 }

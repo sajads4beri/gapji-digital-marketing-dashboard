@@ -1,0 +1,1266 @@
+// ==============================================================================
+// PROPOSED PRISMA SCHEMA DESIGN FOR GAPJI DIGITAL MARKETING PLATFORM
+// Phase: B2.2 — Comprehensive Domain Data Model & ERD Design
+// File: docs/B2.2-PROPOSED-SCHEMA.prisma
+// Status: DESIGN PROPOSAL ARTIFACT ONLY — DO NOT RUN MIGRATIONS
+// ==============================================================================
+// 
+// GOVERNANCE & PROVENANCE:
+// 1. Primary Source of Truth: marketing-platform-phase1-frontend-pages-1.pdf
+// 2. Domain Baseline: docs/B2.1-DOMAIN-DISCOVERY-REPORT.md (32 entities covered)
+// 3. Architectural Register: docs/PROJECT-DECISIONS.md
+//
+// DESIGN PRINCIPLES:
+// - Multi-Tenancy: Mandatory Organization-level scoping via organizationId on all business entities.
+// - Relational Integrity: Enforced foreign key constraints with explicit onDelete actions.
+// - Financial Policy: Monetary amounts stored as Decimal(12, 2) in Toman/Rial, non-negative integers at API boundary.
+// - Role-Based Access: Exactly 6 approved technical roles (admin, marketing_manager, campaign_manager, sales_agent, content_creator, client).
+// - Dynamic Taxonomies: User-configurable business taxonomies modeled via OrganizationTaxonomy instead of brittle DB enums.
+// ==============================================================================
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ==============================================================================
+// ENUMS
+// ==============================================================================
+
+/// Approved technical roles for user memberships within organizations (6 approved roles)
+/// Source: docs/PROJECT-DECISIONS.md §3, Product Document p. 23 §27
+enum Role {
+  admin             @map("admin")             // مدیر ارشد سازمان / سیستم
+  marketing_manager @map("marketing_manager") // مدیر مارکتینگ
+  campaign_manager  @map("campaign_manager")  // کمپین‌چی
+  sales_agent       @map("sales_agent")       // کارشناس فروش
+  content_creator   @map("content_creator")   // تولید محتوا و وبینار
+  client            @map("client")            // کارفرما (فقط خواندنی)
+}
+
+/// Approved organization monetary units
+/// Source: docs/PROJECT-DECISIONS.md §3, Product Document p. 4 §1-2, p. 24 §28
+enum Currency {
+  TOMAN @map("toman") // تومان (Default)
+  RIAL  @map("rial")  // ریال
+}
+
+/// Organization membership status
+/// Source: Product Document p. 23 §27
+enum MembershipStatus {
+  active   @map("active")   // فعال
+  invited  @map("invited")  // دعوت‌شده
+  inactive @map("inactive") // غیرفعال
+}
+
+/// Campaign lifecycle state
+/// Source: Product Document p. 5 §3-2, p. 9 §6
+enum CampaignStatus {
+  draft     @map("draft")     // پیش‌نویس
+  planned   @map("planned")   // برنامه‌ریزی‌شده
+  active    @map("active")    // فعال
+  paused    @map("paused")    // متوقف
+  completed @map("completed") // تکمیل‌شده
+  archived  @map("archived")  // آرشیوشده
+}
+
+/// Campaign health indicator badge
+/// Source: Product Document p. 5 §3-2, p. 8 §4, p. 9 §6
+enum CampaignHealth {
+  healthy         @map("healthy")         // سالم (سبز)
+  needs_attention @map("needs_attention") // نیازمند توجه (زرد)
+  critical        @map("critical")        // ضعیف / بحرانی (قرمز)
+}
+
+/// Lead pipeline stage
+/// Source: Product Document p. 5 §3-2, p. 15 §14, p. 16 §15
+enum LeadStatus {
+  new        @map("new")        // جدید
+  contacted  @map("contacted")  // تماس‌گرفته
+  qualified  @map("qualified")  // واجد شرایط
+  proposal   @map("proposal")   // ارسال پروپوزال
+  customer   @map("customer")   // تبدیل به مشتری
+  lost       @map("lost")       // رد شده / از دست رفته
+}
+
+/// Lead customer journey activity type
+/// Source: Product Document p. 16 §16
+enum LeadActivityType {
+  ad_click      @map("ad_click")      // کلیک روی تبلیغ
+  landing_visit @map("landing_visit") // بازدید از لندینگ
+  form_submit   @map("form_submit")   // ثبت فرم
+  call          @map("call")          // تماس تلفنی
+  note          @map("note")          // یادداشت داخلی
+  status_change @map("status_change") // تغییر وضعیت لید
+  assignment    @map("assignment")    // ارجاع به کارشناس
+  purchase      @map("purchase")      // خرید نهایی
+  rejection     @map("rejection")     // رد شدن لید
+}
+
+/// Telephony call log outcome
+/// Source: Product Document p. 16 §17
+enum LeadCallStatus {
+  successful  @map("successful")  // موفق
+  no_answer   @map("no_answer")   // عدم پاسخگویی
+  busy        @map("busy")        // اشغال
+  rescheduled @map("rescheduled") // تعیین زمان مجدد
+}
+
+/// Task execution state
+/// Source: Product Document p. 5 §3-2, p. 18 §19
+enum TaskStatus {
+  todo        @map("todo")        // انجام نشده
+  in_progress @map("in_progress") // در حال انجام
+  waiting     @map("waiting")     // در انتظار
+  done        @map("done")        // انجام شده
+  overdue     @map("overdue")     // به تعویق افتاده / منقضی
+}
+
+/// Task urgency priority
+/// Source: Product Document p. 18 §19
+enum TaskPriority {
+  low    @map("low")    // کم
+  medium @map("medium") // متوسط
+  high   @map("high")   // بالا
+  urgent @map("urgent") // اضطراری
+}
+
+/// Polymorphic target relation type for tasks
+/// Source: Product Document p. 18 §19, p. 20 §22
+enum TaskRelatedType {
+  campaign  @map("campaign")
+  webinar   @map("webinar")
+  lead      @map("lead")
+  sop       @map("sop")
+  equipment @map("equipment")
+  meeting   @map("meeting")
+}
+
+/// Source mechanism of financial cost entry
+/// Source: Product Document p. 11 §9, p. 12 §9
+enum CostSource {
+  manual @map("manual") // ثبت دستی
+  import @map("import") // ایمپورت از فایل
+}
+
+/// Webinar lifecycle state
+/// Source: Product Document p. 17 §18
+enum WebinarStatus {
+  scheduled @map("scheduled") // برنامه‌ریزی‌شده
+  live      @map("live")      // در حال برگزاری
+  completed @map("completed") // به پایان رسیده
+  cancelled @map("cancelled") // لغو شده
+}
+
+/// SMS campaign delivery state
+/// Source: Product Document p. 16 §16, p. 17 §17
+enum SmsStatus {
+  draft     @map("draft")     // پیش‌نویس
+  scheduled @map("scheduled") // زمان‌بندی‌شده
+  sending   @map("sending")   // در حال ارسال
+  sent      @map("sent")      // ارسال‌شده
+  failed    @map("failed")    // با خطا مواجه شده
+}
+
+/// Physical and digital equipment state
+/// Source: Product Document p. 19 §21
+enum EquipmentStatus {
+  available    @map("available")    // در دسترس
+  in_use       @map("in_use")       // در حال استفاده
+  under_repair @map("under_repair") // در دست تعمیر
+  retired      @map("retired")      // اسقاط / خارج از رده
+}
+
+/// Standard operating procedure workflow state
+/// Source: Product Document p. 20 §23
+enum SopStatus {
+  draft    @map("draft")    // پیش‌نویس
+  active   @map("active")   // معتبر / فعال
+  archived @map("archived") // بایگانی‌شده
+}
+
+/// Creative idea evaluation stage
+/// Source: Product Document p. 21 §25, p. 22 §25
+enum IdeaStatus {
+  submitted   @map("submitted")   // ثبت‌شده
+  reviewing   @map("reviewing")   // در حال بررسی
+  approved    @map("approved")    // تاییدشده
+  rejected    @map("rejected")    // ردشده
+  implemented @map("implemented") // اجراشده
+}
+
+/// User voting on ideas
+/// Source: Product Document p. 22 §25
+enum VoteType {
+  upvote   @map("upvote")   // موافق
+  downvote @map("downvote") // مخالف
+}
+
+/// File import target entity type
+/// Source: Product Document p. 12 §10, p. 13 §10
+enum ImportDataType {
+  leads    @map("leads")
+  costs    @map("costs")
+  contacts @map("contacts")
+}
+
+/// File import asynchronous execution state
+/// Source: Product Document p. 12 §10
+enum ImportStatus {
+  pending    @map("pending")
+  processing @map("processing")
+  completed  @map("completed")
+  failed     @map("failed")
+}
+
+/// System and user alert notification category
+/// Source: Product Document p. 7 §3
+enum NotificationType {
+  info    @map("info")
+  success @map("success")
+  warning @map("warning")
+  alert   @map("alert")
+}
+
+// ==============================================================================
+// 1. IDENTITY & ACCESS MANAGEMENT (IAM) & TENANCY ROOT
+// ==============================================================================
+
+/// Global user identity across organizations
+/// Source: Product Document p. 6 §1, p. 23 §27
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  email        String?   @unique @db.VarChar(255)
+  mobile       String?   @unique @db.VarChar(20)
+  passwordHash String    @db.VarChar(255)
+  fullName     String    @db.VarChar(255)
+  avatarUrl    String?   @db.VarChar(500)
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Tenant memberships
+  memberships           OrganizationMembership[]
+  sessions              Session[]
+
+  // Owned or created entities
+  ownedCampaigns        Campaign[]               @relation("CampaignOwner")
+  assignedLeads         Lead[]                   @relation("LeadAssignee")
+  createdCosts          Cost[]                   @relation("CostCreator")
+  createdTasks          Task[]                   @relation("TaskCreator")
+  assignedTasks         Task[]                   @relation("TaskAssignee")
+  taskComments          TaskComment[]
+  leadActivities        LeadActivity[]           @relation("LeadActivityActor")
+  leadCalls             LeadCall[]               @relation("LeadCallCaller")
+  authoredSops          Sop[]                    @relation("SopAuthor")
+  approvedSops          Sop[]                    @relation("SopApprover")
+  sopVersions           SopVersion[]             @relation("SopVersionCreator")
+  ideas                 Idea[]                   @relation("IdeaAuthor")
+  ideaVotes             IdeaVote[]
+  learningProgress      UserLearningProgress[]
+  createdMeetings       Meeting[]                @relation("MeetingCreator")
+  assignedActionItems   MeetingActionItem[]      @relation("MeetingActionItemAssignee")
+  assignedEquipment     Equipment[]              @relation("EquipmentAssignee")
+  calendarEvents        CalendarEvent[]          @relation("CalendarEventCreator")
+  importJobs            ImportJob[]              @relation("ImportJobCreator")
+  notifications         Notification[]
+  activityLogs          UserActivityLog[]
+
+  @@map("users")
+}
+
+/// Tenant isolation root representing an organization or business unit
+/// Source: Product Document p. 6 §1, p. 24 §28; docs/PROJECT-DECISIONS.md §3
+model Organization {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(255)
+  slug      String   @unique @db.VarChar(100)
+  logoUrl   String?  @db.VarChar(500)
+  currency  Currency @default(TOMAN)
+  timezone  String   @default("Asia/Tehran") @db.VarChar(50)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Multi-tenant relational scope
+  memberships          OrganizationMembership[]
+  sessions             Session[]
+  taxonomies           OrganizationTaxonomy[]
+  campaigns            Campaign[]
+  platforms            Platform[]
+  platformAllocations  CampaignPlatformAllocation[]
+  targetAudiences      TargetAudience[]
+  landingPages         LandingPage[]
+  utmLinks             UtmLink[]
+  costs                Cost[]
+  costCategories       CostCategory[]
+  leads                Lead[]
+  leadActivities       LeadActivity[]
+  leadCalls            LeadCall[]
+  smsCampaigns         SmsCampaign[]
+  webinars             Webinar[]
+  webinarAttendees     WebinarAttendee[]
+  tasks                Task[]
+  taskSubtasks         TaskSubtask[]
+  taskComments         TaskComment[]
+  calendarEvents       CalendarEvent[]
+  equipments           Equipment[]
+  meetings             Meeting[]
+  meetingActionItems   MeetingActionItem[]
+  sops                 Sop[]
+  sopVersions          SopVersion[]
+  learningResources    LearningResource[]
+  userLearningProgress UserLearningProgress[]
+  ideas                Idea[]
+  ideaVotes            IdeaVote[]
+  kpiMetrics           KpiMetric[]
+  kpiAlertRules        KpiAlertRule[]
+  importJobs           ImportJob[]
+  notifications        Notification[]
+  activityLogs         UserActivityLog[]
+  wordpressIntegrations WordpressIntegration[]
+
+  @@map("organizations")
+}
+
+/// Associative join defining user role and membership within an organization
+/// Source: Product Document p. 6 §1, p. 23 §27
+model OrganizationMembership {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @db.Uuid
+  userId         String           @db.Uuid
+  role           Role             @default(campaign_manager)
+  status         MembershipStatus @default(active)
+  invitedAt      DateTime?
+  joinedAt       DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@index([organizationId, role])
+  @@map("organization_memberships")
+}
+
+/// User authentication session and active organization context
+/// Source: Product Document p. 6 §1; Implementation Decision
+model Session {
+  id             String        @id @default(uuid()) @db.Uuid
+  userId         String        @db.Uuid
+  organizationId String?       @db.Uuid
+  tokenHash      String        @unique @db.VarChar(255)
+  userAgent      String?       @db.VarChar(500)
+  ipAddress      String?       @db.VarChar(45)
+  expiresAt      DateTime
+  createdAt      DateTime      @default(now())
+
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([organizationId])
+  @@map("sessions")
+}
+
+/// Dynamic tenant-configurable taxonomies for dropdowns and categories
+/// Source: Product Document p. 23 §27, p. 24 §28
+model OrganizationTaxonomy {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  taxonomyType   String       @db.VarChar(100) // e.g. campaign_type, campaign_objective, lead_source, lost_reason
+  key            String       @db.VarChar(100)
+  label          String       @db.VarChar(255)
+  isSystem       Boolean      @default(false)
+  sortOrder      Int          @default(0)
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, taxonomyType, key])
+  @@index([organizationId, taxonomyType])
+  @@map("organization_taxonomies")
+}
+
+// ==============================================================================
+// 2. PERFORMANCE & MARKETING DOMAIN (WORKSPACE 1)
+// ==============================================================================
+
+/// Core marketing campaign tracking budget, spend, status, and health
+/// Source: Product Document p. 8 §4, p. 9 §6, p. 10 §7; docs/PROJECT-DECISIONS.md
+model Campaign {
+  id             String         @id @default(uuid()) @db.Uuid
+  organizationId String         @db.Uuid
+  name           String         @db.VarChar(255)
+  description    String?        @db.Text
+  type           String         @default("digital") @db.VarChar(100) // Configurable taxonomy
+  objective      String         @default("lead") @db.VarChar(100)    // Configurable taxonomy
+  channel        String         @db.VarChar(100)                     // Legacy compatibility channel
+  status         CampaignStatus @default(draft)
+  health         CampaignHealth @default(healthy)
+  budget         Decimal        @default(0) @db.Decimal(12, 2)       // Monetary non-negative integer Toman/Rial
+  spend          Decimal        @default(0) @db.Decimal(12, 2)       // Aggregated expense in Toman/Rial
+  startDate      DateTime?      @db.Date
+  endDate        DateTime?      @db.Date
+  ownerId        String?        @db.Uuid
+  targetLeads    Int?
+  targetSales    Decimal?       @db.Decimal(12, 2)
+  impressions    Int            @default(0)
+  clicks         Int            @default(0)
+  conversions    Int            @default(0)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // Tenant and owner relations
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  owner          User?          @relation("CampaignOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+
+  // Sub-allocations and marketing assets
+  platformAllocations CampaignPlatformAllocation[]
+  targetAudiences     TargetAudience[]
+  landingPages        LandingPage[]
+  utmLinks            UtmLink[]
+  costs               Cost[]
+  leads               Lead[]
+  smsCampaigns        SmsCampaign[]
+  webinars            Webinar[]
+  meetings            Meeting[]
+  ideas               Idea[]
+  kpiMetrics          KpiMetric[]
+
+  @@unique([id, organizationId]) // Enforces multi-tenant composite isolation
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@index([organizationId, health])
+  @@index([organizationId, ownerId])
+  @@map("campaigns")
+}
+
+/// Advertising platform/channel master catalogue
+/// Source: Product Document p. 8 §4, p. 11 §8
+model Platform {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  name           String       @db.VarChar(100)
+  code           String       @db.VarChar(50)
+  category       String       @db.VarChar(50) // digital, sms, social, ad_network
+  icon           String?      @db.VarChar(100)
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  allocations    CampaignPlatformAllocation[]
+  costs          Cost[]
+  leads          Lead[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@map("platforms")
+}
+
+/// Budget and target volume sub-allocation per advertising platform
+/// Source: Product Document p. 9 §6 (Step 3), p. 10 §7
+model CampaignPlatformAllocation {
+  id              String       @id @default(uuid()) @db.Uuid
+  organizationId  String       @db.Uuid
+  campaignId      String       @db.Uuid
+  platformId      String       @db.Uuid
+  allocatedBudget Decimal      @default(0) @db.Decimal(12, 2)
+  targetCount     Int?
+  actualSpend     Decimal      @default(0) @db.Decimal(12, 2)
+  actualCount     Int          @default(0)
+  notes           String?      @db.Text
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign        Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  platform        Platform     @relation(fields: [platformId], references: [id], onDelete: Restrict)
+
+  @@unique([campaignId, platformId])
+  @@index([organizationId])
+  @@index([campaignId])
+  @@index([platformId])
+  @@map("campaign_platform_allocations")
+}
+
+/// Target audience demographic and psychographic profiles
+/// Source: Product Document p. 9 §6, p. 13 §11, p. 14 §11
+model TargetAudience {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  campaignId     String?      @db.Uuid
+  name           String       @db.VarChar(255)
+  description    String?      @db.Text
+  ageMin         Int?
+  ageMax         Int?
+  gender         String?      @db.VarChar(20)
+  interests      String?      @db.Text
+  location       String?      @db.VarChar(255)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign       Campaign?    @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([campaignId])
+  @@map("target_audiences")
+}
+
+/// Destination marketing landing pages
+/// Source: Product Document p. 9 §6, p. 14 §12
+model LandingPage {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  campaignId     String?      @db.Uuid
+  title          String       @db.VarChar(255)
+  url            String       @db.VarChar(500)
+  slug           String?      @db.VarChar(200)
+  template       String?      @db.VarChar(100)
+  viewsCount     Int          @default(0)
+  leadsCount     Int          @default(0)
+  conversionRate Decimal      @default(0) @db.Decimal(5, 2)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign       Campaign?    @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  utmLinks       UtmLink[]
+
+  @@index([organizationId])
+  @@index([campaignId])
+  @@map("landing_pages")
+}
+
+/// Generated UTM campaign tracking links
+/// Source: Product Document p. 9 §6, p. 14 §13
+model UtmLink {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  campaignId     String?      @db.Uuid
+  landingPageId  String?      @db.Uuid
+  originalUrl    String       @db.VarChar(1000)
+  utmSource      String       @db.VarChar(100)
+  utmMedium      String       @db.VarChar(100)
+  utmCampaign    String       @db.VarChar(100)
+  utmTerm        String?      @db.VarChar(100)
+  utmContent     String?      @db.VarChar(100)
+  finalUrl       String       @db.VarChar(1500)
+  clicksCount    Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign       Campaign?    @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  landingPage    LandingPage? @relation(fields: [landingPageId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([campaignId])
+  @@index([landingPageId])
+  @@map("utm_links")
+}
+
+/// Configurable taxonomy category for marketing expenditures
+/// Source: Product Document p. 23 §27, p. 24 §28
+model CostCategory {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  name           String       @db.VarChar(100)
+  code           String       @db.VarChar(50)
+  description    String?      @db.Text
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  costs          Cost[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@map("cost_categories")
+}
+
+/// Granular expense transaction record attributed to campaign, platform, and date
+/// Source: Product Document p. 8 §4, p. 11 §9, p. 12 §9; docs/PROJECT-DECISIONS.md
+model Cost {
+  id             String        @id @default(uuid()) @db.Uuid
+  organizationId String        @db.Uuid
+  campaignId     String?       @db.Uuid
+  platformId     String?       @db.Uuid
+  categoryId     String?       @db.Uuid
+  date           DateTime      @db.Date
+  amount         Decimal       @default(0) @db.Decimal(12, 2) // Non-negative integer Toman/Rial
+  count          Int?
+  source         CostSource    @default(manual)
+  createdById    String?       @db.Uuid
+  importJobId    String?       @db.Uuid
+  notes          String?       @db.Text
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign       Campaign?     @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  platform       Platform?     @relation(fields: [platformId], references: [id], onDelete: SetNull)
+  category       CostCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  createdBy      User?         @relation("CostCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  importJob      ImportJob?    @relation(fields: [importJobId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([organizationId, date])
+  @@index([campaignId])
+  @@index([platformId])
+  @@index([categoryId])
+  @@map("costs")
+}
+
+// ==============================================================================
+// 3. LEADS & SALES DOMAIN (WORKSPACE 2)
+// ==============================================================================
+
+/// Customer sales opportunity and contact details
+/// Source: Product Document p. 8 §4, p. 14 §14, p. 15 §14, p. 16 §15
+model Lead {
+  id                String            @id @default(uuid()) @db.Uuid
+  organizationId    String            @db.Uuid
+  fullName          String            @db.VarChar(255)
+  mobile            String            @db.VarChar(20)
+  email             String?           @db.VarChar(255)
+  city              String?           @db.VarChar(100)
+  source            String            @default("manual") @db.VarChar(100)
+  campaignId        String?           @db.Uuid
+  platformId        String?           @db.Uuid
+  utmSource         String?           @db.VarChar(100)
+  utmMedium         String?           @db.VarChar(100)
+  utmCampaign       String?           @db.VarChar(100)
+  utmTerm           String?           @db.VarChar(100)
+  utmContent        String?           @db.VarChar(100)
+  status            LeadStatus        @default(new)
+  assignedToId      String?           @db.Uuid
+  salesValue        Decimal?          @db.Decimal(12, 2) // Closed deal value in Toman/Rial
+  lostReason        String?           @db.VarChar(255)
+  nextFollowUpAt    DateTime?
+  nextFollowUpNote  String?           @db.VarChar(500)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  organization      Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign          Campaign?         @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  platform          Platform?         @relation(fields: [platformId], references: [id], onDelete: SetNull)
+  assignedTo        User?             @relation("LeadAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  activities        LeadActivity[]
+  calls             LeadCall[]
+  webinarAttendance WebinarAttendee[]
+
+  @@unique([id, organizationId]) // Enforces multi-tenant composite isolation
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@index([organizationId, assignedToId])
+  @@index([organizationId, mobile])
+  @@index([campaignId])
+  @@map("leads")
+}
+
+/// Immutable event logging customer journey touchpoints and sales state transitions
+/// Source: Product Document p. 16 §16
+model LeadActivity {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @db.Uuid
+  leadId         String           @db.Uuid
+  type           LeadActivityType
+  title          String           @db.VarChar(255)
+  details        String?          @db.Text
+  actorUserId    String?          @db.Uuid
+  createdAt      DateTime         @default(now())
+
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  lead           Lead             @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  actorUser      User?            @relation("LeadActivityActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([leadId])
+  @@index([leadId, createdAt])
+  @@map("lead_activities")
+}
+
+/// Sales agent phone call log and outcome
+/// Source: Product Document p. 16 §17
+model LeadCall {
+  id              String         @id @default(uuid()) @db.Uuid
+  organizationId  String         @db.Uuid
+  leadId          String         @db.Uuid
+  callerUserId    String         @db.Uuid
+  status          LeadCallStatus @default(successful)
+  durationSeconds Int            @default(0)
+  note            String?        @db.Text
+  recordingUrl    String?        @db.VarChar(500)
+  callDate        DateTime       @default(now())
+  createdAt       DateTime       @default(now())
+
+  organization    Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  lead            Lead           @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  callerUser      User           @relation("LeadCallCaller", fields: [callerUserId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId])
+  @@index([leadId])
+  @@index([callerUserId])
+  @@map("lead_calls")
+}
+
+/// Outbound SMS delivery batch execution and delivery reporting
+/// Source: Product Document p. 10 §7, p. 16 §16, p. 17 §17
+model SmsCampaign {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  campaignId     String?      @db.Uuid
+  name           String       @db.VarChar(255)
+  senderNumber   String       @db.VarChar(50)
+  messageText    String       @db.Text
+  recipientCount Int          @default(0)
+  deliveredCount Int          @default(0)
+  failedCount    Int          @default(0)
+  costAmount     Decimal      @default(0) @db.Decimal(12, 2)
+  scheduledAt    DateTime?
+  sentAt         DateTime?
+  status         SmsStatus    @default(draft)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign       Campaign?    @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([campaignId])
+  @@map("sms_campaigns")
+}
+
+/// Educational or promotional online webinar event
+/// Source: Product Document p. 17 §18, p. 18 §18
+model Webinar {
+  id              String            @id @default(uuid()) @db.Uuid
+  organizationId  String            @db.Uuid
+  campaignId      String?           @db.Uuid
+  title           String            @db.VarChar(255)
+  description     String?           @db.Text
+  presenterName   String            @db.VarChar(255)
+  platform        String            @db.VarChar(100)
+  webinarDate     DateTime
+  durationMinutes Int               @default(60)
+  registrationUrl String?           @db.VarChar(500)
+  bannerUrl       String?           @db.VarChar(500)
+  status          WebinarStatus     @default(scheduled)
+  capacity        Int?
+  registeredCount Int               @default(0)
+  attendedCount   Int               @default(0)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  organization    Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign        Campaign?         @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  attendees       WebinarAttendee[]
+
+  @@index([organizationId])
+  @@index([campaignId])
+  @@map("webinars")
+}
+
+/// Registrant and attendance tracking for webinars
+/// Source: Product Document p. 17 §18, p. 18 §18
+model WebinarAttendee {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  webinarId      String       @db.Uuid
+  leadId         String?      @db.Uuid
+  fullName       String       @db.VarChar(255)
+  mobile         String       @db.VarChar(20)
+  email          String?      @db.VarChar(255)
+  attended       Boolean      @default(false)
+  joinedAt       DateTime?
+  createdAt      DateTime     @default(now())
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  webinar        Webinar      @relation(fields: [webinarId], references: [id], onDelete: Cascade)
+  lead           Lead?        @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  @@unique([webinarId, mobile])
+  @@index([organizationId])
+  @@index([webinarId])
+  @@index([leadId])
+  @@map("webinar_attendees")
+}
+
+// ==============================================================================
+// 4. TASKS & EXECUTION DOMAIN (WORKSPACE 3)
+// ==============================================================================
+
+/// Operational task, action item, or SOP checklist assigned to team members
+/// Source: Product Document p. 8 §4, p. 18 §19, p. 19 §19
+model Task {
+  id             String              @id @default(uuid()) @db.Uuid
+  organizationId String              @db.Uuid
+  title          String              @db.VarChar(255)
+  description    String?             @db.Text
+  status         TaskStatus          @default(todo)
+  priority       TaskPriority        @default(medium)
+  dueDate        DateTime?           @db.Date
+  assigneeId     String?             @db.Uuid
+  createdById    String              @db.Uuid
+  relatedType    TaskRelatedType?
+  relatedId      String?             @db.Uuid
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  organization   Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assignee       User?               @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  createdBy      User                @relation("TaskCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  subtasks            TaskSubtask[]
+  comments            TaskComment[]
+  meetingActionItems  MeetingActionItem[]
+
+  @@unique([id, organizationId]) // Enforces multi-tenant composite isolation
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@index([organizationId, assigneeId])
+  @@index([relatedType, relatedId])
+  @@map("tasks")
+}
+
+/// Checklist subtask item within a parent task
+/// Source: Product Document p. 18 §19
+model TaskSubtask {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  taskId         String       @db.Uuid
+  title          String       @db.VarChar(255)
+  isCompleted    Boolean      @default(false)
+  sortOrder      Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  task           Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([taskId])
+  @@map("task_subtasks")
+}
+
+/// Discussion comments and collaboration on tasks
+/// Source: Product Document p. 18 §19
+model TaskComment {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  taskId         String       @db.Uuid
+  authorUserId   String       @db.Uuid
+  content        String       @db.Text
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  task           Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  authorUser     User         @relation(fields: [authorUserId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId])
+  @@index([taskId])
+  @@map("task_comments")
+}
+
+/// Scheduled timeline event or multi-day campaign milestone
+/// Source: Product Document p. 19 §20
+model CalendarEvent {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @db.Uuid
+  title          String           @db.VarChar(255)
+  description    String?          @db.Text
+  startDate      DateTime
+  endDate        DateTime
+  isAllDay       Boolean          @default(false)
+  color          String?          @db.VarChar(50)
+  eventType      String           @default("meeting") @db.VarChar(50)
+  relatedType    TaskRelatedType?
+  relatedId      String?          @db.Uuid
+  createdById    String           @db.Uuid
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy      User             @relation("CalendarEventCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([organizationId])
+  @@index([organizationId, startDate, endDate])
+  @@map("calendar_events")
+}
+
+/// Physical and digital gear asset tracking
+/// Source: Product Document p. 19 §21, p. 20 §21
+model Equipment {
+  id             String          @id @default(uuid()) @db.Uuid
+  organizationId String          @db.Uuid
+  name           String          @db.VarChar(255)
+  code           String          @db.VarChar(100)
+  category       String          @db.VarChar(100)
+  status         EquipmentStatus @default(available)
+  assignedToId   String?         @db.Uuid
+  purchaseDate   DateTime?       @db.Date
+  purchaseCost   Decimal?        @db.Decimal(12, 2)
+  notes          String?         @db.Text
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assignedTo     User?           @relation("EquipmentAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@map("equipments")
+}
+
+// ==============================================================================
+// 5. KNOWLEDGE & COLLABORATION DOMAIN (WORKSPACE 3)
+// ==============================================================================
+
+/// Formal meeting minutes (صورتجلسات) and decisions
+/// Source: Product Document p. 20 §22
+model Meeting {
+  id               String              @id @default(uuid()) @db.Uuid
+  organizationId   String              @db.Uuid
+  campaignId       String?             @db.Uuid
+  title            String              @db.VarChar(255)
+  meetingDate      DateTime
+  location         String?             @db.VarChar(255)
+  attendeesSummary String?             @db.VarChar(500)
+  summary          String?             @db.Text
+  notes            String?             @db.Text
+  createdById      String              @db.Uuid
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  organization     Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign         Campaign?           @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  createdBy        User                @relation("MeetingCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  actionItems      MeetingActionItem[]
+
+  @@index([organizationId])
+  @@index([campaignId])
+  @@map("meetings")
+}
+
+/// Decision converted to an actionable task from meeting minutes
+/// Source: Product Document p. 20 §22
+model MeetingActionItem {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  meetingId      String       @db.Uuid
+  taskId         String?      @db.Uuid
+  description    String       @db.Text
+  assigneeId     String?      @db.Uuid
+  dueDate        DateTime?    @db.Date
+  isCompleted    Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  meeting        Meeting      @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  task           Task?        @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  assignee       User?        @relation("MeetingActionItemAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([meetingId])
+  @@index([taskId])
+  @@map("meeting_action_items")
+}
+
+/// Standard operating procedure document
+/// Source: Product Document p. 20 §23, p. 21 §23
+model Sop {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  title          String       @db.VarChar(255)
+  code           String       @db.VarChar(100)
+  category       String       @db.VarChar(100) // Configurable taxonomy
+  currentVersion String       @default("1.0") @db.VarChar(20)
+  status         SopStatus    @default(draft)
+  authorId       String       @db.Uuid
+  approverId     String?      @db.Uuid
+  content        String       @db.Text
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  author         User         @relation("SopAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  approver       User?        @relation("SopApprover", fields: [approverId], references: [id], onDelete: SetNull)
+  versions       SopVersion[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@map("sops")
+}
+
+/// Historical version archive for standard operating procedures
+/// Source: Product Document p. 20 §23, p. 21 §23
+model SopVersion {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  sopId          String       @db.Uuid
+  versionNumber  String       @db.VarChar(20)
+  changeSummary  String?      @db.VarChar(500)
+  content        String       @db.Text
+  createdById    String       @db.Uuid
+  createdAt      DateTime     @default(now())
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  sop            Sop          @relation(fields: [sopId], references: [id], onDelete: Cascade)
+  createdBy      User         @relation("SopVersionCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@unique([sopId, versionNumber])
+  @@index([organizationId])
+  @@index([sopId])
+  @@map("sop_versions")
+}
+
+/// Training resources and professional development content
+/// Source: Product Document p. 21 §24
+model LearningResource {
+  id              String                 @id @default(uuid()) @db.Uuid
+  organizationId  String                 @db.Uuid
+  title           String                 @db.VarChar(255)
+  category        String                 @db.VarChar(100)
+  type            String                 @db.VarChar(50) // video, article, book, link
+  url             String?                @db.VarChar(1000)
+  durationMinutes Int?
+  description     String?                @db.Text
+  isActive        Boolean                @default(true)
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  organization    Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userProgress    UserLearningProgress[]
+
+  @@index([organizationId])
+  @@index([organizationId, category])
+  @@map("learning_resources")
+}
+
+/// User completion and rating for training materials
+/// Source: Product Document p. 21 §24
+model UserLearningProgress {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @db.Uuid
+  userId         String           @db.Uuid
+  resourceId     String           @db.Uuid
+  isCompleted    Boolean          @default(false)
+  completedAt    DateTime?
+  rating         Int?
+  notes          String?          @db.Text
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resource       LearningResource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, resourceId])
+  @@index([organizationId])
+  @@index([userId])
+  @@map("user_learning_progress")
+}
+
+/// Creative marketing brainstorming proposal and voting item
+/// Source: Product Document p. 21 §25, p. 22 §25
+model Idea {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  campaignId     String?      @db.Uuid
+  title          String       @db.VarChar(255)
+  description    String       @db.Text
+  category       String       @db.VarChar(100)
+  status         IdeaStatus   @default(submitted)
+  authorId       String       @db.Uuid
+  votesCount     Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign       Campaign?    @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  author         User         @relation("IdeaAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  votes          IdeaVote[]
+
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@index([campaignId])
+  @@map("ideas")
+}
+
+/// User vote on creative proposals
+/// Source: Product Document p. 22 §25
+model IdeaVote {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  ideaId         String       @db.Uuid
+  userId         String       @db.Uuid
+  voteType       VoteType     @default(upvote)
+  createdAt      DateTime     @default(now())
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  idea           Idea         @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([ideaId, userId])
+  @@index([organizationId])
+  @@index([ideaId])
+  @@map("idea_votes")
+}
+
+// ==============================================================================
+// 6. METRICS, ALERTS, IMPORTS & SYSTEM OPERATIONS
+// ==============================================================================
+
+/// Target KPI metric definition and historical actual tracking
+/// Source: Product Document p. 8 §4, p. 13 §11
+model KpiMetric {
+  id             String         @id @default(uuid()) @db.Uuid
+  organizationId String         @db.Uuid
+  campaignId     String?        @db.Uuid
+  name           String         @db.VarChar(100)
+  code           String         @db.VarChar(50)
+  targetValue    Decimal        @db.Decimal(12, 2)
+  actualValue    Decimal        @default(0) @db.Decimal(12, 2)
+  unit           String         @db.VarChar(50)
+  period         String         @db.VarChar(50)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign       Campaign?      @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  alertRules     KpiAlertRule[]
+
+  @@index([organizationId])
+  @@index([campaignId])
+  @@map("kpi_metrics")
+}
+
+/// Alert trigger threshold for campaign KPI deviance
+/// Source: Product Document p. 8 §4, p. 13 §11
+model KpiAlertRule {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  kpiMetricId    String?      @db.Uuid
+  metricName     String       @db.VarChar(100)
+  condition      String       @db.VarChar(20) // gt, lt, eq, gte, lte
+  thresholdValue Decimal      @db.Decimal(12, 2)
+  severity       String       @default("warning") @db.VarChar(50)
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  kpiMetric      KpiMetric?   @relation(fields: [kpiMetricId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([kpiMetricId])
+  @@map("kpi_alert_rules")
+}
+
+/// Batch file data import job execution history and reporting
+/// Source: Product Document p. 12 §10, p. 13 §10
+model ImportJob {
+  id             String         @id @default(uuid()) @db.Uuid
+  organizationId String         @db.Uuid
+  dataType       ImportDataType
+  fileName       String         @db.VarChar(255)
+  totalRows      Int            @default(0)
+  successfulRows Int            @default(0)
+  failedRows     Int            @default(0)
+  status         ImportStatus   @default(pending)
+  createdById    String         @db.Uuid
+  errorLog       String?        @db.Text
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy      User           @relation("ImportJobCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  costs          Cost[]
+
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@map("import_jobs")
+}
+
+/// In-app notifications and system alerts for users
+/// Source: Product Document p. 7 §3
+model Notification {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String?          @db.Uuid
+  userId         String           @db.Uuid
+  title          String           @db.VarChar(255)
+  message        String           @db.Text
+  type           NotificationType @default(info)
+  isRead         Boolean          @default(false)
+  linkUrl        String?          @db.VarChar(500)
+  createdAt      DateTime         @default(now())
+
+  organization   Organization?    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([organizationId])
+  @@map("notifications")
+}
+
+/// Immutable system security and user activity audit trail
+/// Source: Product Document p. 22 §26, p. 23 §26
+model UserActivityLog {
+  id             String        @id @default(uuid()) @db.Uuid
+  organizationId String?       @db.Uuid
+  userId         String?       @db.Uuid
+  action         String        @db.VarChar(100)
+  entityType     String        @db.VarChar(100)
+  entityId       String?       @db.Uuid
+  details        String?       @db.Text
+  ipAddress      String?       @db.VarChar(45)
+  userAgent      String?       @db.VarChar(500)
+  createdAt      DateTime      @default(now())
+
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("user_activity_logs")
+}
+
+/// WordPress integration configuration and lead webhook mapping
+/// Source: Product Document p. 24 §29
+model WordpressIntegration {
+  id                String       @id @default(uuid()) @db.Uuid
+  organizationId    String       @db.Uuid
+  siteUrl           String       @db.VarChar(500)
+  apiKeyHash        String       @db.VarChar(255)
+  webhookSecret     String       @db.VarChar(255)
+  leadMappingConfig String       @db.Text // JSON mapping configuration
+  isActive          Boolean      @default(true)
+  lastSyncAt        DateTime?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, siteUrl])
+  @@index([organizationId])
+  @@map("wordpress_integrations")
+}
