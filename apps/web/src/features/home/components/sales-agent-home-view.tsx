@@ -7,11 +7,8 @@ import {
   UserCheck,
   Percent,
   Clock,
-  Phone,
   CheckCircle2,
-  AlertCircle,
   Inbox,
-  ArrowUpRight,
   Send,
   X,
 } from 'lucide-react';
@@ -105,32 +102,32 @@ export function SalesAgentHomeView() {
   return (
     <div className="grid grid-cols-12 gap-5" dir="rtl">
       {/* هدر پیشخوان فروش */}
-      <div className="col-span-12 p-4 bg-gradient-to-r from-blue-50/90 to-indigo-50/60 border border-blue-200/90 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="col-span-12 p-4 sm:p-5 bg-gradient-to-r from-[#111D2E] to-[#18263A] border border-[#1F2E45] rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-xs">
+          <div className="w-10 h-10 rounded-2xl bg-[#719BDF]/10 text-[#719BDF] flex items-center justify-center font-bold border border-[#719BDF]/20 shadow-[0_0_15px_rgba(113,155,223,0.15)] shrink-0">
             <PhoneCall size={20} />
           </div>
           <div>
-            <h2 className="text-sm font-extrabold text-slate-900">
+            <h2 className="text-sm font-extrabold text-white font-display">
               پیشخوان کارشناس فروش (Sales Agent)
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-400 mt-0.5">
               مدیریت پیگیری‌های روزانه، برقراری تماس با سرنخ‌ها و پایش نرخ تبدیل شخصی
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5 flex-wrap">
           <Link
             href="/leads"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-[#719BDF] hover:bg-[#5A85C9] rounded-xl transition-colors shadow-md shadow-[#719BDF]/20"
           >
             <Inbox size={14} />
             <span>صندوق لیدها</span>
           </Link>
           <Link
             href="/leads/board"
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-colors shadow-2xs"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-slate-300 bg-[#0B1423] border border-[#1F2E45] hover:text-white hover:bg-[#18263A] rounded-xl transition-colors"
           >
             <span>برد کانبان لیدها</span>
           </Link>
@@ -149,29 +146,29 @@ export function SalesAgentHomeView() {
         error={error}
         onRetry={fetchData}
         isEmpty={todayFollowups.length === 0}
-        emptyMessage="امروز پیگیری ندارید" /* الزام صریح سند: مثلاً «امروز پیگیری ندارید» */
-        className="col-span-12 lg:col-span-7"
+        emptyMessage="امروز پیگیری ندارید"
+        className="col-span-12 lg:col-span-7 flex flex-col"
       >
-        <div className="space-y-3">
+        <div className="space-y-3 max-h-[380px] overflow-y-auto pe-1.5 scrollbar-thin">
           {todayFollowups.map((lead, idx) => {
             const timeDisplay = idx === 0 ? '۱۰:۳۰' : idx === 1 ? '۱۲:۰۰' : idx === 2 ? '۱۴:۱۵' : '۱۶:۰۰';
             return (
               <div
                 key={lead.id}
-                className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center justify-between gap-3"
+                className="p-3.5 bg-[#0B1423] border border-[#1F2E45] rounded-xl flex items-center justify-between gap-3"
               >
                 <div className="space-y-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-xs text-slate-900 truncate">
+                    <span className="font-extrabold text-xs text-white truncate font-display">
                       {lead.fullName}
                     </span>
-                    <span className="text-[10px] font-bold text-slate-500 font-mono bg-white px-2 py-0.5 rounded border border-slate-200" dir="ltr">
+                    <span className="text-[10px] font-bold text-slate-300 font-mono bg-[#18263A] px-2 py-0.5 rounded border border-[#1F2E45]" dir="ltr">
                       {lead.phoneNumber ? `${lead.phoneNumber.slice(0, 4)}***${lead.phoneNumber.slice(7)}` : '—'}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-3 text-[11px] text-slate-500">
-                    <span className="flex items-center gap-1 text-blue-700 font-bold">
+                  <div className="flex items-center gap-3 text-[11px] text-slate-400">
+                    <span className="flex items-center gap-1 text-[#719BDF] font-bold font-display">
                       <Clock size={12} />
                       ساعت پیگیری: {timeDisplay}
                     </span>
@@ -190,7 +187,7 @@ export function SalesAgentHomeView() {
                     setCallNote('');
                     setCallNotice(null);
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors shadow-2xs shrink-0"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors shadow-md shadow-emerald-900/30 shrink-0 cursor-pointer"
                 >
                   <PhoneCall size={13} />
                   <span>تماس و ثبت نتیجه</span>
@@ -214,26 +211,26 @@ export function SalesAgentHomeView() {
         onRetry={fetchData}
         isEmpty={newLeads.length === 0}
         emptyMessage="لید جدید بدون اقدام در صندوق وجود ندارد."
-        className="col-span-12 lg:col-span-5"
+        className="col-span-12 lg:col-span-5 flex flex-col"
       >
-        <div className="space-y-2.5">
+        <div className="space-y-2.5 max-h-[380px] overflow-y-auto pe-1.5 scrollbar-thin">
           {newLeads.map((lead) => (
             <div
               key={lead.id}
-              className="p-3 bg-blue-50/50 border border-blue-200/70 rounded-xl flex items-center justify-between gap-3"
+              className="p-3.5 bg-[#0B1423] border border-[#719BDF]/30 rounded-xl flex items-center justify-between gap-3"
             >
               <div className="space-y-0.5 min-w-0">
-                <span className="font-extrabold text-xs text-slate-900 truncate block">
+                <span className="font-extrabold text-xs text-white truncate block font-display">
                   {lead.fullName}
                 </span>
-                <span className="text-[11px] text-slate-500 font-mono" dir="ltr">
+                <span className="text-[11px] text-slate-400 font-mono" dir="ltr">
                   {lead.phoneNumber ? `${lead.phoneNumber.slice(0, 4)}***${lead.phoneNumber.slice(7)}` : '—'}
                 </span>
               </div>
 
               <Link
                 href={`/leads/${lead.id}`}
-                className="px-2.5 py-1 text-[11px] font-bold text-blue-700 bg-white border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors shrink-0"
+                className="px-2.5 py-1 text-[11px] font-bold text-[#719BDF] bg-[#719BDF]/10 border border-[#719BDF]/25 rounded-lg hover:bg-[#719BDF]/20 transition-colors shrink-0"
               >
                 بررسی لید
               </Link>
@@ -253,44 +250,44 @@ export function SalesAgentHomeView() {
         className="col-span-12"
       >
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center justify-between">
+          <div className="p-4 bg-[#0B1423] border border-[#1F2E45] rounded-xl flex items-center justify-between">
             <div>
-              <span className="text-xs font-bold text-slate-500 block mb-1">
+              <span className="text-xs font-bold text-slate-400 block mb-1">
                 نرخ تبدیل من (Conversion Rate)
               </span>
-              <span className="text-2xl font-black text-emerald-700">
+              <span className="text-2xl font-black text-emerald-400 font-display">
                 %{conversionRate.toLocaleString('fa-IR')}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
               <Percent size={20} />
             </div>
           </div>
 
-          <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center justify-between">
+          <div className="p-4 bg-[#0B1423] border border-[#1F2E45] rounded-xl flex items-center justify-between">
             <div>
-              <span className="text-xs font-bold text-slate-500 block mb-1">
+              <span className="text-xs font-bold text-slate-400 block mb-1">
                 مشتریان قطعی شده (Won)
               </span>
-              <span className="text-2xl font-black text-blue-700">
+              <span className="text-2xl font-black text-[#719BDF] font-display">
                 {wonCount.toLocaleString('fa-IR')}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-[#719BDF]/10 text-[#719BDF] border border-[#719BDF]/20 flex items-center justify-center">
               <CheckCircle2 size={20} />
             </div>
           </div>
 
-          <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center justify-between">
+          <div className="p-4 bg-[#0B1423] border border-[#1F2E45] rounded-xl flex items-center justify-between">
             <div>
-              <span className="text-xs font-bold text-slate-500 block mb-1">
+              <span className="text-xs font-bold text-slate-400 block mb-1">
                 کل لیدهای تخصیص‌یافته
               </span>
-              <span className="text-2xl font-black text-slate-800">
+              <span className="text-2xl font-black text-white font-display">
                 {totalCount.toLocaleString('fa-IR')}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-slate-200 text-slate-700 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-[#18263A] text-slate-300 border border-[#1F2E45] flex items-center justify-center">
               <UserCheck size={20} />
             </div>
           </div>
@@ -302,20 +299,20 @@ export function SalesAgentHomeView() {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in"
           dir="rtl"
         >
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-md p-6 space-y-4 animate-in zoom-in-95">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="bg-[#111D2E] rounded-3xl border border-[#1F2E45] shadow-2xl w-full max-w-md p-6 space-y-4 animate-in zoom-in-95 text-slate-100">
+            <div className="flex items-center justify-between border-b border-[#1F2E45] pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
                   <PhoneCall size={18} />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-sm text-slate-900">
+                  <h3 className="font-extrabold text-sm text-white font-display">
                     تماس با «{activeCallLead.fullName}»
                   </h3>
-                  <p className="text-[11px] text-slate-500 font-mono" dir="ltr">
+                  <p className="text-[11px] text-slate-400 font-mono" dir="ltr">
                     {activeCallLead.phoneNumber}
                   </p>
                 </div>
@@ -323,30 +320,30 @@ export function SalesAgentHomeView() {
               <button
                 type="button"
                 onClick={() => setActiveCallLead(null)}
-                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
+                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-[#18263A] transition-colors cursor-pointer"
               >
                 <X size={18} />
               </button>
             </div>
 
             {callNotice ? (
-              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-center space-y-2 text-emerald-800">
-                <CheckCircle2 size={24} className="mx-auto text-emerald-600" />
+              <div className="p-4 bg-emerald-500/10 border border-emerald-500/25 rounded-2xl text-center space-y-2 text-emerald-300">
+                <CheckCircle2 size={24} className="mx-auto text-emerald-400" />
                 <p className="text-xs font-bold">{callNotice}</p>
               </div>
             ) : (
               <form onSubmit={handleLogCall} className="space-y-4">
                 <div className="space-y-1.5 text-right">
-                  <label className="block text-xs font-bold text-slate-700">
+                  <label className="block text-xs font-bold text-slate-300">
                     نتیجه تماس:
                   </label>
                   <select
                     value={callResult}
                     onChange={(e) => setCallResult(e.target.value as CallResult)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full bg-[#0B1423] border border-[#1F2E45] rounded-xl px-3 py-2 text-xs font-medium text-white focus:outline-none focus:ring-1 focus:ring-[#719BDF]/40 cursor-pointer"
                   >
                     {Object.entries(CALL_RESULT_LABELS).map(([k, label]) => (
-                      <option key={k} value={k}>
+                      <option key={k} value={k} className="bg-[#0B1423] text-white">
                         {label}
                       </option>
                     ))}
@@ -354,7 +351,7 @@ export function SalesAgentHomeView() {
                 </div>
 
                 <div className="space-y-1.5 text-right">
-                  <label className="block text-xs font-bold text-slate-700">
+                  <label className="block text-xs font-bold text-slate-300">
                     یادداشت مکالمه:
                   </label>
                   <textarea
@@ -362,23 +359,23 @@ export function SalesAgentHomeView() {
                     value={callNote}
                     onChange={(e) => setCallNote(e.target.value)}
                     placeholder="نکات مطرح‌شده و توافقات انجام‌شده در تماس..."
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
+                    className="w-full bg-[#0B1423] border border-[#1F2E45] rounded-xl p-3 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[#719BDF]/40 resize-none"
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-[#1F2E45]">
                   <button
                     type="button"
                     onClick={() => setActiveCallLead(null)}
                     disabled={isSubmittingCall}
-                    className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                    className="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white hover:bg-[#18263A] rounded-xl transition-colors cursor-pointer"
                   >
                     انصراف
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmittingCall}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors shadow-xs"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors shadow-md shadow-emerald-900/30 cursor-pointer"
                   >
                     <Send size={13} />
                     <span>{isSubmittingCall ? 'در حال ثبت...' : 'ثبت قطعی نتیجه'}</span>

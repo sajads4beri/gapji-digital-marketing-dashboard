@@ -88,7 +88,9 @@ export function CampaignWizard({
                 locations: ['تهران', 'اصفهان'],
                 interests: ['دیجیتال مارکتینگ'],
                 estimatedReach: 450_000,
-                selectedAudienceIds: ['aud_ecommerce_heavy'],
+                selectedAudienceIds: Array.isArray((existing as any).targetAudienceIds) && (existing as any).targetAudienceIds.length > 0
+                  ? (existing as any).targetAudienceIds
+                  : [],
               },
               platforms: existing.platforms || [
                 {
@@ -445,9 +447,9 @@ export function CampaignWizard({
 
   if (isLoadingExisting) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
-        <div className="flex flex-col items-center gap-3 text-gray-500">
-          <Loader2 size={32} className="animate-spin text-blue-600" />
+      <div className="bg-[#111D2E]/80 backdrop-blur-md rounded-2xl border border-[#1F2E45] p-12 text-center shadow-xl">
+        <div className="flex flex-col items-center gap-3 text-slate-400">
+          <Loader2 size={32} className="animate-spin text-[#719BDF]" />
           <p className="text-sm font-semibold">درحال بارگذاری اطلاعات کمپین جهت ویرایش...</p>
         </div>
       </div>
@@ -458,17 +460,17 @@ export function CampaignWizard({
     <div className="space-y-6">
       {/* اعلان وجود پیش‌نویس ذخیره‌شده (فقط در حالت ساخت کمپین جدید) */}
       {hasDraftNotice && mode === 'create' && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm animate-in fade-in">
-          <div className="flex items-center gap-2.5 text-xs text-amber-900">
-            <RotateCcw size={18} className="text-amber-600 shrink-0" />
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xl animate-in fade-in">
+          <div className="flex items-center gap-2.5 text-xs text-amber-300">
+            <RotateCcw size={18} className="text-amber-400 shrink-0" />
             <div>
               <span className="font-bold">پیش‌نویس کمپین تکمیل‌نشده یافت شد!</span>
               {draftSavedAt && (
-                <span className="text-amber-700 mr-1.5">
+                <span className="text-amber-400/80 ms-1.5 font-display">
                   (آخرین ذخیره: {draftSavedAt})
                 </span>
               )}
-              <p className="text-amber-700 text-[11px] mt-0.5">
+              <p className="text-amber-300/70 text-[11px] mt-0.5">
                 می‌توانید اطلاعات فرم را به وضعیت آخرین ذخیره خود بازگردانید.
               </p>
             </div>
@@ -477,14 +479,14 @@ export function CampaignWizard({
             <button
               type="button"
               onClick={handleRestoreDraft}
-              className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+              className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors shadow-sm"
             >
               بازیابی پیش‌نویس
             </button>
             <button
               type="button"
               onClick={handleDismissDraft}
-              className="text-gray-500 hover:text-gray-700 p-1.5 rounded-lg hover:bg-amber-100/60 transition-colors"
+              className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-amber-500/20 transition-colors"
               title="نادیده گرفتن و حذف پیش‌نویس"
             >
               <X size={16} />
@@ -496,28 +498,28 @@ export function CampaignWizard({
       {/* پیام بازخورد (Toast / Banner) */}
       {feedbackMessage && (
         <div
-          className={`rounded-2xl p-3.5 flex items-center justify-between text-xs border shadow-sm transition-all ${
+          className={`rounded-2xl p-3.5 flex items-center justify-between text-xs border shadow-xl transition-all ${
             feedbackMessage.type === 'success'
-              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
               : feedbackMessage.type === 'error'
-              ? 'bg-red-50 text-red-800 border-red-200'
-              : 'bg-blue-50 text-blue-800 border-blue-200'
+              ? 'bg-[#D66B73]/10 text-[#D66B73] border-[#D66B73]/30'
+              : 'bg-blue-500/10 text-[#719BDF] border-blue-500/30'
           }`}
         >
           <div className="flex items-center gap-2">
             {feedbackMessage.type === 'success' ? (
-              <CheckCircle2 size={16} className="text-emerald-600" />
+              <CheckCircle2 size={16} className="text-emerald-400" />
             ) : feedbackMessage.type === 'error' ? (
-              <AlertCircle size={16} className="text-red-600" />
+              <AlertCircle size={16} className="text-[#D66B73]" />
             ) : (
-              <AlertCircle size={16} className="text-blue-600" />
+              <AlertCircle size={16} className="text-[#719BDF]" />
             )}
             <span className="font-semibold">{feedbackMessage.text}</span>
           </div>
           <button
             type="button"
             onClick={() => setFeedbackMessage(null)}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-slate-400 hover:text-white"
           >
             <X size={14} />
           </button>

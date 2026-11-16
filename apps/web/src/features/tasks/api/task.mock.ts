@@ -676,6 +676,6 @@ export class TaskMockService implements ITaskService {
 }
 
 /**
- * نمونه Singleton سرویس تسک جهت استفاده در بخش‌های برنامه
+ * نمونه Mock سرویس تسک جهت تست‌های مجزا
  */
-export const taskService = new TaskMockService();
+export const mockTaskService = new TaskMockService();

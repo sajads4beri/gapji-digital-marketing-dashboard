@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Modal } from '@/components/common/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { Layers, Plus, Edit3, Tag, ShieldCheck, Check } from 'lucide-react';
 import type {
   OrgListType,
@@ -45,7 +46,6 @@ export function OrgItemModal({
   const [isActive, setIsActive] = React.useState(true);
   const [errors, setErrors] = React.useState<{ label?: string; key?: string }>({});
 
-  // همگام‌سازی وضعیت اولیه فرم هنگام باز شدن یا تغییر آیتم
   React.useEffect(() => {
     if (isOpen) {
       if (mode === 'edit' && item) {
@@ -100,26 +100,26 @@ export function OrgItemModal({
       isOpen={isOpen}
       onClose={onClose}
       title={
-        <div className="flex items-center gap-2 text-slate-900" dir="rtl">
+        <div className="flex items-center gap-2.5 text-slate-100" dir="rtl">
           {mode === 'create' ? (
-            <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-[#719BDF]/15 text-[#719BDF] border border-[#719BDF]/30 flex items-center justify-center shrink-0">
               <Plus size={18} />
             </div>
           ) : (
-            <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-[#719BDF]/15 text-[#719BDF] border border-[#719BDF]/30 flex items-center justify-center shrink-0">
               <Edit3 size={18} />
             </div>
           )}
-          <span className="font-bold text-sm sm:text-base">{titleText}</span>
+          <span className="font-bold text-sm sm:text-base font-display">{titleText}</span>
         </div>
       }
       size="md"
     >
-      <form onSubmit={handleSubmit} className="space-y-4 pt-1" dir="rtl">
+      <form onSubmit={handleSubmit} className="space-y-4 pt-1 text-slate-100" dir="rtl">
         {/* ۱. فیلد عنوان گزینه */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-bold text-slate-700">
-            عنوان گزینه <span className="text-rose-500">*</span>
+          <label className="block text-xs font-bold text-slate-200">
+            عنوان گزینه <span className="text-[#D66B73]">*</span>
           </label>
           <Input
             value={label}
@@ -129,11 +129,13 @@ export function OrgItemModal({
             }}
             placeholder="مثال: تبلیغات در پیام‌رسان‌ها، لید وبینار و ..."
             disabled={isLoading}
-            className={`text-xs sm:text-sm ${errors.label ? 'border-rose-400 focus:ring-rose-200' : ''}`}
+            className={`text-xs sm:text-sm bg-[#0B1423] border-[#1F2E45] text-slate-100 placeholder:text-slate-500 ${
+              errors.label ? 'border-[#D66B73] focus:ring-[#D66B73]/20' : ''
+            }`}
             autoFocus
           />
           {errors.label && (
-            <p className="text-[11px] text-rose-600 font-medium">{errors.label}</p>
+            <p className="text-[11px] text-[#D66B73] font-medium">{errors.label}</p>
           )}
         </div>
 
@@ -141,7 +143,7 @@ export function OrgItemModal({
         {mode === 'create' ? (
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="block text-xs font-bold text-slate-700">
+              <label className="block text-xs font-bold text-slate-200">
                 کلید سیستمی (اختیاری)
               </label>
               <span className="text-[10px] text-slate-400">فقط حروف انگلیسی و خط تیره (_)</span>
@@ -152,16 +154,16 @@ export function OrgItemModal({
               placeholder="مثال: messenger_ads (در صورت خالی بودن خودکار ساخته می‌شود)"
               disabled={isLoading}
               dir="ltr"
-              className="text-xs font-mono text-left"
+              className="text-xs font-mono text-left bg-[#0B1423] border-[#1F2E45] text-slate-100 placeholder:text-slate-500"
             />
           </div>
         ) : (
-          <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 flex items-center justify-between text-xs">
-            <span className="text-slate-500 flex items-center gap-1.5">
-              <Tag size={13} className="text-slate-400" />
+          <div className="bg-[#18263A] border border-[#1F2E45] rounded-xl p-3 flex items-center justify-between text-xs">
+            <span className="text-slate-400 flex items-center gap-1.5">
+              <Tag size={13} className="text-[#719BDF]" />
               <span>کلید سیستمی پایدار:</span>
             </span>
-            <span className="font-mono text-slate-800 font-bold bg-white px-2 py-0.5 rounded border border-slate-200">
+            <span className="font-mono text-slate-200 font-bold bg-[#111D2E] px-2.5 py-0.5 rounded border border-[#1F2E45]">
               {item?.key}
             </span>
           </div>
@@ -169,12 +171,12 @@ export function OrgItemModal({
 
         {/* ۳. انتخاب گروه وضعیت (صرفاً برای فهرست وضعیتهای لید) */}
         {isLeadStatusList && (
-          <div className="space-y-2 pt-1 border-t border-slate-100">
+          <div className="space-y-2 pt-2 border-t border-[#1F2E45]">
             <div className="flex items-center justify-between">
-              <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                <ShieldCheck size={14} className="text-purple-600" />
+              <label className="block text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                <ShieldCheck size={14} className="text-[#719BDF]" />
                 <span>گروه وضعیت لید</span>
-                <span className="text-rose-500">*</span>
+                <span className="text-[#D66B73]">*</span>
               </label>
               <span className="text-[10px] text-slate-400">الزام سند محصول (صفحه ۲۳)</span>
             </div>
@@ -186,13 +188,13 @@ export function OrgItemModal({
                 disabled={isLoading}
                 className={`p-2.5 rounded-xl border text-right transition-all flex flex-col justify-between gap-1 cursor-pointer ${
                   group === 'open'
-                    ? 'border-blue-500 bg-blue-50/70 text-blue-900 ring-2 ring-blue-100'
-                    : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
+                    ? 'border-[#719BDF] bg-[#18263A] text-sky-300 ring-1 ring-[#719BDF]/40'
+                    : 'border-[#1F2E45] bg-[#0B1423] hover:bg-[#18263A] text-slate-300'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold">{LEAD_STATUS_GROUP_LABELS.open}</span>
-                  {group === 'open' && <Check size={13} className="text-blue-600" />}
+                  {group === 'open' && <Check size={13} className="text-[#719BDF]" />}
                 </div>
                 <span className="text-[10px] text-slate-400">لیدهای جاری پیگیری</span>
               </button>
@@ -203,13 +205,13 @@ export function OrgItemModal({
                 disabled={isLoading}
                 className={`p-2.5 rounded-xl border text-right transition-all flex flex-col justify-between gap-1 cursor-pointer ${
                   group === 'won'
-                    ? 'border-emerald-500 bg-emerald-50/70 text-emerald-900 ring-2 ring-emerald-100'
-                    : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
+                    ? 'border-emerald-500 bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/40'
+                    : 'border-[#1F2E45] bg-[#0B1423] hover:bg-[#18263A] text-slate-300'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold">{LEAD_STATUS_GROUP_LABELS.won}</span>
-                  {group === 'won' && <Check size={13} className="text-emerald-600" />}
+                  {group === 'won' && <Check size={13} className="text-emerald-400" />}
                 </div>
                 <span className="text-[10px] text-slate-400">تبدیل به مشتری</span>
               </button>
@@ -220,13 +222,13 @@ export function OrgItemModal({
                 disabled={isLoading}
                 className={`p-2.5 rounded-xl border text-right transition-all flex flex-col justify-between gap-1 cursor-pointer ${
                   group === 'lost'
-                    ? 'border-rose-500 bg-rose-50/70 text-rose-900 ring-2 ring-rose-100'
-                    : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
+                    ? 'border-[#D66B73] bg-[#D66B73]/15 text-[#D66B73] ring-1 ring-[#D66B73]/40'
+                    : 'border-[#1F2E45] bg-[#0B1423] hover:bg-[#18263A] text-slate-300'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold">{LEAD_STATUS_GROUP_LABELS.lost}</span>
-                  {group === 'lost' && <Check size={13} className="text-rose-600" />}
+                  {group === 'lost' && <Check size={13} className="text-[#D66B73]" />}
                 </div>
                 <span className="text-[10px] text-slate-400">ردشده یا انصرافی</span>
               </button>
@@ -235,37 +237,33 @@ export function OrgItemModal({
         )}
 
         {/* ۴. وضعیت فعال یا غیرفعال */}
-        <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+        <div className="pt-2 border-t border-[#1F2E45] flex items-center justify-between">
           <div>
-            <span className="text-xs font-bold text-slate-800 block">وضعیت در سامانه</span>
-            <span className="text-[11px] text-slate-500">
+            <span className="text-xs font-bold text-slate-200 block">وضعیت در سامانه</span>
+            <span className="text-[11px] text-slate-400">
               {isActive
                 ? 'گزینه فعال بوده و در فرم‌های ثبت جدید نمایش داده می‌شود.'
                 : 'گزینه غیرفعال است و فقط برای نمایش سوابق قبلی حفظ می‌شود.'}
             </span>
           </div>
 
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={isActive}
-              onChange={(e) => setIsActive(e.target.checked)}
-              disabled={isLoading}
-              className="sr-only peer"
-            />
-            <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
-          </label>
+          <Switch
+            id="item-active-status"
+            checked={isActive}
+            onCheckedChange={setIsActive}
+            disabled={isLoading}
+          />
         </div>
 
         {/* دکمه‌های اقدام */}
-        <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+        <div className="pt-3 border-t border-[#1F2E45] flex items-center justify-end gap-2">
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={onClose}
             disabled={isLoading}
-            className="text-xs"
+            className="text-xs border-[#1F2E45] bg-[#18263A] text-slate-300 hover:bg-[#1F2E45]"
           >
             انصراف
           </Button>
@@ -274,7 +272,7 @@ export function OrgItemModal({
             variant="primary"
             size="sm"
             disabled={isLoading}
-            className="text-xs bg-purple-600 hover:bg-purple-700 text-white min-w-[90px]"
+            className="text-xs bg-gradient-to-r from-[#719BDF] to-[#3B82F6] hover:from-[#5e8bd8] hover:to-[#2563eb] text-white min-w-[90px] border-0 shadow-[0_0_15px_rgba(113,155,223,0.25)]"
           >
             {isLoading ? 'در حال ذخیره...' : mode === 'create' ? 'ایجاد گزینه' : 'ذخیره تغییرات'}
           </Button>

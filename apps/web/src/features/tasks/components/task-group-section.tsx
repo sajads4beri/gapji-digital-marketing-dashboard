@@ -42,31 +42,31 @@ export function TaskGroupSection({
       >
         <div className="flex items-center gap-2">
           {isOverdue && (
-            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            <AlertCircle className="w-4 h-4 text-[#D66B73] shrink-0" />
           )}
 
           <h3
             className={`text-sm font-bold transition-colors ${
               isOverdue
-                ? 'text-rose-700'
-                : 'text-slate-800 group-hover:text-blue-600'
+                ? 'text-[#D66B73]'
+                : 'text-slate-100 group-hover:text-[#719BDF]'
             }`}
           >
             {title}
           </h3>
 
           <span
-            className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-semibold rounded-full ${
+            className={`inline-flex items-center justify-center min-w-[22px] h-5 px-2 text-xs font-bold rounded-full ${
               isOverdue
-                ? 'bg-rose-100 text-rose-800'
-                : 'bg-slate-100 text-slate-600 group-hover:bg-blue-50 group-hover:text-blue-700'
+                ? 'bg-[#D66B73]/20 text-[#D66B73] border border-[#D66B73]/30'
+                : 'bg-[#18263A] text-slate-300 border border-[#1F2E45] group-hover:border-[#719BDF]/40 group-hover:text-[#719BDF]'
             }`}
           >
             {count}
           </span>
         </div>
 
-        <span className="text-slate-400 group-hover:text-slate-600 transition-colors p-1">
+        <span className="text-slate-500 group-hover:text-slate-300 transition-colors p-1">
           {isOpen ? (
             <ChevronUp className="w-4 h-4" />
           ) : (

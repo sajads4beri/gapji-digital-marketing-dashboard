@@ -80,19 +80,19 @@ export function TaskCard({
       }}
       onDragEnd={onDragEnd}
       dir="rtl"
-      className={`group relative p-3.5 bg-white hover:bg-slate-50/90 border rounded-xl shadow-2xs hover:shadow-xs transition-all cursor-pointer space-y-3 ${
+      className={`group relative p-3.5 bg-[#111D2E] hover:bg-[#18263A] border rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer space-y-3 ${
         isDragging
-          ? 'opacity-40 scale-95 border-blue-400 rotate-1 shadow-md bg-blue-50/30'
+          ? 'opacity-40 scale-95 border-[#719BDF] rotate-1 shadow-xl bg-[#18263A]'
           : isDone
-          ? 'opacity-70 bg-slate-50/50 border-slate-200'
-          : 'border-slate-200 cursor-grab active:cursor-grabbing hover:border-blue-300'
+          ? 'opacity-70 bg-[#111D2E]/60 border-[#1F2E45]'
+          : 'border-[#1F2E45] cursor-grab active:cursor-grabbing hover:border-[#719BDF]/40'
       } ${className}`}
     >
       {/* هدر کارت: عنوان و اولویت */}
       <div className="flex items-start justify-between gap-2">
         <h4
-          className={`text-sm font-medium leading-snug line-clamp-2 ${
-            isDone ? 'line-through text-slate-400' : 'text-slate-900 group-hover:text-blue-600'
+          className={`text-xs sm:text-sm font-semibold leading-snug line-clamp-2 ${
+            isDone ? 'line-through text-slate-500' : 'text-slate-100 group-hover:text-[#719BDF]'
           }`}
         >
           {task.title}
@@ -103,26 +103,26 @@ export function TaskCard({
       {/* متادیتا: برچسب مرتبط و تاخیر */}
       <div className="flex items-center gap-2 flex-wrap">
         {task.relatedTo && (
-          <span className="inline-flex items-center gap-1 text-[11px] text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md max-w-[160px] truncate">
+          <span className="inline-flex items-center gap-1 text-[11px] text-slate-300 bg-[#0B1423] border border-[#1F2E45] px-2 py-0.5 rounded-lg max-w-[160px] truncate">
             {getRelatedIcon(task.relatedTo.type)}
             <span className="truncate">{task.relatedTo.title || task.relatedTo.id}</span>
           </span>
         )}
 
         {isOverdue && (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[11px] font-bold bg-[#D66B73]/15 text-[#D66B73] border border-[#D66B73]/30">
             {formatOverdueBadgeText(overdueDays)}
           </span>
         )}
       </div>
 
       {/* فوتر کارت: زیرتسک‌ها، تاریخ و آواتار */}
-      <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs text-slate-500">
+      <div className="flex items-center justify-between pt-2 border-t border-[#1F2E45] text-xs text-slate-400">
         <div className="flex items-center gap-2.5">
           {/* شمارنده زیرتسک‌ها */}
           {subtasksCount > 0 && (
-            <span className="inline-flex items-center gap-1 text-[11px] text-slate-500">
-              <CheckSquare className="w-3.5 h-3.5 text-slate-400" />
+            <span className="inline-flex items-center gap-1 text-[11px] text-slate-400">
+              <CheckSquare className="w-3.5 h-3.5 text-slate-500" />
               <span>
                 {completedSubtasksCount}/{subtasksCount}
               </span>
@@ -131,8 +131,8 @@ export function TaskCard({
 
           {/* کامنت‌ها */}
           {task.comments.length > 0 && (
-            <span className="inline-flex items-center gap-1 text-[11px] text-slate-500">
-              <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
+            <span className="inline-flex items-center gap-1 text-[11px] text-slate-400">
+              <MessageSquare className="w-3.5 h-3.5 text-slate-500" />
               <span>{task.comments.length}</span>
             </span>
           )}
@@ -141,7 +141,7 @@ export function TaskCard({
           {jalaliDueDate && (
             <span
               className={`inline-flex items-center gap-1 text-[11px] ${
-                isOverdue ? 'text-rose-600 font-medium' : 'text-slate-500'
+                isOverdue ? 'text-[#D66B73] font-bold' : 'text-slate-400'
               }`}
             >
               <Calendar className="w-3.5 h-3.5" />
@@ -151,7 +151,7 @@ export function TaskCard({
         </div>
 
         {/* آواتار مسئول */}
-        <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] font-medium text-slate-700 overflow-hidden shrink-0">
+        <div className="w-6 h-6 rounded-full bg-[#18263A] border border-[#1F2E45] flex items-center justify-center text-[10px] font-bold text-slate-300 overflow-hidden shrink-0">
           {task.assignee ? (
             task.assignee.avatarUrl ? (
               <img

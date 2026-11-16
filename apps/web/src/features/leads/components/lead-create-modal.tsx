@@ -23,6 +23,7 @@ import { useToast } from '@/components/common/toast-provider';
 import { useAuth } from '@/features/auth';
 import { getCampaigns } from '@/lib/api';
 import type { Campaign } from '@gapji/shared';
+import { organizationService } from '@/features/organization';
 import { leadApi, DuplicateLeadError, type ExistingLeadSummary } from '../api/lead.api';
 import type { LeadDetail } from '../types';
 
@@ -55,6 +56,7 @@ export function LeadCreateModal({ isOpen, onClose, onSuccess }: LeadCreateModalP
   const [source, setSource] = React.useState('manual');
   const [campaignId, setCampaignId] = React.useState('');
   const [assignedToId, setAssignedToId] = React.useState('');
+  const [sourceOptions, setSourceOptions] = React.useState(SOURCE_OPTIONS);
   const [nextFollowUpAt, setNextFollowUpAt] = React.useState('');
   const [nextFollowUpNote, setNextFollowUpNote] = React.useState('');
 
@@ -99,11 +101,23 @@ export function LeadCreateModal({ isOpen, onClose, onSuccess }: LeadCreateModalP
     Promise.all([
       getCampaigns().catch(() => []),
       isSalesAgent ? Promise.resolve([]) : leadApi.getAssignees().catch(() => []),
+      organizationService.getListItems('lead_sources').catch(() => []),
     ])
-      .then(([camps, members]) => {
+      .then(([camps, members, sources]) => {
         if (!isMounted) return;
         setCampaigns(camps);
         setAssignees(members);
+        if (sources && sources.length > 0) {
+          const activeSources = sources
+            .filter((s: any) => s.isActive)
+            .map((s: any) => ({
+              value: s.key || s.label,
+              label: s.label,
+            }));
+          if (activeSources.length > 0) {
+            setSourceOptions(activeSources);
+          }
+        }
       })
       .finally(() => {
         if (isMounted) setIsLoadingMeta(false);
@@ -387,7 +401,7 @@ export function LeadCreateModal({ isOpen, onClose, onSuccess }: LeadCreateModalP
             label="منبع ورودی لید"
             value={source}
             onChange={(e) => setSource(e.target.value)}
-            options={SOURCE_OPTIONS}
+            options={sourceOptions}
           />
 
           <Select

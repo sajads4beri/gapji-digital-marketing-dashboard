@@ -131,20 +131,26 @@ export function mapLeadEventToTimelineEvent(event: LeadEvent): TimelineEvent {
 
  // ۲. اطلاعات تغییر وضعیت
  if (event.type === 'status_change' && event.metadata) {
- const fromLabel = event.metadata.fromStatus
- ? LEAD_STATUS_LABELS[event.metadata.fromStatus] || event.metadata.fromStatus
- : null;
- const toLabel = event.metadata.toStatus
- ? LEAD_STATUS_LABELS[event.metadata.toStatus] || event.metadata.toStatus
- : null;
+  const fromStatus = event.metadata.fromStatus;
+  const toStatus = event.metadata.toStatus;
+  const fromLabel: string | null = (typeof event.metadata.fromStatusLabel === 'string' && event.metadata.fromStatusLabel)
+   ? event.metadata.fromStatusLabel
+   : fromStatus
+   ? ((LEAD_STATUS_LABELS as Record<string, string>)[String(fromStatus)] || String(fromStatus))
+   : null;
+  const toLabel: string | null = (typeof event.metadata.toStatusLabel === 'string' && event.metadata.toStatusLabel)
+   ? event.metadata.toStatusLabel
+   : toStatus
+   ? ((LEAD_STATUS_LABELS as Record<string, string>)[String(toStatus)] || String(toStatus))
+   : null;
 
- if (fromLabel && toLabel) {
- descriptionElements.push(
- <div key="status-change" className="text-xs text-slate-600 ">
- تغییر از «{fromLabel}» به «{toLabel}»
- </div>
- );
- }
+  if (fromLabel && toLabel) {
+  descriptionElements.push(
+  <div key="status-change" className="text-xs text-slate-600 ">
+  تغییر از «{fromLabel}» به «{toLabel}»
+  </div>
+  );
+  }
  }
 
  // ۳. اطلاعات پیش‌فاکتور / پیشنهاد

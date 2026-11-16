@@ -1,10 +1,8 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import { ToastProvider } from '@/components/common';
 import { AuthProvider } from '@/features/auth';
+import { vazirmatn } from '@/lib/fonts';
 import './globals.css';
-
-const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Gapji Digital Marketing Dashboard',
@@ -17,8 +15,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fa" dir="rtl">
-      <body className={inter.className}>
+    <html lang="fa" dir="rtl" className={vazirmatn.variable}>
+      <body className={`${vazirmatn.className} font-sans antialiased text-slate-100 bg-[#080F1C]`}>
         <ToastProvider>
           <AuthProvider>{children}</AuthProvider>
         </ToastProvider>

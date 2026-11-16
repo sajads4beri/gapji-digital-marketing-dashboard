@@ -33,6 +33,7 @@ export interface AudienceSegment {
   interests: string[];
   estimatedSize: number;
   isCustom?: boolean;
+  channel?: string | null;
 }
 
 /**

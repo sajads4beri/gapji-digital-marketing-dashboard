@@ -4,44 +4,92 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
+    /* Midnight Executive — Quiet Luxury Palette (Dark Mode by Default) */
+    --background: 220 56% 7%;      /* #080F1C Deep Midnight Navy */
+    --foreground: 210 40% 96%;     /* #F1F5F9 Soft White/Silver */
+    --card: 215 45% 12%;           /* #111D2E Primary Card Surface */
+    --card-foreground: 210 40% 96%;/* #F1F5F9 */
+    --popover: 215 42% 16%;        /* #18263A Elevated Surface */
+    --popover-foreground: 210 40% 96%;
+    --primary: 217 63% 66%;        /* #719BDF Icy Blue Accent */
+    --primary-foreground: 220 56% 7%;
+    --secondary: 215 42% 16%;      /* #18263A */
+    --secondary-foreground: 210 40% 96%;
+    --muted: 215 39% 21%;          /* #20314A */
+    --muted-foreground: 216 23% 68%;/* #9AAAC0 Slate */
+    --accent: 215 39% 21%;         /* #20314A */
+    --accent-foreground: 210 40% 96%;
+    --destructive: 355 58% 63%;    /* #D66B73 Crimson/Coral */
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.75rem;
+    --border: 215 38% 19%;         /* #1F2E45 Subtle Dark Border */
+    --input: 215 38% 19%;          /* #1F2E45 */
+    --ring: 217 63% 66%;           /* #719BDF */
+    --radius: 0.875rem;            /* 14px */
   }
 
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     direction: rtl;
+    font-family: var(--font-vazirmatn), 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-vazirmatn), 'Vazirmatn', sans-serif;
   }
 }
 
-/* Custom scrollbar styling */
+/* Glassmorphism & Quiet Luxury Surface Utilities */
+.glass-card {
+  background-color: rgba(17, 29, 46, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.45);
+}
+
+.glass-surface {
+  background-color: rgba(24, 38, 58, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+}
+
+.glow-blue {
+  box-shadow: 0 0 25px rgba(113, 155, 223, 0.18);
+}
+
+.glow-blue-sm {
+  box-shadow: 0 0 12px rgba(113, 155, 223, 0.12);
+}
+
+/* Custom Dark scrollbar styling */
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 .scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(8, 15, 28, 0.4);
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.4);
+  background: rgba(113, 155, 223, 0.25);
   border-radius: 3px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(113, 155, 223, 0.45);
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

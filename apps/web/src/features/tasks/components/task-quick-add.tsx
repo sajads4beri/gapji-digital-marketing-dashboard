@@ -91,10 +91,10 @@ export function TaskQuickAdd({
             placeholder={placeholder}
             disabled={isSubmitting}
             autoFocus={autoFocus}
-            className={`w-full px-4 py-2.5 text-sm bg-white border rounded-xl shadow-xs transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-60 disabled:cursor-not-allowed ${
+            className={`w-full px-4 py-2.5 text-xs sm:text-sm bg-[#0B1423] border rounded-xl shadow-xs transition-all text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[#719BDF]/30 focus:border-[#719BDF] disabled:opacity-60 disabled:cursor-not-allowed ${
               errorMessage
-                ? 'border-rose-300 focus:ring-rose-500 focus:border-rose-500'
-                : 'border-slate-300 hover:border-slate-400'
+                ? 'border-[#D66B73] focus:ring-[#D66B73]/30 focus:border-[#D66B73]'
+                : 'border-[#1F2E45] hover:border-[#1F2E45]/80'
             }`}
           />
         </div>
@@ -102,19 +102,19 @@ export function TaskQuickAdd({
         <button
           type="submit"
           disabled={isSubmitting || !title.trim()}
-          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0 shadow-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-[#719BDF] to-[#3B82F6] hover:brightness-110 active:brightness-95 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl transition-all shrink-0 shadow-[0_0_15px_rgba(113,155,223,0.2)] focus:outline-none focus:ring-1 focus:ring-[#719BDF]"
         >
           {isSubmitting ? (
             <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4" strokeWidth={2.5} />
           )}
-          <span>افزودن</span>
+          <span>افزودن تسک</span>
         </button>
       </form>
 
       {errorMessage && (
-        <p className="mt-1.5 text-xs text-rose-600 pr-1 animate-in fade-in duration-150">
+        <p className="mt-1.5 text-xs text-[#D66B73] font-medium ps-1 animate-in fade-in duration-150">
           {errorMessage}
         </p>
       )}

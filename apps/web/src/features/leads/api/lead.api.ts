@@ -116,6 +116,18 @@ export const leadApi = {
   },
 
   /**
+   * دریافت لیست وضعیت‌های پیکربندی‌شده لید در پایپ‌لاین سازمان (B2.5.4)
+   */
+  async getPipelineStatuses(): Promise<any[]> {
+    try {
+      const { data } = await api.get('/organization/taxonomies/lead_statuses');
+      return data;
+    } catch {
+      return [];
+    }
+  },
+
+  /**
    * دریافت تاریخچه رویدادها و فعالیت‌های یک لید از پایگاه داده
    */
   async getEvents(leadId: string): Promise<LeadEvent[]> {

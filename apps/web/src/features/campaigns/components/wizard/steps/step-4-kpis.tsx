@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { CampaignFormData, KpiTargetItem } from '../../../types';
 import {
   Target,
-  Plus,
   Trash2,
   TrendingUp,
   Percent,
@@ -110,11 +109,9 @@ export function Step4Kpis({
         },
       ];
     }
-
     syncKpiState(updated);
   };
 
-  // حذف یک KPI از لیست
   const handleRemoveKpi = (id: string) => {
     const updated = selectedItems.filter((item) => item.id !== id);
     syncKpiState(updated);
@@ -140,34 +137,34 @@ export function Step4Kpis({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200/80 p-6 sm:p-7 shadow-sm space-y-6">
+    <div className="bg-[#111D2E]/80 backdrop-blur-md rounded-2xl border border-[#1F2E45] p-6 sm:p-7 shadow-xl space-y-6">
       {/* هدر مرحله */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-gray-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#1F2E45]">
         <div>
-          <div className="flex items-center gap-2 text-blue-600 mb-1">
+          <div className="flex items-center gap-2 text-[#719BDF] mb-1">
             <Target size={20} />
-            <h3 className="text-base font-bold text-gray-900">
+            <h3 className="text-base font-bold text-slate-100 font-display">
               انتخاب KPI و تعیین اهداف عددی
             </h3>
           </div>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-slate-400">
             شاخص‌های کلیدی عملکرد کمپین را برگزینید و تارگت‌های عددی واقع‌بینانه تعیین کنید.
           </p>
         </div>
-        <span className="text-xs bg-gray-100 text-gray-600 font-medium px-2.5 py-1 rounded-full self-start sm:self-auto">
+        <span className="text-xs bg-[#18263A] text-slate-300 border border-[#1F2E45] font-medium px-2.5 py-1 rounded-full self-start sm:self-auto">
           مرحله ۴ از ۶
         </span>
       </div>
 
       {errors.targetKpis && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-xs p-3 rounded-xl font-medium">
+        <div className="bg-[#D66B73]/10 border border-[#D66B73]/30 text-[#D66B73] text-xs p-3 rounded-xl font-medium">
           {errors.targetKpis}
         </div>
       )}
 
       {/* بخش ۱: کارت‌های شاخص‌های آماده جهت انتخاب سریع */}
       <div className="space-y-3">
-        <label className="block text-xs font-bold text-gray-700">
+        <label className="block text-xs font-semibold text-slate-300">
           شاخص‌های کلیدی عملکرد پیشنهادی (برای فعال‌سازی یا حذف کلیک کنید):
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
@@ -182,20 +179,20 @@ export function Step4Kpis({
                 onClick={() => handleToggleKpi(kpi)}
                 className={`flex items-center gap-2.5 p-3 rounded-xl border text-right transition-all ${
                   active
-                    ? 'bg-blue-50/80 border-blue-400 ring-1 ring-blue-300 text-blue-900'
-                    : 'bg-gray-50/60 hover:bg-gray-100/70 border-gray-200 text-gray-700'
+                    ? 'bg-[#18263A] border-[#719BDF] text-[#719BDF] shadow-lg shadow-[#719BDF]/5 ring-1 ring-[#719BDF]/30'
+                    : 'bg-[#111D2E]/60 hover:bg-[#18263A]/50 border-[#1F2E45] text-slate-300'
                 }`}
               >
                 <div
                   className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                    active ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'
+                    active ? 'bg-gradient-to-r from-blue-600 to-[#719BDF] text-white' : 'bg-[#0B1423] text-slate-500 border border-[#1F2E45]'
                   }`}
                 >
                   {active ? <Check size={14} /> : <Icon size={14} />}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h4 className="text-[11px] font-bold truncate">{kpi.name}</h4>
-                  <span className="text-[10px] text-gray-400">واحد: {kpi.unit}</span>
+                  <h4 className="text-[11px] font-bold truncate text-slate-100">{kpi.name}</h4>
+                  <span className="text-[10px] text-slate-400">واحد: {kpi.unit}</span>
                 </div>
               </button>
             );
@@ -206,31 +203,31 @@ export function Step4Kpis({
       {/* بخش ۲: جدول تنظیم مقادیر عددی KPIهای انتخاب‌شده */}
       <div className="space-y-3 pt-2">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-bold text-gray-800">
+          <label className="text-xs font-semibold text-slate-300">
             اهداف عددی شاخص‌های انتخاب‌شده ({selectedItems.length} شاخص فعال):
           </label>
         </div>
 
         {selectedItems.length === 0 ? (
-          <div className="text-center py-10 bg-gray-50 rounded-xl border border-dashed border-gray-200 text-gray-400 text-xs">
+          <div className="text-center py-10 bg-[#0B1423]/40 rounded-xl border border-dashed border-[#1F2E45] text-slate-500 text-xs">
             هنوز شاخصی انتخاب نشده است. از گزینه‌های بالا یک یا چند KPI را انتخاب کنید.
           </div>
         ) : (
-          <div className="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100 shadow-sm">
+          <div className="border border-[#1F2E45] rounded-xl overflow-hidden divide-y divide-[#1F2E45] shadow-xl bg-[#0B1423]/40">
             {selectedItems.map((kpi) => (
               <div
                 key={kpi.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-white hover:bg-gray-50/50 transition-colors"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-[#111D2E]/60 hover:bg-[#18263A]/40 transition-colors"
               >
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-gray-900">{kpi.name}</span>
-                    <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">
+                    <span className="text-xs font-bold text-slate-100 font-display">{kpi.name}</span>
+                    <span className="text-[10px] bg-[#0B1423] text-slate-400 border border-[#1F2E45] px-2 py-0.5 rounded-full font-medium">
                       واحد: {kpi.unit}
                     </span>
                   </div>
                   {kpi.description && (
-                    <p className="text-[11px] text-gray-500">{kpi.description}</p>
+                    <p className="text-[11px] text-slate-400">{kpi.description}</p>
                   )}
                 </div>
 
@@ -244,10 +241,10 @@ export function Step4Kpis({
                         handleUpdateTargetValue(kpi.id, Number(e.target.value) || 0)
                       }
                       placeholder="مقدار هدف..."
-                      className="w-36 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-bold text-gray-900 text-left focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      className="w-36 bg-[#0B1423] border border-[#1F2E45] rounded-lg px-3 py-1.5 text-xs font-bold text-slate-100 text-left focus:border-[#719BDF] focus:outline-none"
                       dir="ltr"
                     />
-                    <span className="absolute left-2 text-[10px] text-gray-400 pointer-events-none">
+                    <span className="absolute left-2 text-[10px] text-slate-500 pointer-events-none">
                       {kpi.unit}
                     </span>
                   </div>
@@ -255,7 +252,7 @@ export function Step4Kpis({
                   <button
                     type="button"
                     onClick={() => handleRemoveKpi(kpi.id)}
-                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    className="p-1.5 text-slate-400 hover:text-[#D66B73] hover:bg-[#D66B73]/10 rounded-lg transition-colors"
                     title="حذف این KPI"
                   >
                     <Trash2 size={15} />

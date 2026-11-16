@@ -44,24 +44,24 @@ export interface UsersTableProps {
 }
 
 /**
- * تولید استایل اختصاصی برای هر نقش کاربری
+ * تولید استایل اختصاصی برای هر نقش کاربری در تم Midnight Executive
  */
 function getRoleBadgeStyle(role: UserRole): { bg: string; text: string; border: string } {
   switch (role) {
     case 'admin':
-      return { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' };
+      return { bg: 'bg-[#719BDF]/15', text: 'text-[#719BDF]', border: 'border-[#719BDF]/30' };
     case 'marketing_manager':
-      return { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' };
+      return { bg: 'bg-[#3B82F6]/15', text: 'text-[#93C5FD]', border: 'border-[#3B82F6]/30' };
     case 'campaign_manager':
-      return { bg: 'bg-cyan-50', text: 'text-cyan-700', border: 'border-cyan-200' };
+      return { bg: 'bg-cyan-500/15', text: 'text-cyan-400', border: 'border-cyan-500/30' };
     case 'sales_agent':
-      return { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' };
+      return { bg: 'bg-emerald-500/15', text: 'text-emerald-400', border: 'border-emerald-500/30' };
     case 'content_creator':
-      return { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' };
+      return { bg: 'bg-amber-500/15', text: 'text-amber-400', border: 'border-amber-500/30' };
     case 'client':
-      return { bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-200' };
+      return { bg: 'bg-slate-500/15', text: 'text-slate-300', border: 'border-slate-500/30' };
     default:
-      return { bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-200' };
+      return { bg: 'bg-[#18263A]', text: 'text-slate-300', border: 'border-[#1F2E45]' };
   }
 }
 
@@ -77,29 +77,29 @@ function formatLastLogin(isoString?: string | null): string {
 }
 
 /**
- * تولید آواتار حروف اول نام در صورت نبود تصویر
+ * تولید آواتار حروف اول نام با استایل لوکس
  */
 function renderUserAvatar(user: UserItem) {
   if (user.avatarUrl) {
     return (
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         src={user.avatarUrl}
         alt={user.fullName}
-        className="w-9 h-9 rounded-full object-cover border border-slate-200"
+        className="w-9 h-9 rounded-full object-cover border border-[#1F2E45] shrink-0"
       />
     );
   }
 
-  const initials = user.fullName
-    .split(' ')
-    .filter(Boolean)
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join('');
+  const parts = user.fullName.trim().split(/\s+/);
+  const initials =
+    parts.length === 1
+      ? parts[0].slice(0, 2)
+      : `${parts[0][0]}‌${parts[parts.length - 1][0]}`;
 
   return (
-    <div className="w-9 h-9 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-xs font-bold border border-slate-200 select-none">
-      {initials || 'کاربر'}
+    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#719BDF]/30 to-[#1D4ED8]/40 border border-[#719BDF]/30 text-[#719BDF] flex items-center justify-center font-bold text-xs shrink-0 select-none shadow-[0_0_8px_rgba(113,155,223,0.15)]">
+      {initials}
     </div>
   );
 }
@@ -114,7 +114,6 @@ export function UsersTable({
   onActivate,
   onResendInvite,
 }: UsersTableProps) {
-  // شمارش تعداد ادمین‌های فعال جهت اعمال گارد UI
   const activeAdminsCount = React.useMemo(() => {
     return users.filter((u) => u.role === 'admin' && u.status === 'active').length;
   }, [users]);
@@ -122,25 +121,25 @@ export function UsersTable({
   // ۱. حالت بارگذاری (Loading Skeleton)
   if (isLoading) {
     return (
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-2xs p-6 space-y-4" dir="rtl">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-          <div className="h-5 w-32 bg-slate-100 rounded-md animate-pulse" />
-          <div className="h-8 w-24 bg-slate-100 rounded-lg animate-pulse" />
+      <div className="bg-[#111D2E] rounded-2xl border border-[#1F2E45] overflow-hidden shadow-lg p-6 space-y-4" dir="rtl">
+        <div className="flex items-center justify-between pb-4 border-b border-[#1F2E45]">
+          <div className="h-5 w-32 bg-[#18263A] rounded-md animate-pulse" />
+          <div className="h-8 w-24 bg-[#18263A] rounded-lg animate-pulse" />
         </div>
         <div className="space-y-3">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex items-center justify-between py-3 border-b border-slate-50 last:border-0">
+            <div key={i} className="flex items-center justify-between py-3 border-b border-[#1F2E45]/40 last:border-0">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-slate-100 animate-pulse" />
+                <div className="w-9 h-9 rounded-full bg-[#18263A] animate-pulse" />
                 <div className="space-y-1.5">
-                  <div className="h-4 w-28 bg-slate-100 rounded animate-pulse" />
-                  <div className="h-3 w-40 bg-slate-100 rounded animate-pulse" />
+                  <div className="h-4 w-28 bg-[#18263A] rounded animate-pulse" />
+                  <div className="h-3 w-40 bg-[#18263A] rounded animate-pulse" />
                 </div>
               </div>
-              <div className="h-6 w-20 bg-slate-100 rounded-full animate-pulse" />
-              <div className="h-6 w-16 bg-slate-100 rounded-full animate-pulse" />
-              <div className="h-4 w-24 bg-slate-100 rounded animate-pulse" />
-              <div className="h-8 w-24 bg-slate-100 rounded-lg animate-pulse" />
+              <div className="h-6 w-20 bg-[#18263A] rounded-full animate-pulse" />
+              <div className="h-6 w-16 bg-[#18263A] rounded-full animate-pulse" />
+              <div className="h-4 w-24 bg-[#18263A] rounded animate-pulse" />
+              <div className="h-8 w-24 bg-[#18263A] rounded-lg animate-pulse" />
             </div>
           ))}
         </div>
@@ -151,25 +150,35 @@ export function UsersTable({
   // ۲. حالت بدون داده (Empty State)
   if (users.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-2xs space-y-4" dir="rtl">
-        <div className="w-14 h-14 rounded-2xl bg-slate-50 text-slate-400 mx-auto flex items-center justify-center border border-slate-100">
+      <div className="bg-[#111D2E] rounded-2xl border border-[#1F2E45] p-12 text-center shadow-lg space-y-4" dir="rtl">
+        <div className="w-14 h-14 rounded-2xl bg-[#18263A] text-slate-400 mx-auto flex items-center justify-center border border-[#1F2E45]">
           <AlertCircle size={28} />
         </div>
         <div className="space-y-1">
-          <h3 className="text-base font-bold text-slate-800">کاربری یافت نشد</h3>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+          <h3 className="text-base font-bold text-slate-100">کاربری یافت نشد</h3>
+          <p className="text-xs text-slate-400 max-w-sm mx-auto">
             هیچ کاربری با فیلترهای انتخابی مطابقت ندارد یا هنوز کاربری به سامانه دعوت نشده است.
           </p>
         </div>
         <div className="flex items-center justify-center gap-2 pt-2">
           {onRefresh && (
-            <Button variant="outline" size="sm" onClick={onRefresh}>
-              <RotateCcw size={14} className="ml-1.5" />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onRefresh}
+              className="border-[#1F2E45] bg-[#18263A] text-slate-200 hover:bg-[#1F2E45]"
+            >
+              <RotateCcw size={14} className="me-1.5" />
               بارگذاری مجدد
             </Button>
           )}
           {onInviteClick && (
-            <Button variant="primary" size="sm" onClick={onInviteClick}>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={onInviteClick}
+              className="bg-gradient-to-r from-[#719BDF] to-[#3B82F6] text-white border-0"
+            >
               دعوت کاربر جدید
             </Button>
           )}
@@ -181,26 +190,26 @@ export function UsersTable({
   return (
     <div className="space-y-4" dir="rtl">
       {/* نمای دسکتاپ: جدول کامل */}
-      <div className="hidden md:block bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
+      <div className="hidden md:block bg-[#111D2E] rounded-2xl border border-[#1F2E45] shadow-lg overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="bg-slate-50/75 border-b border-slate-200/80">
-              <TableHead className="text-right font-bold text-slate-700 py-3.5 px-4 text-xs">
+            <TableRow className="bg-[#0E1726]/90 border-b border-[#1F2E45]">
+              <TableHead className="text-right font-bold text-slate-400 py-3.5 px-4 text-xs">
                 کاربر
               </TableHead>
-              <TableHead className="text-right font-bold text-slate-700 py-3.5 px-4 text-xs">
+              <TableHead className="text-right font-bold text-slate-400 py-3.5 px-4 text-xs">
                 نقش سازمانی
               </TableHead>
-              <TableHead className="text-right font-bold text-slate-700 py-3.5 px-4 text-xs">
+              <TableHead className="text-right font-bold text-slate-400 py-3.5 px-4 text-xs">
                 وضعیت حساب
               </TableHead>
-              <TableHead className="text-right font-bold text-slate-700 py-3.5 px-4 text-xs">
+              <TableHead className="text-right font-bold text-slate-400 py-3.5 px-4 text-xs">
                 شماره تماس
               </TableHead>
-              <TableHead className="text-right font-bold text-slate-700 py-3.5 px-4 text-xs">
+              <TableHead className="text-right font-bold text-slate-400 py-3.5 px-4 text-xs">
                 آخرین ورود
               </TableHead>
-              <TableHead className="text-left font-bold text-slate-700 py-3.5 px-4 text-xs">
+              <TableHead className="text-left font-bold text-slate-400 py-3.5 px-4 text-xs">
                 عملیات
               </TableHead>
             </TableRow>
@@ -214,7 +223,7 @@ export function UsersTable({
               return (
                 <TableRow
                   key={user.id}
-                  className="hover:bg-slate-50/60 border-b border-slate-100 last:border-0 transition-colors"
+                  className="hover:bg-[#18263A]/50 border-b border-[#1F2E45]/60 last:border-0 transition-colors"
                 >
                   {/* ۱. ستون کاربر */}
                   <TableCell className="py-3 px-4">
@@ -222,16 +231,16 @@ export function UsersTable({
                       {renderUserAvatar(user)}
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-bold text-slate-900">
+                          <span className="text-xs font-bold text-slate-100">
                             {user.fullName}
                           </span>
                           {user.role === 'admin' && (
                             <span title="ادمین ارشد">
-                              <Shield size={13} className="text-purple-600 inline shrink-0" />
+                              <Shield size={13} className="text-[#719BDF] inline shrink-0" />
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-1 text-[11px] text-slate-500 font-mono" dir="ltr">
+                        <div className="flex items-center gap-1 text-[11px] text-slate-400 font-mono" dir="ltr">
                           <span>{user.email}</span>
                         </div>
                       </div>
@@ -256,39 +265,37 @@ export function UsersTable({
                   </TableCell>
 
                   {/* ۴. ستون شماره تماس */}
-                  <TableCell className="py-3 px-4 text-xs text-slate-600">
+                  <TableCell className="py-3 px-4 text-xs text-slate-300">
                     {user.phoneNumber ? (
-                      <span className="font-mono">{user.phoneNumber}</span>
+                      <span className="font-mono tabular-nums">{user.phoneNumber}</span>
                     ) : (
-                      <span className="text-slate-400">—</span>
+                      <span className="text-slate-500">—</span>
                     )}
                   </TableCell>
 
                   {/* ۵. ستون آخرین ورود */}
-                  <TableCell className="py-3 px-4 text-xs text-slate-500">
+                  <TableCell className="py-3 px-4 text-xs text-slate-400">
                     <div className="flex items-center gap-1.5">
-                      <Clock size={13} className="text-slate-400" />
-                      <span>{formatLastLogin(user.lastLoginAt)}</span>
+                      <Clock size={13} className="text-slate-500" />
+                      <span className="tabular-nums">{formatLastLogin(user.lastLoginAt)}</span>
                     </div>
                   </TableCell>
 
                   {/* ۶. ستون عملیات */}
                   <TableCell className="py-3 px-4 text-left">
                     <div className="flex items-center justify-end gap-1.5">
-                      {/* دکمه تغییر نقش */}
                       {onChangeRole && (
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => onChangeRole(user)}
                           title="تغییر نقش کاربری"
-                          className="h-8 px-2 text-xs text-slate-600 hover:text-slate-900"
+                          className="h-8 px-2.5 text-xs text-slate-300 hover:text-slate-100 hover:bg-[#18263A] rounded-xl"
                         >
                           تغییر نقش
                         </Button>
                       )}
 
-                      {/* عملیات بر اساس وضعیت */}
                       {user.status === 'active' && onDeactivate && (
                         <div className="relative inline-block">
                           <Button
@@ -301,10 +308,10 @@ export function UsersTable({
                                 ? 'تنها ادمین فعال سامانه قابل غیرفعال‌سازی نیست'
                                 : 'غیرفعال‌سازی حساب کاربری'
                             }
-                            className={`h-8 px-2 text-xs ${
+                            className={`h-8 px-2.5 text-xs rounded-xl ${
                               isLastActiveAdmin
-                                ? 'text-slate-300 cursor-not-allowed'
-                                : 'text-rose-600 hover:text-rose-700 hover:bg-rose-50'
+                                ? 'text-slate-600 cursor-not-allowed'
+                                : 'text-[#D66B73] hover:text-rose-300 hover:bg-[#D66B73]/15'
                             }`}
                           >
                             غیرفعال‌سازی
@@ -321,7 +328,7 @@ export function UsersTable({
                           size="sm"
                           onClick={() => onActivate(user)}
                           title="فعال‌سازی مجدد حساب کاربری"
-                          className="h-8 px-2 text-xs text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                          className="h-8 px-2.5 text-xs text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/15 rounded-xl"
                         >
                           فعال‌سازی
                         </Button>
@@ -333,9 +340,9 @@ export function UsersTable({
                           size="sm"
                           onClick={() => onResendInvite(user)}
                           title="ارسال مجدد دعوت‌نامه"
-                          className="h-8 px-2 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          className="h-8 px-2.5 text-xs text-[#719BDF] hover:text-[#93C5FD] hover:bg-[#719BDF]/15 rounded-xl"
                         >
-                          <Send size={12} className="ml-1" />
+                          <Send size={12} className="me-1" />
                           ارسال مجدد
                         </Button>
                       )}
@@ -358,20 +365,20 @@ export function UsersTable({
           return (
             <div
               key={user.id}
-              className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3"
+              className="bg-[#111D2E] p-4 rounded-2xl border border-[#1F2E45] shadow-lg space-y-3 text-slate-100"
             >
               {/* هدر کارت کاربر */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   {renderUserAvatar(user)}
                   <div>
-                    <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1">
+                    <h4 className="text-xs font-bold text-slate-100 flex items-center gap-1">
                       {user.fullName}
                       {user.role === 'admin' && (
-                        <Shield size={12} className="text-purple-600" />
+                        <Shield size={12} className="text-[#719BDF]" />
                       )}
                     </h4>
-                    <p className="text-[11px] text-slate-500 font-mono" dir="ltr">
+                    <p className="text-[11px] text-slate-400 font-mono" dir="ltr">
                       {user.email}
                     </p>
                   </div>
@@ -383,7 +390,7 @@ export function UsersTable({
               </div>
 
               {/* مشخصات فرعی */}
-              <div className="grid grid-cols-2 gap-2 text-[11px] pt-2 border-t border-slate-100">
+              <div className="grid grid-cols-2 gap-2 text-[11px] pt-2 border-t border-[#1F2E45]/60">
                 <div>
                   <span className="text-slate-400 block mb-0.5">نقش سازمانی:</span>
                   <span
@@ -394,20 +401,20 @@ export function UsersTable({
                 </div>
                 <div>
                   <span className="text-slate-400 block mb-0.5">آخرین ورود:</span>
-                  <span className="text-slate-700 font-medium">
+                  <span className="text-slate-300 font-medium tabular-nums">
                     {formatLastLogin(user.lastLoginAt)}
                   </span>
                 </div>
               </div>
 
               {/* دکمه‌های عملیات موبایل */}
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#1F2E45]/60">
                 {onChangeRole && (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => onChangeRole(user)}
-                    className="h-8 text-xs flex-1"
+                    className="h-8 text-xs flex-1 border-[#1F2E45] bg-[#18263A] text-slate-200"
                   >
                     تغییر نقش
                   </Button>
@@ -421,8 +428,8 @@ export function UsersTable({
                     onClick={() => onDeactivate(user)}
                     className={`h-8 text-xs flex-1 ${
                       isLastActiveAdmin
-                        ? 'opacity-40 cursor-not-allowed'
-                        : 'text-rose-600 border-rose-200 hover:bg-rose-50'
+                        ? 'opacity-40 cursor-not-allowed border-[#1F2E45]'
+                        : 'text-[#D66B73] border-[#D66B73]/30 hover:bg-[#D66B73]/10'
                     }`}
                   >
                     غیرفعال‌سازی
@@ -434,7 +441,7 @@ export function UsersTable({
                     variant="outline"
                     size="sm"
                     onClick={() => onActivate(user)}
-                    className="h-8 text-xs flex-1 text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+                    className="h-8 text-xs flex-1 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
                   >
                     فعال‌سازی
                   </Button>
@@ -445,7 +452,7 @@ export function UsersTable({
                     variant="outline"
                     size="sm"
                     onClick={() => onResendInvite(user)}
-                    className="h-8 text-xs flex-1 text-blue-600 border-blue-200 hover:bg-blue-50"
+                    className="h-8 text-xs flex-1 text-[#719BDF] border-[#719BDF]/30 hover:bg-[#719BDF]/10"
                   >
                     ارسال مجدد
                   </Button>

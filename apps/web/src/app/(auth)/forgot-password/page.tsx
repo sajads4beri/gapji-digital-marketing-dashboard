@@ -56,41 +56,50 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="w-full space-y-6">
-      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-sm">
+      <div className="bg-[#0B1423]/95 border border-[#1F2E45] rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative overflow-hidden">
+        {/* هاله ظریف نوری بالای کارت */}
+        <div
+          className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-[#719BDF] to-transparent opacity-80"
+          aria-hidden="true"
+        />
+
         {/* هدر کارت بازیابی رمز */}
-        <div className="text-center space-y-3 pb-6 border-b border-slate-100">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center shadow-xs">
+        <div className="text-center space-y-3 pb-6 border-b border-[#1F2E45]/80">
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(245,158,11,0.2)]">
             <KeyRound size={26} />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight font-display">
               بازیابی رمز عبور
             </h1>
-            <p className="text-xs text-slate-500 mt-1 font-medium leading-relaxed">
+            <p className="text-xs text-slate-400 mt-1 font-medium leading-relaxed">
               ایمیل یا شماره موبایل ثبت‌شده در حساب خود را وارد نمایید تا لینک بازیابی ارسال شود.
             </p>
           </div>
         </div>
 
         {successInfo ? (
-          /* وضعیت نمایش نتیجه ارسال موفق لینک بازیابی (Mock شبیه‌سازی‌شده) */
+          /* وضعیت نمایش نتیجه ارسال موفق لینک بازیابی */
           <div className="mt-6 space-y-5 text-center animate-in fade-in">
-            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-right space-y-2">
-              <div className="flex items-center gap-2 text-emerald-800 font-bold text-sm">
-                <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
+            <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-right space-y-2">
+              <div className="flex items-center gap-2 text-emerald-300 font-bold text-sm">
+                <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />
                 <span>لینک بازیابی رمز عبور صادر شد</span>
               </div>
-              <p className="text-xs text-emerald-700 leading-relaxed">
+              <p className="text-xs text-emerald-200/90 leading-relaxed">
                 {successInfo.message}
               </p>
-              <div className="pt-2 text-[11px] text-emerald-800/80 border-t border-emerald-200/60">
+              <div className="pt-2 text-[11px] text-emerald-300/70 border-t border-emerald-500/20">
                 <strong>نکته توسعه فرانت‌اند:</strong> مطابق مستند محصول، این عملیات در این فاز به‌صورت Mock شبیه‌سازی شده و ارسال ایمیل یا پیامک واقعی نیازمند اتصال به Backend در فازهای بعدی است.
               </div>
             </div>
 
             <div className="pt-2">
               <Link href="/login" className="w-full inline-block">
-                <Button variant="primary" size="lg" className="w-full font-bold">
+                <Button
+                  size="lg"
+                  className="w-full font-bold bg-gradient-to-r from-[#719BDF] to-[#3B82F6] hover:from-[#5A85C9] hover:to-[#2563EB] text-white shadow-lg shadow-[#719BDF]/25 rounded-xl h-11"
+                >
                   <span>بازگشت به صفحه ورود</span>
                 </Button>
               </Link>
@@ -102,11 +111,11 @@ export default function ForgotPasswordPage() {
             <div className="space-y-1.5 text-right">
               <label
                 htmlFor="forgot-identifier"
-                className="block text-xs font-bold text-slate-700"
+                className="block text-xs font-bold text-slate-300"
               >
-                ایمیل یا شماره موبایل <span className="text-rose-500">*</span>
+                ایمیل یا شماره موبایل <span className="text-rose-400">*</span>
               </label>
-              <div className="relative">
+              <div className="relative flex items-center">
                 <input
                   id="forgot-identifier"
                   type="text"
@@ -119,9 +128,9 @@ export default function ForgotPasswordPage() {
                   disabled={isSubmitting}
                   placeholder="ali.mohammadi@gapji.ir یا ۰۹۱۲۱۱۱۱۱۱۱"
                   dir="ltr"
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl px-4 py-2.5 pl-10 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all placeholder:text-slate-400 placeholder:text-right"
+                  className="w-full bg-[#111D2E] border border-[#1F2E45] text-white text-sm rounded-xl py-2.5 pl-11 pr-4 focus:bg-[#18263A]/80 focus:ring-2 focus:ring-[#719BDF]/30 focus:border-[#719BDF] focus:outline-none transition-all placeholder:text-slate-500 placeholder:text-right"
                 />
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none text-slate-400">
                   {identifier.includes('@') ? <Mail size={16} /> : <Phone size={16} />}
                 </div>
               </div>
@@ -131,20 +140,19 @@ export default function ForgotPasswordPage() {
             {errorMessage && (
               <div
                 role="alert"
-                className="p-3 bg-rose-50 border border-rose-200/90 rounded-2xl flex items-start gap-2 text-rose-800 text-xs"
+                className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-start gap-2 text-rose-300 text-xs animate-in fade-in"
               >
-                <AlertCircle size={16} className="text-rose-600 shrink-0 mt-0.5" />
+                <AlertCircle size={16} className="text-rose-400 shrink-0 mt-0.5" />
                 <span className="font-semibold">{errorMessage}</span>
               </div>
             )}
 
             <Button
               type="submit"
-              variant="primary"
               size="lg"
               isLoading={isSubmitting}
               disabled={isSubmitting}
-              className="w-full font-bold"
+              className="w-full font-bold bg-gradient-to-r from-[#719BDF] to-[#3B82F6] hover:from-[#5A85C9] hover:to-[#2563EB] text-white shadow-lg shadow-[#719BDF]/25 rounded-xl h-11"
             >
               <span>ارسال لینک بازیابی</span>
             </Button>
@@ -152,7 +160,7 @@ export default function ForgotPasswordPage() {
             <div className="pt-2 text-center">
               <Link
                 href="/login"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-blue-600 transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-[#719BDF] transition-colors"
               >
                 <ArrowRight size={14} className="rotate-180" />
                 <span>انصراف و بازگشت به صفحه ورود</span>

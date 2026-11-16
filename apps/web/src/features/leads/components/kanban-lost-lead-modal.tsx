@@ -2,6 +2,7 @@ import * as React from 'react';
 import { XCircle } from 'lucide-react';
 import { Modal } from '@/components/common/modal';
 import { Button } from '@/components/ui/button';
+import { organizationService } from '@/features/organization';
 import type { LeadDetail } from '../types';
 
 export interface KanbanLostLeadModalProps {
@@ -28,11 +29,23 @@ export function KanbanLostLeadModal({
  onClose,
 }: KanbanLostLeadModalProps) {
  const [reason, setReason] = React.useState<string>('');
+ const [reasonsList, setReasonsList] = React.useState<string[]>(PRESET_REASONS);
  const [error, setError] = React.useState<string | null>(null);
 
  React.useEffect(() => {
  setReason('');
  setError(null);
+ if (isOpen) {
+   organizationService
+     .getListItems('lost_reasons')
+     .then((items) => {
+       const activeReasons = items.filter((i) => i.isActive).map((i) => i.label);
+       if (activeReasons.length > 0) {
+         setReasonsList(activeReasons);
+       }
+     })
+     .catch(() => {});
+ }
  }, [lead, isOpen]);
 
  const handleSubmit = (e?: React.FormEvent) => {
@@ -102,7 +115,7 @@ export function KanbanLostLeadModal({
  انتخاب سریع از دلایل متداول:
  </label>
  <div className="flex flex-wrap gap-1.5">
- {PRESET_REASONS.map((preset) => (
+ {reasonsList.map((preset) => (
  <button
  key={preset}
  type="button"

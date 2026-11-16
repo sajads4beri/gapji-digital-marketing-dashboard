@@ -148,7 +148,7 @@ export function TimelineItem({
  </div>
 
  {/* بدنه محتوای رویداد */}
- <div className={`min-w-0 ${isCompact ? 'pr-11' : 'pr-14'}`}>
+ <div className={`min-w-0 ${isCompact ? 'ps-11' : 'ps-14'}`}>
  {/* عنوان و زمان رویداد */}
  <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1">
  <h4

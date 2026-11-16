@@ -33,26 +33,26 @@ export function WizardLiveSummary({ formData }: WizardLiveSummaryProps) {
       : 0;
 
   return (
-    <aside className="bg-white rounded-2xl border border-gray-200/80 p-5 shadow-sm space-y-5 sticky top-6">
+    <aside className="bg-[#111D2E]/80 backdrop-blur-md rounded-2xl border border-[#1F2E45] p-5 shadow-xl space-y-5 sticky top-6">
       {/* هدر سایدبار */}
-      <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-        <div className="flex items-center gap-2 text-gray-900 font-bold text-sm">
-          <PieChart size={18} className="text-blue-600" />
+      <div className="flex items-center justify-between pb-3 border-b border-[#1F2E45]">
+        <div className="flex items-center gap-2 text-slate-100 font-bold text-sm">
+          <PieChart size={18} className="text-[#719BDF]" />
           <span>خلاصه زنده بودجه و پلتفرم‌ها</span>
         </div>
-        <span className="text-xs bg-blue-50 text-blue-700 font-medium px-2 py-0.5 rounded-full">
+        <span className="text-xs bg-[#18263A] text-[#719BDF] font-medium px-2 py-0.5 rounded-full border border-[#1F2E45]">
           مرحله {formData.currentStep} از ۶
         </span>
       </div>
 
       {/* کارت بودجه کل */}
-      <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 space-y-3">
+      <div className="bg-[#0B1423]/60 rounded-xl p-4 border border-[#1F2E45] space-y-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs text-gray-500">
-            <Wallet size={15} className="text-gray-400" />
+          <div className="flex items-center gap-2 text-xs text-slate-400">
+            <Wallet size={15} className="text-slate-500" />
             <span>بودجه کل کمپین:</span>
           </div>
-          <span className="text-sm font-bold text-gray-900">
+          <span className="text-sm font-bold text-slate-100 font-display">
             {totalBudget.toLocaleString('fa-IR')} تومان
           </span>
         </div>
@@ -60,25 +60,25 @@ export function WizardLiveSummary({ formData }: WizardLiveSummaryProps) {
         {/* نوار پیشرفت درصد تخصیص */}
         <div>
           <div className="flex justify-between text-[11px] mb-1 font-medium">
-            <span className="text-gray-500">تخصیص پلتفرم‌ها</span>
+            <span className="text-slate-400">تخصیص پلتفرم‌ها</span>
             <span
               className={
                 isBudgetExceeded
-                  ? 'text-red-600 font-bold'
-                  : 'text-blue-600 font-semibold'
+                  ? 'text-[#D66B73] font-bold'
+                  : 'text-[#719BDF] font-semibold'
               }
             >
               {percentage.toLocaleString('fa-IR')}٪
             </span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-[#18263A] rounded-full h-2 overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-300 ${
                 isBudgetExceeded
-                  ? 'bg-red-500'
+                  ? 'bg-[#D66B73]'
                   : isBudgetMatched
                   ? 'bg-emerald-500'
-                  : 'bg-blue-600'
+                  : 'bg-gradient-to-r from-blue-600 to-[#719BDF]'
               }`}
               style={{
                 width: `${Math.min(100, isBudgetExceeded ? 100 : percentage)}%`,
@@ -87,22 +87,22 @@ export function WizardLiveSummary({ formData }: WizardLiveSummaryProps) {
           </div>
         </div>
 
-        <div className="flex items-center justify-between text-xs pt-1 border-t border-gray-200/60">
-          <span className="text-gray-500">مجموع تخصیص‌یافته:</span>
-          <span className="font-semibold text-gray-800">
+        <div className="flex items-center justify-between text-xs pt-1 border-t border-[#1F2E45]">
+          <span className="text-slate-400">مجموع تخصیص‌یافته:</span>
+          <span className="font-semibold text-slate-200 font-display">
             {allocatedBudget.toLocaleString('fa-IR')} تومان
           </span>
         </div>
 
         <div className="flex items-center justify-between text-xs">
-          <span className="text-gray-500">باقیمانده:</span>
+          <span className="text-slate-400">باقیمانده:</span>
           <span
-            className={`font-bold ${
+            className={`font-bold font-display ${
               isBudgetExceeded
-                ? 'text-red-600'
+                ? 'text-[#D66B73]'
                 : isBudgetMatched
-                ? 'text-emerald-600'
-                : 'text-amber-600'
+                ? 'text-emerald-400'
+                : 'text-amber-400'
             }`}
           >
             {Math.abs(remainingBudget).toLocaleString('fa-IR')} تومان
@@ -113,8 +113,8 @@ export function WizardLiveSummary({ formData }: WizardLiveSummaryProps) {
 
       {/* پیام‌های هشدار یا تایید هوشمند بودجه */}
       {isBudgetExceeded && (
-        <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-xs">
-          <AlertTriangle size={16} className="shrink-0 mt-0.5 text-red-600" />
+        <div className="flex items-start gap-2 bg-[#D66B73]/10 border border-[#D66B73]/30 text-[#D66B73] p-3 rounded-xl text-xs">
+          <AlertTriangle size={16} className="shrink-0 mt-0.5 text-[#D66B73]" />
           <span>
             مجموع بودجه پلتفرم‌ها بیشتر از بودجه کل کمپین است. لطفاً مبالغ پلتفرم‌ها
             را تعدیل کنید.
@@ -123,16 +123,16 @@ export function WizardLiveSummary({ formData }: WizardLiveSummaryProps) {
       )}
 
       {isBudgetMatched && (
-        <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 p-3 rounded-xl text-xs">
-          <CheckCircle2 size={16} className="shrink-0 text-emerald-600" />
+        <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 p-3 rounded-xl text-xs">
+          <CheckCircle2 size={16} className="shrink-0 text-emerald-400" />
           <span>بودجه تمام پلتفرم‌ها با بودجه کل تطابق ۱۰۰٪ دارد.</span>
         </div>
       )}
 
       {/* پلتفرم‌های فعال */}
       <div className="space-y-2">
-        <h5 className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
-          <Layers size={14} className="text-gray-400" />
+        <h5 className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+          <Layers size={14} className="text-slate-500" />
           <span>کانال‌های تبلیغاتی فعال ({formData.platforms.filter((p) => p.enabled).length})</span>
         </h5>
         <div className="space-y-1.5">
@@ -141,10 +141,10 @@ export function WizardLiveSummary({ formData }: WizardLiveSummaryProps) {
             .map((p) => (
               <div
                 key={p.platformId}
-                className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg text-xs"
+                className="flex items-center justify-between bg-[#0B1423]/60 px-3 py-2 rounded-lg text-xs border border-[#1F2E45]"
               >
-                <span className="text-gray-700 font-medium">{p.name}</span>
-                <span className="text-gray-500 text-[11px]">
+                <span className="text-slate-300 font-medium">{p.name}</span>
+                <span className="text-slate-400 text-[11px] font-display">
                   {p.allocatedBudget > 0
                     ? `${p.allocatedBudget.toLocaleString('fa-IR')} ت`
                     : 'بدون بودجه'}
@@ -155,10 +155,10 @@ export function WizardLiveSummary({ formData }: WizardLiveSummaryProps) {
       </div>
 
       {/* اطلاعات کلیدی کمپین */}
-      <div className="pt-2 border-t border-gray-100 text-xs text-gray-500 space-y-1.5">
+      <div className="pt-2 border-t border-[#1F2E45] text-xs text-slate-400 space-y-1.5">
         <div className="flex items-center justify-between">
           <span>نام کمپین:</span>
-          <span className="font-medium text-gray-800 truncate max-w-[140px]">
+          <span className="font-medium text-slate-200 truncate max-w-[140px]">
             {formData.name || 'نامشخص'}
           </span>
         </div>
@@ -167,7 +167,7 @@ export function WizardLiveSummary({ formData }: WizardLiveSummaryProps) {
             <Calendar size={12} />
             <span>بازه زمانی:</span>
           </span>
-          <span className="font-medium text-gray-800 text-[11px]">
+          <span className="font-medium text-slate-300 text-[11px]">
             {formatPersianDate(formData.startDate)} تا {formatPersianDate(formData.endDate)}
           </span>
         </div>

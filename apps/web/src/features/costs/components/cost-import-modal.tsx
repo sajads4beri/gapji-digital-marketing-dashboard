@@ -424,7 +424,7 @@ export function CostImportModal({
               onClick={handleDownloadSampleCsv}
               className="text-xs"
             >
-              <Download className="w-3.5 h-3.5 ml-1.5" />
+              <Download className="w-3.5 h-3.5 me-1.5" />
               دانلود فایل نمونه
             </Button>
 

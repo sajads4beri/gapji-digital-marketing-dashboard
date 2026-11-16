@@ -11,8 +11,6 @@ import {
   UserCheck,
   Clock,
   UserX,
-  Filter,
-  Layers,
   Sparkles,
 } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/breadcrumb';
@@ -24,7 +22,6 @@ import {
   UserItem,
   UserRole,
   UserStatus,
-  UserFilter,
   USER_ROLES,
   USER_ROLE_LABELS,
   UsersTable,
@@ -108,7 +105,7 @@ function UsersManagementContent() {
     fetchUsers();
   }, [fetchUsers]);
 
-  // سوئیچ تب‌ها با به‌روزرسانی پارامتر آدرس بدون رفرش صفحه
+  // سوئیچ تب‌ها با به‌روزرسانی پارامتر آدرس
   const handleTabChange = (tab: ActiveTab) => {
     const current = new URLSearchParams(searchParams.toString());
     if (tab === 'users') {
@@ -120,18 +117,15 @@ function UsersManagementContent() {
     router.replace(`${pathname}${qs ? `?${qs}` : ''}`, { scroll: false });
   };
 
-  // فیلتر کلاینت‌ساید بر مبنای آخرین داده‌های معتبر برای جلوگیری از عدم همگامی
+  // فیلتر کلاینت‌ساید
   const filteredUsers = React.useMemo(() => {
     return allUsers.filter((u) => {
-      // ۱. فیلتر نقش
       if (selectedRole !== 'all' && u.role !== selectedRole) {
         return false;
       }
-      // ۲. فیلتر وضعیت
       if (selectedStatus !== 'all' && u.status !== selectedStatus) {
         return false;
       }
-      // ۳. جستجوی متنی
       if (searchQuery.trim()) {
         const q = searchQuery.trim().toLowerCase();
         const nameMatch = u.fullName.toLowerCase().includes(q);
@@ -151,7 +145,6 @@ function UsersManagementContent() {
   const invitedCount = allUsers.filter((u) => u.status === 'invited').length;
   const disabledCount = allUsers.filter((u) => u.status === 'disabled').length;
 
-  // شمارش ادمین‌های فعال جهت اعمال گارد آخرین ادمین
   const activeAdminsCount = React.useMemo(() => {
     return allUsers.filter((u) => u.role === 'admin' && u.status === 'active').length;
   }, [allUsers]);
@@ -165,7 +158,7 @@ function UsersManagementContent() {
     setSelectedStatus('all');
   };
 
-  // فعال‌سازی مجدد کاربر غیرفعال‌شده
+  // فعال‌سازی مجدد کاربر
   const handleActivateUser = async (user: UserItem) => {
     try {
       await userService.activateUser(user.id);
@@ -188,7 +181,7 @@ function UsersManagementContent() {
   };
 
   return (
-    <div className="space-y-6 pb-12" dir="rtl">
+    <div className="space-y-6 pb-12 text-slate-100" dir="rtl">
       {/* ۱. مسیر راهنما (Breadcrumb) */}
       <Breadcrumb
         items={[
@@ -197,28 +190,28 @@ function UsersManagementContent() {
         ]}
       />
 
-      {/* ۲. سربرگ اصلی صفحه */}
+      {/* ۲. سربرگ اصلی صفحه با استایل لوکس Midnight Executive */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <span className="w-2.5 h-6 bg-purple-600 rounded-full inline-block" />
-            مدیریت کاربران و نقش‌ها
+          <h1 className="text-xl sm:text-2xl font-black text-slate-100 tracking-tight flex items-center gap-2.5 font-display">
+            <span className="w-2.5 h-6 bg-[#719BDF] rounded-full inline-block shadow-[0_0_12px_rgba(113,155,223,0.4)]" />
+            <span>مدیریت کاربران و نقش‌ها</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-400 mt-1 leading-relaxed">
             مدیریت اعضای سازمان، تعیین سطوح دسترسی، دعوت همکاران جدید و بررسی ماتریس نقش‌ها
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2.5 flex-wrap">
           <Button
             variant="outline"
             size="sm"
             onClick={fetchUsers}
             disabled={loading}
-            className="text-xs"
+            className="text-xs border-[#1F2E45] bg-[#111D2E] text-slate-200 hover:bg-[#18263A] hover:border-[#719BDF]/40 transition-all"
             title="به‌روزرسانی داده‌ها"
           >
-            <RefreshCw size={14} className={`ml-1.5 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw size={14} className={`me-1.5 ${loading ? 'animate-spin' : ''}`} />
             به‌روزرسانی
           </Button>
 
@@ -226,32 +219,32 @@ function UsersManagementContent() {
             variant="primary"
             size="sm"
             onClick={() => setIsInviteDrawerOpen(true)}
-            className="text-xs bg-purple-600 hover:bg-purple-700 shadow-2xs hover:shadow-xs"
+            className="text-xs bg-gradient-to-r from-[#719BDF] to-[#3B82F6] hover:from-[#5e8bd8] hover:to-[#2563eb] text-white shadow-[0_0_15px_rgba(113,155,223,0.25)] border-0 transition-all"
           >
-            <UserPlus size={14} className="ml-1.5" />
+            <UserPlus size={14} className="me-1.5" />
             دعوت کاربر جدید
           </Button>
         </div>
       </div>
 
       {/* ۳. سوئیچ دو تب اصلی: «کاربران» و «نقش‌ها و دسترسی‌ها» */}
-      <div className="flex border-b border-slate-200">
+      <div className="flex border-b border-[#1F2E45]">
         <button
           type="button"
           onClick={() => handleTabChange('users')}
           className={`flex items-center gap-2 py-3 px-5 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer ${
             activeTab === 'users'
-              ? 'border-purple-600 text-purple-700 bg-purple-50/40 rounded-t-xl'
-              : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'
+              ? 'border-[#719BDF] text-[#719BDF] bg-[#111D2E] rounded-t-xl shadow-xs'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-[#1F2E45]'
           }`}
         >
           <Users size={16} />
           <span>کاربران سازمان</span>
           <span
-            className={`px-2 py-0.5 rounded-full text-xs ${
+            className={`px-2 py-0.5 rounded-full text-xs font-mono font-bold tabular-nums ${
               activeTab === 'users'
-                ? 'bg-purple-100 text-purple-800'
-                : 'bg-slate-100 text-slate-600'
+                ? 'bg-[#719BDF]/15 text-[#719BDF] border border-[#719BDF]/30'
+                : 'bg-[#18263A] text-slate-400 border border-[#1F2E45]'
             }`}
           >
             {totalCount.toLocaleString('fa-IR')}
@@ -263,8 +256,8 @@ function UsersManagementContent() {
           onClick={() => handleTabChange('matrix')}
           className={`flex items-center gap-2 py-3 px-5 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer ${
             activeTab === 'matrix'
-              ? 'border-purple-600 text-purple-700 bg-purple-50/40 rounded-t-xl'
-              : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'
+              ? 'border-[#719BDF] text-[#719BDF] bg-[#111D2E] rounded-t-xl shadow-xs'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-[#1F2E45]'
           }`}
         >
           <ShieldCheck size={16} />
@@ -277,58 +270,58 @@ function UsersManagementContent() {
         <div className="space-y-5 animate-in fade-in duration-200">
           {/* کارت‌های آمار خلاصه وضعیت کاربران */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
-              <span className="text-[11px] font-medium text-slate-500">کل اعضا</span>
+            <div className="bg-[#111D2E] p-4 rounded-2xl border border-[#1F2E45] shadow-lg space-y-1">
+              <span className="text-[11px] font-medium text-slate-400">کل اعضا</span>
               <div className="flex items-baseline justify-between">
-                <span className="text-xl sm:text-2xl font-extrabold text-slate-900">
+                <span className="text-xl sm:text-2xl font-black text-slate-100 tabular-nums">
                   {totalCount.toLocaleString('fa-IR')}
                 </span>
-                <span className="text-xs text-slate-400">نفر</span>
+                <span className="text-xs text-slate-500">نفر</span>
               </div>
             </div>
 
-            <div className="bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
-              <span className="text-[11px] font-medium text-emerald-600 flex items-center gap-1">
+            <div className="bg-[#111D2E] p-4 rounded-2xl border border-[#1F2E45] shadow-lg space-y-1">
+              <span className="text-[11px] font-medium text-emerald-400 flex items-center gap-1.5">
                 <UserCheck size={13} />
                 <span>کاربران فعال</span>
               </span>
               <div className="flex items-baseline justify-between">
-                <span className="text-xl sm:text-2xl font-extrabold text-emerald-700">
+                <span className="text-xl sm:text-2xl font-black text-emerald-400 tabular-nums">
                   {activeCount.toLocaleString('fa-IR')}
                 </span>
-                <span className="text-xs text-emerald-600/70">نفر</span>
+                <span className="text-xs text-emerald-500/70">نفر</span>
               </div>
             </div>
 
-            <div className="bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
-              <span className="text-[11px] font-medium text-amber-600 flex items-center gap-1">
+            <div className="bg-[#111D2E] p-4 rounded-2xl border border-[#1F2E45] shadow-lg space-y-1">
+              <span className="text-[11px] font-medium text-amber-400 flex items-center gap-1.5">
                 <Clock size={13} />
                 <span>دعوت‌شده</span>
               </span>
               <div className="flex items-baseline justify-between">
-                <span className="text-xl sm:text-2xl font-extrabold text-amber-700">
+                <span className="text-xl sm:text-2xl font-black text-amber-400 tabular-nums">
                   {invitedCount.toLocaleString('fa-IR')}
                 </span>
-                <span className="text-xs text-amber-600/70">نفر</span>
+                <span className="text-xs text-amber-500/70">نفر</span>
               </div>
             </div>
 
-            <div className="bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
-              <span className="text-[11px] font-medium text-slate-500 flex items-center gap-1">
+            <div className="bg-[#111D2E] p-4 rounded-2xl border border-[#1F2E45] shadow-lg space-y-1">
+              <span className="text-[11px] font-medium text-slate-400 flex items-center gap-1.5">
                 <UserX size={13} />
                 <span>غیرفعال</span>
               </span>
               <div className="flex items-baseline justify-between">
-                <span className="text-xl sm:text-2xl font-extrabold text-slate-700">
+                <span className="text-xl sm:text-2xl font-black text-slate-400 tabular-nums">
                   {disabledCount.toLocaleString('fa-IR')}
                 </span>
-                <span className="text-xs text-slate-400">نفر</span>
+                <span className="text-xs text-slate-500">نفر</span>
               </div>
             </div>
           </div>
 
           {/* نوار فیلتر و جستجو */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-2xs">
+          <div className="bg-[#111D2E] p-4 rounded-2xl border border-[#1F2E45] shadow-lg">
             <FilterBar
               showSearch={true}
               searchPlaceholder="جستجوی نام، ایمیل یا شماره تماس..."
@@ -354,12 +347,17 @@ function UsersManagementContent() {
 
           {/* پیام خطای دریافت اطلاعات */}
           {error && (
-            <div className="bg-rose-50 p-4 rounded-2xl border border-rose-200 text-xs text-rose-800 flex items-center justify-between">
+            <div className="bg-[#D66B73]/15 p-4 rounded-2xl border border-[#D66B73]/30 text-xs text-[#D66B73] flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <AlertTriangle size={16} className="text-rose-600 shrink-0" />
+                <AlertTriangle size={16} className="text-[#D66B73] shrink-0" />
                 <span>{error}</span>
               </div>
-              <Button variant="outline" size="sm" onClick={fetchUsers}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchUsers}
+                className="border-[#D66B73]/30 text-[#D66B73] hover:bg-[#D66B73]/10"
+              >
                 تلاش دوباره
               </Button>
             </div>
@@ -425,9 +423,9 @@ export default function UsersManagementPage() {
     <React.Suspense
       fallback={
         <div className="space-y-6 p-6" dir="rtl">
-          <div className="h-6 w-48 bg-slate-100 rounded-md animate-pulse" />
-          <div className="h-10 w-full bg-slate-100 rounded-xl animate-pulse" />
-          <div className="h-64 w-full bg-slate-100 rounded-2xl animate-pulse" />
+          <div className="h-6 w-48 bg-[#18263A] rounded-md animate-pulse" />
+          <div className="h-10 w-full bg-[#18263A] rounded-xl animate-pulse" />
+          <div className="h-64 w-full bg-[#18263A] rounded-2xl animate-pulse" />
         </div>
       }
     >

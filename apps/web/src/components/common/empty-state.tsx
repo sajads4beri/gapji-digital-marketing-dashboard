@@ -6,73 +6,74 @@ import { FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export interface EmptyStateAction {
- label: string;
- onClick?: () => void;
- href?: string;
+  label: string;
+  onClick?: () => void;
+  href?: string;
 }
 
 export interface EmptyStateProps {
- title?: string;
- description?: string;
- icon?: React.ReactNode;
- action?: EmptyStateAction | React.ReactNode;
- className?: string;
+  title?: string;
+  description?: string;
+  icon?: React.ReactNode;
+  action?: EmptyStateAction | React.ReactNode;
+  className?: string;
 }
 
 export function EmptyState({
- title = 'داده‌ای یافت نشد',
- description,
- icon,
- action,
- className = '',
+  title = 'داده‌ای یافت نشد',
+  description,
+  icon,
+  action,
+  className = '',
 }: EmptyStateProps) {
- const isCustomActionNode = React.isValidElement(action);
- const actionConfig = !isCustomActionNode
- ? (action as EmptyStateAction | undefined)
- : undefined;
+  const isCustomActionNode = React.isValidElement(action);
+  const actionConfig = !isCustomActionNode
+    ? (action as EmptyStateAction | undefined)
+    : undefined;
 
- return (
- <div
- className={`flex flex-col items-center justify-center text-center p-6 sm:p-8 select-none ${className}`}
- dir="rtl"
- >
- <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400 mb-3.5 shrink-0">
- {icon || <FolderOpen size={24} />}
- </div>
+  return (
+    <div
+      className={`flex flex-col items-center justify-center text-center p-8 sm:p-12 select-none ${className}`}
+      dir="rtl"
+    >
+      <div className="w-14 h-14 rounded-2xl bg-[#18263A] border border-[#1F2E45] flex items-center justify-center text-[#719BDF] shadow-[0_0_15px_rgba(113,155,223,0.1)] mb-4 shrink-0">
+        {icon || <FolderOpen size={26} strokeWidth={1.5} />}
+      </div>
 
- {title && (
- <h4 className="text-sm sm:text-base font-bold text-gray-800 mb-1">
- {title}
- </h4>
- )}
+      {title && (
+        <h4 className="text-sm sm:text-base font-bold text-slate-100 font-display mb-1.5">
+          {title}
+        </h4>
+      )}
 
- {description && (
- <p className="text-xs text-gray-500 max-w-sm leading-relaxed">
- {description}
- </p>
- )}
+      {description && (
+        <p className="text-xs text-slate-400 max-w-sm leading-relaxed mb-5">
+          {description}
+        </p>
+      )}
 
- {action && (
- <div className="mt-4">
- {isCustomActionNode ? (
- action
- ) : actionConfig?.href ? (
- <Link href={actionConfig.href}>
- <Button size="sm" variant="primary">
- {actionConfig.label}
- </Button>
- </Link>
- ) : actionConfig?.onClick ? (
- <Button
- size="sm"
- variant="primary"
- onClick={actionConfig.onClick}
- >
- {actionConfig.label}
- </Button>
- ) : null}
- </div>
- )}
- </div>
- );
+      {action && (
+        <div>
+          {isCustomActionNode ? (
+            action
+          ) : actionConfig?.href ? (
+            <Link
+              href={actionConfig.href}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#719BDF] to-[#3B82F6] hover:brightness-110 shadow-[0_0_15px_rgba(113,155,223,0.25)] transition-all"
+            >
+              {actionConfig.label}
+            </Link>
+          ) : actionConfig?.onClick ? (
+            <button
+              type="button"
+              onClick={actionConfig.onClick}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#719BDF] to-[#3B82F6] hover:brightness-110 shadow-[0_0_15px_rgba(113,155,223,0.25)] transition-all"
+            >
+              {actionConfig.label}
+            </button>
+          ) : null}
+        </div>
+      )}
+    </div>
+  );
 }

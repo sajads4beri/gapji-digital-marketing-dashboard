@@ -6,21 +6,29 @@ import type { LeadStatus } from '../types';
 import { LEAD_STATUS_LABELS } from '../types';
 import { LeadStatusBadge } from './lead-status-badge';
 
+export interface LeadBulkStatusOption {
+ key: string;
+ label: string;
+ color?: string;
+ isActive?: boolean;
+}
+
 export interface LeadBulkStatusModalProps {
  isOpen: boolean;
  onClose: () => void;
  selectedCount: number;
  isLoading: boolean;
  onConfirm: (newStatus: LeadStatus) => void;
+ availableStatuses?: LeadBulkStatusOption[];
 }
 
-const AVAILABLE_STATUSES: LeadStatus[] = [
- 'new',
- 'in_progress',
- 'qualified',
- 'proposal',
- 'won',
- 'lost',
+const DEFAULT_FALLBACK_STATUSES: LeadBulkStatusOption[] = [
+ { key: 'new', label: 'جدید', color: 'blue', isActive: true },
+ { key: 'in_progress', label: 'تماس گرفته شد', color: 'indigo', isActive: true },
+ { key: 'qualified', label: 'واجد شرایط', color: 'purple', isActive: true },
+ { key: 'proposal', label: 'پیشنهاد', color: 'amber', isActive: true },
+ { key: 'won', label: 'مشتری', color: 'emerald', isActive: true },
+ { key: 'lost', label: 'ردشده', color: 'rose', isActive: true },
 ];
 
 export function LeadBulkStatusModal({
@@ -29,8 +37,24 @@ export function LeadBulkStatusModal({
  selectedCount,
  isLoading,
  onConfirm,
+ availableStatuses,
 }: LeadBulkStatusModalProps) {
- const [selectedStatus, setSelectedStatus] = React.useState<LeadStatus>('in_progress');
+ const statusOptions = React.useMemo(() => {
+  if (availableStatuses && availableStatuses.length > 0) {
+   return availableStatuses.filter((s) => s.isActive !== false);
+  }
+  return DEFAULT_FALLBACK_STATUSES;
+ }, [availableStatuses]);
+
+ const [selectedStatus, setSelectedStatus] = React.useState<LeadStatus>(
+  () => (statusOptions[0]?.key as LeadStatus) || 'in_progress'
+ );
+
+ React.useEffect(() => {
+  if (statusOptions.length > 0 && !statusOptions.some((s) => s.key === selectedStatus)) {
+   setSelectedStatus(statusOptions[0].key as LeadStatus);
+  }
+ }, [statusOptions, selectedStatus]);
 
  const handleConfirm = () => {
  onConfirm(selectedStatus);
@@ -86,13 +110,13 @@ export function LeadBulkStatusModal({
  </p>
 
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
- {AVAILABLE_STATUSES.map((status) => {
- const isSelected = status === selectedStatus;
+ {statusOptions.map((statusItem) => {
+ const isSelected = statusItem.key === selectedStatus;
  return (
  <button
- key={status}
+ key={statusItem.key}
  type="button"
- onClick={() => setSelectedStatus(status)}
+ onClick={() => setSelectedStatus(statusItem.key as LeadStatus)}
  disabled={isLoading}
  className={`flex items-center justify-between p-3 rounded-xl border transition-all text-right ${
  isSelected
@@ -100,7 +124,11 @@ export function LeadBulkStatusModal({
  : 'border-gray-200 hover:bg-gray-50 '
  }`}
  >
- <LeadStatusBadge status={status} />
+ <LeadStatusBadge
+  status={statusItem.key as LeadStatus}
+  label={statusItem.label}
+  color={statusItem.color}
+ />
 
  <div
  className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${

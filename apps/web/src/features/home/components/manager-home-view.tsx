@@ -123,17 +123,17 @@ export function ManagerHomeView({ isAdmin = false, onPreviewRole }: ManagerHomeV
   return (
     <div className="grid grid-cols-12 gap-5" dir="rtl">
       {/* هدر دسترسی سریع مدیریت و داشبورد اجرایی */}
-      <div className="col-span-12 p-4 bg-gradient-to-r from-blue-50/90 to-slate-50 border border-blue-200/90 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="col-span-12 p-4 sm:p-5 bg-gradient-to-r from-[#111D2E] to-[#18263A] border border-[#1F2E45] rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-extrabold text-slate-900">
+          <div className="flex items-center gap-2.5">
+            <span className="text-sm font-extrabold text-white font-display">
               {isAdmin ? 'پیشخوان مدیریتی سراسری (مدیر سیستم / Admin)' : 'پیشخوان مدیریت مارکتینگ (Marketing Manager)'}
             </span>
-            <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">
+            <span className="text-[10px] font-bold bg-[#719BDF]/10 text-[#719BDF] px-2 py-0.5 rounded-full border border-[#719BDF]/25 font-display">
               صفحه خانه نقشمحور (ص ۷ مستند)
             </span>
           </div>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-400">
             پایش لحظه‌ای هشدارهای بحرانی کمپین‌ها، تسک‌های معوقه و تقویم اجرایی ۷ روز آینده
           </p>
         </div>
@@ -141,7 +141,7 @@ export function ManagerHomeView({ isAdmin = false, onPreviewRole }: ManagerHomeV
         <div className="flex items-center gap-2.5 flex-wrap shrink-0">
           <Link
             href="/performance/dashboard"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-[#719BDF] hover:bg-[#5A85C9] rounded-xl transition-colors shadow-md shadow-[#719BDF]/20"
           >
             <span>ورود به داشبورد اجرایی</span>
             <ArrowUpRight size={14} />
@@ -151,16 +151,16 @@ export function ManagerHomeView({ isAdmin = false, onPreviewRole }: ManagerHomeV
             <>
               <Link
                 href="/settings/users"
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-300 bg-[#0B1423] border border-[#1F2E45] hover:text-white hover:bg-[#18263A] rounded-xl transition-colors"
               >
-                <ShieldCheck size={14} className="text-blue-600" />
+                <ShieldCheck size={14} className="text-[#719BDF]" />
                 <span>کاربران و نقش‌ها</span>
               </Link>
               <Link
                 href="/settings/organization"
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-300 bg-[#0B1423] border border-[#1F2E45] hover:text-white hover:bg-[#18263A] rounded-xl transition-colors"
               >
-                <Building2 size={14} className="text-purple-600" />
+                <Building2 size={14} className="text-purple-400" />
                 <span>تنظیمات سازمان</span>
               </Link>
             </>
@@ -170,44 +170,44 @@ export function ManagerHomeView({ isAdmin = false, onPreviewRole }: ManagerHomeV
 
       {/* نوار انتخاب شبیه‌سازی نقش برای ادمین جهت تست و بازبینی */}
       {isAdmin && onPreviewRole && (
-        <div className="col-span-12 p-3 bg-white border border-slate-200/90 rounded-2xl flex items-center justify-between gap-3 text-xs flex-wrap">
-          <div className="flex items-center gap-2 font-bold text-slate-700">
-            <Eye size={15} className="text-blue-600" />
+        <div className="col-span-12 p-3.5 bg-[#111D2E]/80 backdrop-blur-md border border-[#1F2E45] rounded-2xl flex items-center justify-between gap-3 text-xs flex-wrap shadow-lg">
+          <div className="flex items-center gap-2 font-bold text-slate-200">
+            <Eye size={15} className="text-[#719BDF]" />
             <span>پیش‌نمایش زنده صفحه خانه سایر نقش‌ها (ویژه Admin):</span>
           </div>
           <div className="flex items-center gap-1.5 flex-wrap">
             <button
               type="button"
               onClick={() => onPreviewRole('marketing_manager')}
-              className="px-2.5 py-1 text-[11px] font-bold rounded-lg border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+              className="px-2.5 py-1 text-[11px] font-bold rounded-lg border border-[#719BDF]/30 bg-[#719BDF]/10 text-[#719BDF] hover:bg-[#719BDF]/20 transition-colors"
             >
               مدیر مارکتینگ
             </button>
             <button
               type="button"
               onClick={() => onPreviewRole('client')}
-              className="px-2.5 py-1 text-[11px] font-bold rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors"
+              className="px-2.5 py-1 text-[11px] font-bold rounded-lg border border-[#1F2E45] bg-[#0B1423] text-slate-300 hover:text-white hover:bg-[#18263A] transition-colors"
             >
               کارفرما
             </button>
             <button
               type="button"
               onClick={() => onPreviewRole('campaign_manager')}
-              className="px-2.5 py-1 text-[11px] font-bold rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors"
+              className="px-2.5 py-1 text-[11px] font-bold rounded-lg border border-[#1F2E45] bg-[#0B1423] text-slate-300 hover:text-white hover:bg-[#18263A] transition-colors"
             >
               کمپین‌چی
             </button>
             <button
               type="button"
               onClick={() => onPreviewRole('sales_agent')}
-              className="px-2.5 py-1 text-[11px] font-bold rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors"
+              className="px-2.5 py-1 text-[11px] font-bold rounded-lg border border-[#1F2E45] bg-[#0B1423] text-slate-300 hover:text-white hover:bg-[#18263A] transition-colors"
             >
               کارشناس فروش
             </button>
             <button
               type="button"
               onClick={() => onPreviewRole('content_creator')}
-              className="px-2.5 py-1 text-[11px] font-bold rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors"
+              className="px-2.5 py-1 text-[11px] font-bold rounded-lg border border-[#1F2E45] bg-[#0B1423] text-slate-300 hover:text-white hover:bg-[#18263A] transition-colors"
             >
               تولید محتوا
             </button>
@@ -234,25 +234,25 @@ export function ManagerHomeView({ isAdmin = false, onPreviewRole }: ManagerHomeV
           {alerts.map((al) => (
             <div
               key={al.id}
-              className="p-3 bg-rose-50/50 border border-rose-200/70 rounded-xl space-y-1.5"
+              className="p-3.5 bg-[#0B1423] border border-rose-500/25 rounded-xl space-y-1.5"
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-bold text-rose-950 truncate">
+                <span className="text-xs font-bold text-rose-300 truncate">
                   {al.title}
                 </span>
-                <span className="text-[10px] font-bold text-rose-700 bg-rose-100 px-2 py-0.5 rounded-full shrink-0">
+                <span className="text-[10px] font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20 shrink-0">
                   {al.source === 'campaign' ? 'کمپین' : al.source}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between text-[11px] text-rose-800">
-                <p className="text-[11px] text-rose-700 leading-relaxed truncate max-w-[280px]">
+              <div className="flex items-center justify-between text-[11px] text-slate-400">
+                <p className="text-[11px] text-slate-400 leading-relaxed truncate max-w-[280px]">
                   {al.description}
                 </p>
 
                 <Link
                   href={al.actionHref || '/campaigns'}
-                  className="text-blue-600 hover:text-blue-700 font-bold text-[11px] underline shrink-0"
+                  className="text-[#719BDF] hover:text-[#93bbf5] font-bold text-[11px] underline shrink-0"
                 >
                   {al.actionLabel || 'بررسی کمپین'}
                 </Link>
@@ -283,18 +283,18 @@ export function ManagerHomeView({ isAdmin = false, onPreviewRole }: ManagerHomeV
             return (
               <div
                 key={t.id}
-                className="p-3 bg-amber-50/50 border border-amber-200/70 rounded-xl flex items-center justify-between gap-3"
+                className="p-3.5 bg-[#0B1423] border border-amber-500/25 rounded-xl flex items-center justify-between gap-3"
               >
                 <div className="space-y-0.5 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-slate-900 truncate">
+                    <span className="text-xs font-bold text-slate-200 truncate">
                       {t.title}
                     </span>
-                    <span className="text-[10px] font-bold text-rose-700 bg-rose-100 px-2 py-0.5 rounded-full shrink-0">
+                    <span className="text-[10px] font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20 shrink-0">
                       {days > 0 ? `${days} روز تأخیر` : 'معوق'}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-[11px] text-slate-500">
+                  <div className="flex items-center gap-2 text-[11px] text-slate-400">
                     <span>مسئول: {t.assignee?.name || 'تخصیص‌نیافته'}</span>
                     {t.relatedTo?.title && (
                       <span>• کمپین: {t.relatedTo.title}</span>
@@ -304,7 +304,7 @@ export function ManagerHomeView({ isAdmin = false, onPreviewRole }: ManagerHomeV
 
                 <Link
                   href="/work/tasks"
-                  className="px-2.5 py-1 text-[11px] font-bold text-amber-800 bg-amber-100/70 hover:bg-amber-200/70 rounded-lg transition-colors shrink-0"
+                  className="px-2.5 py-1 text-[11px] font-bold text-amber-300 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 rounded-lg transition-colors shrink-0"
                 >
                   پیگیری
                 </Link>
@@ -330,17 +330,17 @@ export function ManagerHomeView({ isAdmin = false, onPreviewRole }: ManagerHomeV
           {upcomingEvents.map((ev) => (
             <div
               key={ev.id}
-              className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl space-y-1.5"
+              className="p-3.5 bg-[#0B1423] border border-[#1F2E45] rounded-xl space-y-1.5"
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                <span className="text-[10px] font-bold text-[#719BDF] bg-[#719BDF]/10 px-2 py-0.5 rounded border border-[#719BDF]/25 font-display">
                   {ev.badge}
                 </span>
-                <span className="text-[11px] text-slate-400 font-mono">
+                <span className="text-[11px] text-slate-400 font-display">
                   {formatPersianDate(ev.date)}
                 </span>
               </div>
-              <h4 className="text-xs font-bold text-slate-900 leading-snug">
+              <h4 className="text-xs font-bold text-slate-200 leading-snug">
                 {ev.title}
               </h4>
             </div>

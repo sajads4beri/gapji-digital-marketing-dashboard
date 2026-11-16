@@ -389,12 +389,12 @@ function CostsPageContent() {
         accessorFn: (row) => row.title,
         cell: ({ row }) => (
           <div className="space-y-0.5">
-            <span className="font-bold text-gray-900 block truncate max-w-xs sm:max-w-md">
+            <span className="font-bold text-slate-100 font-display block truncate max-w-xs sm:max-w-md">
               {row.title}
             </span>
             {row.vendor && (
-              <span className="text-[11px] text-gray-400 flex items-center gap-1">
-                <Building className="w-3 h-3" />
+              <span className="text-[11px] text-slate-400 flex items-center gap-1">
+                <Building className="w-3 h-3 text-slate-500" />
                 {row.vendor}
                 {row.invoiceNumber && <span>(فاکتور: {row.invoiceNumber})</span>}
               </span>
@@ -408,7 +408,7 @@ function CostsPageContent() {
         sortable: true,
         accessorFn: (row) => row.category,
         cell: ({ row }) => (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-[#18263A] text-slate-300 border border-[#1F2E45]">
             {COST_CATEGORY_LABELS[row.category] || row.category}
           </span>
         ),
@@ -420,11 +420,11 @@ function CostsPageContent() {
         accessorFn: (row) => row.channel || '',
         cell: ({ row }) =>
           row.channel ? (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-blue-500/10 text-[#719BDF] border border-blue-500/20">
               {COST_CHANNEL_LABELS[row.channel] || row.channel}
             </span>
           ) : (
-            <span className="text-xs text-gray-400">عمومی</span>
+            <span className="text-xs text-slate-500">عمومی</span>
           ),
       },
       {
@@ -435,15 +435,15 @@ function CostsPageContent() {
         cell: ({ row }) =>
           row.campaignId ? (
             <div className="space-y-0.5 max-w-[150px] truncate">
-              <span className="text-xs font-semibold text-gray-800 block truncate">
+              <span className="text-xs font-semibold text-slate-200 block truncate">
                 {row.campaignName || row.campaignId}
               </span>
-              <span className="text-[10px] text-gray-400 font-mono block">
+              <span className="text-[10px] text-slate-500 font-mono block">
                 {row.campaignId}
               </span>
             </div>
           ) : (
-            <span className="text-xs text-gray-400">هزینه عمومی مارکتینگ</span>
+            <span className="text-xs text-slate-500">هزینه عمومی مارکتینگ</span>
           ),
       },
       {
@@ -452,9 +452,9 @@ function CostsPageContent() {
         align: 'left',
         accessorFn: (row) => row.amount,
         cell: ({ row }) => (
-          <div className="text-xs font-mono text-gray-700">
+          <div className="text-xs font-mono text-slate-400">
             <span>{row.amount.toLocaleString()}</span>{' '}
-            <span className="text-[11px] text-gray-400">
+            <span className="text-[11px] text-slate-500">
               {COST_CURRENCY_LABELS[row.currency]}
             </span>
           </div>
@@ -467,11 +467,11 @@ function CostsPageContent() {
         align: 'left',
         accessorFn: (row) => row.normalizedAmountToman,
         cell: ({ row }) => (
-          <div className="flex items-baseline gap-1 justify-end">
-            <span className="font-bold text-gray-900 text-sm">
+          <div className="flex items-baseline gap-1 justify-end font-display">
+            <span className="font-bold text-slate-100 text-sm">
               {formatMoneyDisplay(row.normalizedAmountToman) || '۰'}
             </span>
-            <span className="text-[11px] text-gray-500 font-normal">تومان</span>
+            <span className="text-[11px] text-slate-400 font-normal">تومان</span>
           </div>
         ),
       },
@@ -481,7 +481,7 @@ function CostsPageContent() {
         sortable: true,
         accessorFn: (row) => row.date,
         cell: ({ row }) => (
-          <span className="text-xs text-gray-600 font-medium">
+          <span className="text-xs text-slate-300 font-medium">
             {formatPersianDate(row.date)}
           </span>
         ),
@@ -494,7 +494,7 @@ function CostsPageContent() {
         cell: ({ row }) => {
           if (row.status === 'paid') {
             return (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                 <CheckCircle2 className="w-3 h-3" />
                 {COST_STATUS_LABELS.paid}
               </span>
@@ -502,14 +502,14 @@ function CostsPageContent() {
           }
           if (row.status === 'pending') {
             return (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30">
                 <Clock className="w-3 h-3" />
                 {COST_STATUS_LABELS.pending}
               </span>
             );
           }
           return (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200">
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-500/10 text-slate-400 border border-slate-500/30">
               <AlertCircle className="w-3 h-3" />
               {COST_STATUS_LABELS.draft}
             </span>
@@ -528,7 +528,7 @@ function CostsPageContent() {
             <Button
               variant="ghost"
               size="sm"
-              className="p-1 h-7 w-7 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+              className="p-1 h-7 w-7 text-slate-400 hover:text-[#719BDF] hover:bg-[#18263A]"
               onClick={() => setSelectedCost(row)}
               title="مشاهده جزئیات"
             >
@@ -539,7 +539,7 @@ function CostsPageContent() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="p-1 h-7 w-7 text-gray-500 hover:text-amber-600 hover:bg-amber-50"
+                className="p-1 h-7 w-7 text-slate-400 hover:text-amber-400 hover:bg-[#18263A]"
                 onClick={() => {
                   setCostToEdit(row);
                   setIsFormModalOpen(true);
@@ -554,7 +554,7 @@ function CostsPageContent() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="p-1 h-7 w-7 text-gray-500 hover:text-red-600 hover:bg-red-50"
+                className="p-1 h-7 w-7 text-slate-400 hover:text-[#D66B73] hover:bg-[#D66B73]/10"
                 onClick={() => setCostToDelete(row)}
                 title="حذف هزینه"
               >
@@ -573,32 +573,33 @@ function CostsPageContent() {
       {/* مسیر راهنما */}
       <Breadcrumb
         items={[
-          { label: 'فضای کاری ۱: عملکرد' },
+          { label: 'عملکرد و کمپین‌ها' },
           { label: 'مدیریت هزینه‌ها' },
         ]}
       />
 
       {/* سربرگ صفحه و دکمه‌های اقدام */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
-            <span className="w-2.5 h-6 bg-blue-600 rounded-full inline-block" />
+      <div className="relative overflow-hidden rounded-2xl border border-[#1F2E45] bg-[#111D2E]/80 backdrop-blur-md p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="absolute top-0 right-0 -ms-16 -mt-16 w-64 h-64 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+        <div className="relative z-10">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-100 tracking-tight font-display flex items-center gap-2">
+            <span className="w-2.5 h-6 bg-gradient-to-b from-[#719BDF] to-blue-600 rounded-full inline-block" />
             مدیریت هزینه‌های بازاریابی
           </h1>
-          <p className="text-xs sm:text-sm text-gray-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-400 mt-1">
             رهگیری، تفکیک و ثبت مصارف مالی کمپین‌ها، پلتفرم‌های تبلیغاتی و هزینه‌های بازاریابی
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="relative z-10 flex items-center gap-2 flex-wrap">
           <Button
             variant="outline"
             size="sm"
             onClick={handleExportCsv}
             disabled={costs.length === 0}
-            className="text-xs"
+            className="text-xs bg-[#18263A] border-[#1F2E45] text-slate-300 hover:text-white hover:bg-[#1F2E45]"
           >
-            <FileSpreadsheet className="w-4 h-4 ml-1.5 text-emerald-600" />
+            <FileSpreadsheet className="w-4 h-4 me-1.5 text-emerald-400" />
             خروجی CSV
           </Button>
 
@@ -606,11 +607,12 @@ function CostsPageContent() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setIsImportModalOpen(true)}
-              className="text-xs"
+              onClick={() => router.push('/performance/imports?type=costs')}
+              className="text-xs bg-[#18263A] border-[#1F2E45] text-slate-300 hover:text-white hover:bg-[#1F2E45]"
+              title="ورود گروهی هزینه‌ها از طریق مرکز جامع ایمپورت"
             >
-              <UploadCloud className="w-4 h-4 ml-1.5 text-blue-600" />
-              ورود دسته‌ای
+              <UploadCloud className="w-4 h-4 me-1.5 text-[#719BDF]" />
+              ورود دسته‌ای (ایمپورت)
             </Button>
           )}
 
@@ -622,9 +624,9 @@ function CostsPageContent() {
                 setCostToEdit(null);
                 setIsFormModalOpen(true);
               }}
-              className="text-xs shadow-sm hover:shadow-md transition-shadow"
+              className="text-xs bg-gradient-to-r from-blue-600 to-[#719BDF] text-white shadow-lg shadow-blue-500/20 hover:from-blue-500 hover:to-[#719BDF]/90"
             >
-              <Plus className="w-4 h-4 ml-1.5" />
+              <Plus className="w-4 h-4 me-1.5" />
               ثبت هزینه جدید
             </Button>
           )}
@@ -639,7 +641,7 @@ function CostsPageContent() {
       />
 
       {/* نوار فیلتر و جستجو */}
-      <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm space-y-3">
+      <div className="bg-[#111D2E]/80 backdrop-blur-md p-4 rounded-2xl border border-[#1F2E45] shadow-xl space-y-3">
         <FilterBar
           showSearch={true}
           searchPlaceholder="جستجو در عنوان، فروشنده، فاکتور..."
@@ -668,9 +670,10 @@ function CostsPageContent() {
               }}
               disabled={loading}
               title="بارگذاری مجدد داده‌ها"
+              className="text-slate-400 hover:text-white"
             >
               <RefreshCw
-                className={`w-3.5 h-3.5 ml-1.5 ${loading ? 'animate-spin' : ''}`}
+                className={`w-3.5 h-3.5 me-1.5 ${loading ? 'animate-spin' : ''}`}
               />
               به‌روزرسانی
             </Button>
@@ -681,11 +684,11 @@ function CostsPageContent() {
       {/* خطای بارگذاری همراه با دکمه تلاش مجدد */}
       {error && (
         <div
-          className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-xs flex items-center justify-between"
+          className="p-4 bg-[#D66B73]/10 border border-[#D66B73]/30 rounded-xl text-[#D66B73] text-xs flex items-center justify-between"
           role="alert"
         >
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+            <AlertCircle className="w-4 h-4 text-[#D66B73] shrink-0" />
             <span>{error}</span>
           </div>
           <Button
@@ -695,7 +698,7 @@ function CostsPageContent() {
               loadCosts();
               loadStats();
             }}
-            className="text-xs text-red-700 border-red-300 hover:bg-red-100"
+            className="text-xs text-[#D66B73] border-[#D66B73]/30 hover:bg-[#D66B73]/20"
           >
             تلاش مجدد
           </Button>
@@ -703,7 +706,7 @@ function CostsPageContent() {
       )}
 
       {/* جدول داده هزینه‌ها */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-[#111D2E]/80 backdrop-blur-md rounded-2xl border border-[#1F2E45] shadow-xl overflow-hidden">
         <DataTable
           data={costs}
           columns={columns}
@@ -746,7 +749,7 @@ function CostsPageContent() {
                         setIsFormModalOpen(true);
                       }}
                     >
-                      <Plus className="w-4 h-4 ml-1.5" />
+                      <Plus className="w-4 h-4 me-1.5" />
                       ثبت اولین هزینه
                     </Button>
                   ),
@@ -814,17 +817,17 @@ export default function CostsPage() {
     <React.Suspense
       fallback={
         <div className="space-y-6" dir="rtl">
-          <div className="h-6 w-48 bg-gray-200 rounded animate-pulse" />
-          <div className="h-10 w-full bg-gray-100 rounded-xl animate-pulse" />
+          <div className="h-6 w-48 bg-[#18263A] rounded animate-pulse" />
+          <div className="h-20 w-full bg-[#111D2E] border border-[#1F2E45] rounded-2xl animate-pulse" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="h-28 bg-gray-100 rounded-xl animate-pulse"
+                className="h-28 bg-[#111D2E] border border-[#1F2E45] rounded-2xl animate-pulse"
               />
             ))}
           </div>
-          <div className="h-96 bg-gray-50 border border-gray-200 rounded-xl animate-pulse" />
+          <div className="h-96 bg-[#111D2E] border border-[#1F2E45] rounded-2xl animate-pulse" />
         </div>
       }
     >

@@ -92,6 +92,20 @@ function LeadsInboxContent() {
  const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
  const [isBulkLoading, setIsBulkLoading] = React.useState(false);
 
+ // وضعیت‌های پیکربندی‌شده پایپ‌لاین سازمان (B2.5.4.1)
+ const [pipelineStatuses, setPipelineStatuses] = React.useState<Array<{ key: string; label: string; color?: string; isActive?: boolean }>>([]);
+
+ const fetchStatuses = React.useCallback(async () => {
+  try {
+   const items = await leadApi.getPipelineStatuses();
+   if (items && items.length > 0) {
+    setPipelineStatuses(items);
+   }
+  } catch (err) {
+   console.error('Failed to load lead status configurations in inbox:', err);
+  }
+ }, []);
+
  // ۴. دریافت داده‌ها از سرویس واقعی لیدها
  const fetchLeads = React.useCallback(async () => {
  if (isRouteDenied) {
@@ -148,8 +162,9 @@ function LeadsInboxContent() {
  ]);
 
  React.useEffect(() => {
- fetchLeads();
- }, [fetchLeads]);
+  fetchLeads();
+  fetchStatuses();
+ }, [fetchLeads, fetchStatuses]);
 
  // ۵. به‌روزرسانی پارامترهای URL با هماهنگی فیلترها
  const updateUrlParams = React.useCallback(
@@ -179,21 +194,23 @@ function LeadsInboxContent() {
  return () => clearTimeout(handler);
  }, [searchInput, searchQuery, updateUrlParams]);
 
- // تنظیمات گزینه‌های FilterBar
+ // تنظیمات گزینه‌های FilterBar به صورت داینامیک از وضعیت‌های پایپ‌لاین سازمان
  const filtersConfig: FilterConfig[] = React.useMemo(
  () => [
  {
  id: 'status',
  label: 'وضعیت',
  type: 'multi-select',
- options: [
- { label: 'جدید', value: 'new' },
- { label: 'تماس گرفته شد', value: 'in_progress' },
- { label: 'واجد شرایط', value: 'qualified' },
- { label: 'پیشنهاد', value: 'proposal' },
- { label: 'مشتری', value: 'won' },
- { label: 'ردشده', value: 'lost' },
- ],
+ options: pipelineStatuses.length > 0
+  ? pipelineStatuses.map((s) => ({ label: s.label, value: s.key }))
+  : [
+   { label: 'جدید', value: 'new' },
+   { label: 'تماس گرفته شد', value: 'in_progress' },
+   { label: 'واجد شرایط', value: 'qualified' },
+   { label: 'پیشنهاد', value: 'proposal' },
+   { label: 'مشتری', value: 'won' },
+   { label: 'ردشده', value: 'lost' },
+  ],
  },
  {
  id: 'assignedToId',
@@ -232,7 +249,7 @@ function LeadsInboxContent() {
  ],
  },
  ],
- []
+ [pipelineStatuses]
  );
 
  const selectedFilters: Record<string, string | string[]> = React.useMemo(() => {
@@ -410,43 +427,53 @@ function LeadsInboxContent() {
  return (
  <div className="space-y-6" dir="rtl">
  {/* هدر صفحه و نوار عنوان */}
- <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
- <div>
+ <div className="relative overflow-hidden rounded-2xl border border-[#1F2E45] bg-[#111D2E]/80 backdrop-blur-md p-6 shadow-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+ <div className="absolute top-0 right-0 -ms-16 -mt-16 w-64 h-64 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+ <div className="relative z-10">
  <Breadcrumb
  items={[
  { label: 'فروش و لید', href: '/leads' },
  { label: 'صندوق لیدها' },
  ]}
  />
- <h1 className="mt-2 text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
+ <h1 className="mt-2 text-xl sm:text-2xl font-extrabold text-slate-100 tracking-tight font-display flex items-center gap-2">
+ <span className="w-2.5 h-6 bg-gradient-to-b from-[#719BDF] to-blue-600 rounded-full inline-block" />
  صندوق لیدها
  </h1>
- <p className="mt-1 text-xs sm:text-sm text-gray-500 ">
+ <p className="mt-1 text-xs sm:text-sm text-slate-400">
  مدیریت، پیگیری و غربالگری لیدهای جذب‌شده از کلیه کمپین‌ها و کانال‌های بازاریابی
  </p>
  </div>
 
- {/* دکمه‌های اکشن هدر: طبق سند Phase 1 (غیرفعال با نشان به‌زودی جهت پرهیز از رفتارهای ساختگی) */}
- <div className="flex items-center gap-2.5 shrink-0">
+ <div className="relative z-10 flex items-center gap-2.5 shrink-0">
+ <Link href="/leads/board">
  <Button
  type="button"
  variant="outline"
- disabled
- className="cursor-not-allowed opacity-70 flex items-center gap-2 text-xs"
- title="قابلیت واردسازی دسته‌جمعی داده‌ها در مراحل بعدی توسعه اضافه خواهد شد."
+ className="flex items-center gap-2 text-xs bg-[#18263A] border-[#1F2E45] text-slate-300 hover:text-white hover:bg-[#1F2E45]"
+ title="مشاهده تابلوی کانبان لیدها"
  >
- <UploadCloud size={15} />
- <span>Import</span>
- <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-normal">
- به‌زودی
- </span>
+ <span>نمای کانبان</span>
  </Button>
+ </Link>
+
+ <Link href="/performance/imports?type=leads">
+ <Button
+ type="button"
+ variant="outline"
+ className="flex items-center gap-2 text-xs bg-[#18263A] border-[#1F2E45] text-slate-300 hover:text-white hover:bg-[#1F2E45]"
+ title="ایمپورت دسته‌جمعی لیدها از فایل CSV با بررسی خودکار تکراری‌ها"
+ >
+ <UploadCloud size={15} className="text-[#719BDF]" />
+ <span>ایمپورت لیدها</span>
+ </Button>
+ </Link>
 
  <Button
  type="button"
  variant="primary"
  onClick={() => setIsCreateModalOpen(true)}
- className="flex items-center gap-2 text-xs font-bold"
+ className="flex items-center gap-2 text-xs font-bold bg-gradient-to-r from-blue-600 to-[#719BDF] hover:from-blue-500 hover:to-[#719BDF]/90 text-white shadow-lg shadow-blue-500/20"
  title="ثبت دستی لید جدید در سامانه"
  >
  <Plus size={15} />
@@ -456,6 +483,7 @@ function LeadsInboxContent() {
  </div>
 
  {/* نوار فیلترها (FilterBar مشترک) */}
+ <div className="bg-[#111D2E]/80 backdrop-blur-md p-4 rounded-2xl border border-[#1F2E45] shadow-xl">
  <FilterBar
  showSearch
  searchPlaceholder="جستجو بر اساس نام، شماره تماس، شرکت یا ایمیل..."
@@ -471,11 +499,12 @@ function LeadsInboxContent() {
  hasActiveFilters={hasActiveFilters}
  onClearAll={handleClearAll}
  />
+ </div>
 
  {/* نوار اقدامات گروهی شناور در صورت انتخاب سطرها (برای موبایل و دسکتاپ) */}
  {selectedRowIds.length > 0 && (
- <div className="flex flex-wrap items-center justify-between gap-3 p-3 sm:p-4 rounded-2xl bg-blue-50/90 border border-blue-200 animate-in fade-in">
- <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-blue-950 ">
+ <div className="flex flex-wrap items-center justify-between gap-3 p-3 sm:p-4 rounded-2xl bg-[#18263A] border border-[#1F2E45] shadow-xl animate-in fade-in">
+ <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-100 font-display">
  <span>{toPersianDigits(selectedRowIds.length)} لید انتخاب شده است</span>
  </div>
 
@@ -486,9 +515,9 @@ function LeadsInboxContent() {
  variant="outline"
  size="sm"
  onClick={() => setIsAssignModalOpen(true)}
- className="flex items-center gap-1.5 text-xs bg-white "
+ className="flex items-center gap-1.5 text-xs bg-[#111D2E] border-[#1F2E45] text-slate-200 hover:text-white"
  >
- <UserCheck size={14} className="text-blue-600" />
+ <UserCheck size={14} className="text-[#719BDF]" />
  <span>تخصیص به کارشناس</span>
  </Button>
  )}
@@ -498,9 +527,9 @@ function LeadsInboxContent() {
  variant="outline"
  size="sm"
  onClick={() => setIsStatusModalOpen(true)}
- className="flex items-center gap-1.5 text-xs bg-white "
+ className="flex items-center gap-1.5 text-xs bg-[#111D2E] border-[#1F2E45] text-slate-200 hover:text-white"
  >
- <RefreshCw size={14} className="text-indigo-600" />
+ <RefreshCw size={14} className="text-indigo-400" />
  <span>تغییر وضعیت</span>
  </Button>
 
@@ -509,7 +538,7 @@ function LeadsInboxContent() {
  variant="ghost"
  size="sm"
  onClick={() => setSelectedRowIds([])}
- className="text-xs text-gray-600 hover:text-gray-900"
+ className="text-xs text-slate-400 hover:text-white"
  >
  لغو انتخاب
  </Button>
@@ -520,27 +549,27 @@ function LeadsInboxContent() {
  {/* حالت بارگذاری اسکلتون */}
  {loading ? (
  <div className="space-y-4" dir="rtl">
- <div className="h-10 w-full rounded-2xl bg-gray-100 animate-pulse" />
- <div className="h-80 w-full rounded-2xl bg-gray-50 border border-gray-200 animate-pulse" />
+ <div className="h-10 w-full rounded-2xl bg-[#18263A] animate-pulse" />
+ <div className="h-80 w-full rounded-2xl bg-[#111D2E] border border-[#1F2E45] animate-pulse" />
  </div>
  ) : error ? (
  // حالت خطای سرویس همراه با دکمه تلاش مجدد
- <div className="rounded-2xl border border-rose-200 bg-rose-50 p-8 text-center ">
+ <div className="rounded-2xl border border-[#D66B73]/30 bg-[#D66B73]/10 p-8 text-center">
  <AlertCircle
- className="mx-auto h-12 w-12 text-rose-500 "
+ className="mx-auto h-12 w-12 text-[#D66B73]"
  aria-hidden="true"
  />
- <h2 className="mt-3 text-base font-bold text-rose-900 ">
+ <h2 className="mt-3 text-base font-bold text-slate-100 font-display">
  خطا در بارگذاری صندوق لیدها
  </h2>
- <p className="mt-1 text-xs sm:text-sm text-rose-700 ">
+ <p className="mt-1 text-xs sm:text-sm text-[#D66B73]">
  {error}
  </p>
  <div className="mt-5 flex items-center justify-center gap-3">
  <button
  type="button"
  onClick={() => fetchLeads()}
- className="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-rose-700"
+ className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-[#719BDF] px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-blue-500/20"
  >
  <RefreshCw className="h-4 w-4" aria-hidden="true" />
  <span>تلاش مجدد</span>
@@ -549,7 +578,7 @@ function LeadsInboxContent() {
  </div>
  ) : leads.length === 0 ? (
  // حالت خالی (Empty State)
- <div className="rounded-2xl border border-gray-200 bg-white p-6 ">
+ <div className="rounded-2xl border border-[#1F2E45] bg-[#111D2E]/80 backdrop-blur-md p-6 shadow-xl">
  {hasActiveFilters ? (
  <EmptyState
  title="نتیجه‌ای برای فیلترهای انتخابی یافت نشد"
@@ -563,7 +592,7 @@ function LeadsInboxContent() {
  <EmptyState
  title="صندوق لیدها خالی است"
  description="هنوز هیچ لیدی در سامانه ثبت نشده یا لیدهای موجود پاک‌سازی شده‌اند."
- icon={<Inbox size={26} className="text-gray-400" />}
+ icon={<Inbox size={26} className="text-slate-500" />}
  />
  )}
  </div>
@@ -642,6 +671,7 @@ function LeadsInboxContent() {
  selectedCount={selectedRowIds.length}
  isLoading={isBulkLoading}
  onConfirm={handleConfirmBulkStatus}
+ availableStatuses={pipelineStatuses}
  />
 
  {/* مدال ثبت دستی لید جدید */}

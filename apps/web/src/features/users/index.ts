@@ -4,6 +4,5 @@
 
 export * from './types';
 export * from './users.contract';
-export * from './users.storage';
-export * from './users.mock';
+export * from './users.api';
 export * from './components';

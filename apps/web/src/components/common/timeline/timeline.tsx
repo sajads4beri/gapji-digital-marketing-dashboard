@@ -38,7 +38,7 @@ function TimelineSkeleton({
  }`}
  aria-hidden="true"
  />
- <div className={`w-full ${isCompact ? 'pr-11 pb-4' : 'pr-14 pb-6'}`}>
+ <div className={`w-full ${isCompact ? 'ps-11 pb-4' : 'ps-14 pb-6'}`}>
  <div className="flex items-center justify-between gap-4">
  <div className="h-4 w-32 rounded bg-slate-200 animate-pulse" />
  <div className="h-3 w-16 rounded bg-slate-200 animate-pulse" />

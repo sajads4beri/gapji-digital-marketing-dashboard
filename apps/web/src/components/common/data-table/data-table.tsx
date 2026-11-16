@@ -61,7 +61,7 @@ function IndeterminateCheckbox({
  onChange={onChange}
  disabled={disabled}
  aria-label={ariaLabel}
- className={`w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition-colors cursor-pointer disabled:cursor-not-allowed ${className}`}
+ className={`w-4 h-4 rounded border-[#1F2E45] bg-[#18263A] text-[#719BDF] focus:ring-[#719BDF]/30 transition-colors cursor-pointer disabled:cursor-not-allowed ${className}`}
  />
  );
 }
@@ -441,7 +441,7 @@ export function DataTable<TData>({
 
  return (
  <div
- className={`bg-white rounded-2xl shadow-xs border border-gray-200/90 overflow-hidden flex flex-col transition-colors ${className}`}
+ className={`bg-[#111D2E]/80 backdrop-blur-md rounded-2xl shadow-xl border border-[#1F2E45] overflow-hidden flex flex-col transition-colors ${className}`}
  >
  {/* تولبار بالای جدول (شامل نوار عملیات گروهی یا ابزارهای نمایش ستون و تراکم) */}
  <DataTableToolbar
@@ -468,12 +468,12 @@ export function DataTable<TData>({
  <div className="overflow-x-auto">
  <Table className={`w-full text-right ${tableClassName}`}>
  <TableHeader>
- <TableRow className="bg-gray-50/90 border-b border-gray-200/80 ">
+ <TableRow className="bg-[#0B1423]/90 border-b border-[#1F2E45]">
  {/* ستون چک‌باکس انتخاب ردیف‌ها */}
  {enableRowSelection && (
  <TableHead
  style={{ width: '44px', minWidth: '44px' }}
- className={`text-center align-middle whitespace-nowrap select-none sticky right-0 bg-gray-50 z-20 shadow-[-2px_0_4px_rgba(0,0,0,0.03)] ${checkboxPaddingClass}`}
+ className={`text-center align-middle whitespace-nowrap select-none sticky right-0 bg-[#0B1423] z-20 shadow-[-2px_0_4px_rgba(0,0,0,0.1)] ${checkboxPaddingClass}`}
  >
  <div className="flex items-center justify-center">
  <IndeterminateCheckbox
@@ -495,9 +495,9 @@ export function DataTable<TData>({
  const rightOffset = enableRowSelection ? 'right-[44px]' : 'right-0';
  const stickyClass =
  column.sticky === 'left'
- ? 'sticky left-0 bg-gray-50 z-20 shadow-[3px_0_6px_-2px_rgba(0,0,0,0.06)]'
+ ? 'sticky left-0 bg-[#0B1423] z-20 shadow-[3px_0_6px_-2px_rgba(0,0,0,0.2)]'
  : column.sticky === 'right'
- ? `sticky ${rightOffset} bg-gray-50 z-20 shadow-[-3px_0_6px_-2px_rgba(0,0,0,0.06)]`
+ ? `sticky ${rightOffset} bg-[#0B1423] z-20 shadow-[-3px_0_6px_-2px_rgba(0,0,0,0.2)]`
  : '';
 
  return (
@@ -507,7 +507,7 @@ export function DataTable<TData>({
  width: column.width,
  minWidth: column.minWidth,
  }}
- className={`font-bold text-gray-700 whitespace-nowrap select-none ${headerPaddingClass} ${alignClass} ${stickyClass}`}
+ className={`font-bold text-slate-300 whitespace-nowrap select-none ${headerPaddingClass} ${alignClass} ${stickyClass}`}
  >
  {column.sortable ? (
  <button
@@ -568,10 +568,10 @@ export function DataTable<TData>({
  <TableRow>
  <TableCell
  colSpan={totalColumnsCount}
- className="h-44 text-center text-gray-500 py-10"
+ className="h-44 text-center text-slate-400 py-10"
  >
  <div className="flex flex-col items-center justify-center gap-2">
- <Loader2 size={24} className="animate-spin text-blue-600 " />
+ <Loader2 size={24} className="animate-spin text-[#719BDF]" />
  <span className="text-sm font-medium">
  در حال بارگذاری داده‌ها...
  </span>
@@ -584,7 +584,7 @@ export function DataTable<TData>({
  colSpan={totalColumnsCount}
  className="py-10 text-center"
  >
- <div className="inline-flex items-center gap-2 text-red-700 bg-red-50 border border-red-200 px-4 py-2.5 rounded-xl text-xs font-semibold">
+ <div className="inline-flex items-center gap-2 text-[#D66B73] bg-[#D66B73]/10 border border-[#D66B73]/30 px-4 py-2.5 rounded-xl text-xs font-semibold">
  <AlertTriangle size={16} />
  <span>{error}</span>
  </div>
@@ -615,21 +615,21 @@ export function DataTable<TData>({
  <TableRow
  key={rowId}
  onClick={() => onRowClick?.(row, rowIndex)}
- className={`border-b border-gray-100 last:border-0 transition-colors text-gray-800 ${
+ className={`group/row border-b border-[#1F2E45]/60 last:border-0 transition-colors text-slate-200 ${
  isSelected
- ? 'bg-blue-50/60 hover:bg-blue-50/80 '
- : 'hover:bg-gray-50/80 '
+ ? 'bg-[#18263A] hover:bg-[#20314A]'
+ : 'bg-[#111D2E] hover:bg-[#18263A]'
  } ${onRowClick ? 'cursor-pointer' : ''}`}
  >
  {/* سلول چک‌باکس انتخاب ردیف */}
  {enableRowSelection && (
  <TableCell
  style={{ width: '44px', minWidth: '44px' }}
- className={`text-center align-middle sticky right-0 z-10 ${
+ className={`text-center align-middle sticky right-0 z-10 transition-colors ${
  isSelected
- ? 'bg-blue-50 group-hover:bg-blue-100/70'
- : 'bg-white group-hover:bg-gray-50 '
- } shadow-[-2px_0_4px_rgba(0,0,0,0.03)] ${checkboxPaddingClass}`}
+ ? 'bg-[#18263A] group-hover/row:bg-[#20314A]'
+ : 'bg-[#111D2E] group-hover/row:bg-[#18263A]'
+ } shadow-[-2px_0_4px_rgba(0,0,0,0.1)] ${checkboxPaddingClass}`}
  onClick={(e) => e.stopPropagation()}
  >
  <div className="flex items-center justify-center">
@@ -638,7 +638,7 @@ export function DataTable<TData>({
  checked={isSelected}
  onChange={() => handleToggleRow(rowId)}
  aria-label={`انتخاب ردیف ${rowId}`}
- className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition-colors cursor-pointer "
+ className="w-4 h-4 rounded border-[#1F2E45] bg-[#18263A] text-[#719BDF] focus:ring-[#719BDF]/30 transition-colors cursor-pointer"
  />
  </div>
  </TableCell>
@@ -651,17 +651,17 @@ export function DataTable<TData>({
  const rightOffset = enableRowSelection ? 'right-[44px]' : 'right-0';
  const stickyClass =
  column.sticky === 'left'
- ? `sticky left-0 ${
+ ? `sticky left-0 transition-colors ${
  isSelected
- ? 'bg-blue-50 group-hover:bg-blue-100/70'
- : 'bg-white group-hover:bg-gray-50 '
- } z-10 shadow-[3px_0_6px_-2px_rgba(0,0,0,0.06)]`
+ ? 'bg-[#18263A] group-hover/row:bg-[#20314A]'
+ : 'bg-[#111D2E] group-hover/row:bg-[#18263A]'
+ } z-10 shadow-[3px_0_6px_-2px_rgba(0,0,0,0.2)]`
  : column.sticky === 'right'
- ? `sticky ${rightOffset} ${
+ ? `sticky ${rightOffset} transition-colors ${
  isSelected
- ? 'bg-blue-50 group-hover:bg-blue-100/70'
- : 'bg-white group-hover:bg-gray-50 '
- } z-10 shadow-[-3px_0_6px_-2px_rgba(0,0,0,0.06)]`
+ ? 'bg-[#18263A] group-hover/row:bg-[#20314A]'
+ : 'bg-[#111D2E] group-hover/row:bg-[#18263A]'
+ } z-10 shadow-[-3px_0_6px_-2px_rgba(0,0,0,0.2)]`
  : '';
 
  return (

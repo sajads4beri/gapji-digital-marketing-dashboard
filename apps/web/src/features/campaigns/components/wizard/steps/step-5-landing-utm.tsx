@@ -202,21 +202,21 @@ export function Step5LandingUtm({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200/80 p-6 sm:p-7 shadow-sm space-y-6">
+    <div className="bg-[#111D2E]/80 backdrop-blur-md rounded-2xl border border-[#1F2E45] p-6 sm:p-7 shadow-xl space-y-6">
       {/* هدر مرحله */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-gray-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#1F2E45]">
         <div>
-          <div className="flex items-center gap-2 text-blue-600 mb-1">
+          <div className="flex items-center gap-2 text-[#719BDF] mb-1">
             <Link2 size={20} />
-            <h3 className="text-base font-bold text-gray-900">
+            <h3 className="text-base font-bold text-slate-100 font-display">
               صفحه فرود و ساخت پارامترهای UTM
             </h3>
           </div>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-slate-400">
             صفحه فرود هدف را برگزینید و پارامترهای رهگیری استاندارد (UTM) را برای هر پلتفرم شخصی‌سازی کنید.
           </p>
         </div>
-        <span className="text-xs bg-gray-100 text-gray-600 font-medium px-2.5 py-1 rounded-full self-start sm:self-auto">
+        <span className="text-xs bg-[#18263A] text-slate-300 border border-[#1F2E45] font-medium px-2.5 py-1 rounded-full self-start sm:self-auto">
           مرحله ۵ از ۶
         </span>
       </div>
@@ -224,10 +224,10 @@ export function Step5LandingUtm({
       {/* ۱. انتخاب لندینگ‌پیج از میان صفحات فرود متصل */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-bold text-gray-800">
+          <label className="text-xs font-semibold text-slate-300">
             انتخاب صفحه فرود (از میان صفحات متصل آزمایشی / Mock Data):
           </label>
-          <span className="text-[11px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+          <span className="text-[11px] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/30">
             داده‌های آزمایشی Frontend
           </span>
         </div>
@@ -244,27 +244,27 @@ export function Step5LandingUtm({
                 onClick={() => handleSelectLanding(landing)}
                 className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
                   isSelected
-                    ? 'bg-blue-50/70 border-blue-400 ring-1 ring-blue-300 shadow-sm'
-                    : 'bg-gray-50/50 hover:bg-gray-100/60 border-gray-200'
+                    ? 'bg-[#18263A] border-[#719BDF] shadow-lg shadow-[#719BDF]/5 ring-1 ring-[#719BDF]/30'
+                    : 'bg-[#111D2E]/60 hover:bg-[#18263A]/50 border-[#1F2E45]'
                 }`}
               >
                 <div className="flex items-start justify-between gap-2 mb-1">
-                  <h4 className="text-xs font-bold text-gray-900">{landing.title}</h4>
+                  <h4 className="text-xs font-bold text-slate-100 font-display">{landing.title}</h4>
                   <div
                     className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border ${
                       isSelected
-                        ? 'bg-blue-600 border-blue-600 text-white'
-                        : 'border-gray-300 bg-white'
+                        ? 'bg-gradient-to-r from-blue-600 to-[#719BDF] border-transparent text-white'
+                        : 'border-[#1F2E45] bg-[#0B1423]'
                     }`}
                   >
                     {isSelected && <Check size={11} />}
                   </div>
                 </div>
-                <span className="text-[10px] text-blue-600 bg-blue-100/60 px-2 py-0.5 rounded font-medium inline-block mb-1.5">
+                <span className="text-[10px] text-[#719BDF] bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded font-medium inline-block mb-1.5">
                   {landing.category}
                 </span>
                 <p
-                  className="text-[11px] text-gray-500 font-mono truncate text-left"
+                  className="text-[11px] text-slate-400 font-mono truncate text-left"
                   dir="ltr"
                 >
                   {landing.url}
@@ -276,16 +276,16 @@ export function Step5LandingUtm({
       </div>
 
       {/* ۲. ساخت پارامترهای UTM برای هر پلتفرم فعال */}
-      <div className="space-y-4 pt-3 border-t border-gray-100">
+      <div className="space-y-4 pt-3 border-t border-[#1F2E45]">
         <div className="flex items-center gap-2">
-          <Layers size={16} className="text-blue-600" />
-          <h4 className="text-xs font-bold text-gray-800">
+          <Layers size={16} className="text-[#719BDF]" />
+          <h4 className="text-xs font-semibold text-slate-200">
             پارامترهای رهگیری اختصاصی برای کانال‌های فعال ({activePlatforms.length} پلتفرم):
           </h4>
         </div>
 
         {activePlatforms.length === 0 ? (
-          <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-200 text-gray-500 text-xs">
+          <div className="text-center py-8 bg-[#0B1423]/40 rounded-xl border border-dashed border-[#1F2E45] text-slate-400 text-xs">
             در مرحله ۳ هیچ پلتفرمی فعال نشده است. لطفاً به مرحله قبل بازگردید و کانال‌های تبلیغاتی را مشخص کنید.
           </div>
         ) : (
@@ -293,14 +293,14 @@ export function Step5LandingUtm({
             {(formData.trackingUtm.platformUtms || []).map((cfg) => (
               <div
                 key={cfg.platformId}
-                className="bg-gray-50/80 rounded-2xl border border-gray-200 p-4 sm:p-5 space-y-4"
+                className="bg-[#0B1423]/60 rounded-2xl border border-[#1F2E45] p-4 sm:p-5 space-y-4"
               >
-                <div className="flex items-center justify-between pb-2 border-b border-gray-200/70">
-                  <span className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-blue-600" />
+                <div className="flex items-center justify-between pb-2 border-b border-[#1F2E45]">
+                  <span className="text-xs font-bold text-slate-100 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#719BDF]" />
                     {cfg.platformName}
                   </span>
-                  <span className="text-[10px] text-gray-500 font-mono">
+                  <span className="text-[10px] text-slate-500 font-mono">
                     ID: {cfg.platformId}
                   </span>
                 </div>
@@ -308,8 +308,8 @@ export function Step5LandingUtm({
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
                   {/* utm_source */}
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-gray-600">
-                      utm_source <span className="text-red-500">*</span>
+                    <label className="text-[10px] font-semibold text-slate-400">
+                      utm_source <span className="text-[#D66B73]">*</span>
                     </label>
                     <input
                       type="text"
@@ -321,15 +321,15 @@ export function Step5LandingUtm({
                           e.target.value,
                         )
                       }
-                      className="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs text-left font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      className="w-full bg-[#111D2E] border border-[#1F2E45] rounded-lg px-2.5 py-1.5 text-xs text-left font-mono text-slate-100 focus:border-[#719BDF] focus:outline-none"
                       dir="ltr"
                     />
                   </div>
 
                   {/* utm_medium */}
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-gray-600">
-                      utm_medium <span className="text-red-500">*</span>
+                    <label className="text-[10px] font-semibold text-slate-400">
+                      utm_medium <span className="text-[#D66B73]">*</span>
                     </label>
                     <input
                       type="text"
@@ -341,15 +341,15 @@ export function Step5LandingUtm({
                           e.target.value,
                         )
                       }
-                      className="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs text-left font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      className="w-full bg-[#111D2E] border border-[#1F2E45] rounded-lg px-2.5 py-1.5 text-xs text-left font-mono text-slate-100 focus:border-[#719BDF] focus:outline-none"
                       dir="ltr"
                     />
                   </div>
 
                   {/* utm_campaign */}
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-gray-600">
-                      utm_campaign <span className="text-red-500">*</span>
+                    <label className="text-[10px] font-semibold text-slate-400">
+                      utm_campaign <span className="text-[#D66B73]">*</span>
                     </label>
                     <input
                       type="text"
@@ -361,14 +361,14 @@ export function Step5LandingUtm({
                           e.target.value,
                         )
                       }
-                      className="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs text-left font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      className="w-full bg-[#111D2E] border border-[#1F2E45] rounded-lg px-2.5 py-1.5 text-xs text-left font-mono text-slate-100 focus:border-[#719BDF] focus:outline-none"
                       dir="ltr"
                     />
                   </div>
 
                   {/* utm_term */}
                   <div className="space-y-1">
-                    <label className="text-[10px] font-semibold text-gray-500">
+                    <label className="text-[10px] font-semibold text-slate-400">
                       utm_term (اختیاری)
                     </label>
                     <input
@@ -382,14 +382,14 @@ export function Step5LandingUtm({
                         )
                       }
                       placeholder="کلمه کلیدی..."
-                      className="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs text-left font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      className="w-full bg-[#111D2E] border border-[#1F2E45] rounded-lg px-2.5 py-1.5 text-xs text-left font-mono text-slate-100 placeholder:text-slate-500 focus:border-[#719BDF] focus:outline-none"
                       dir="ltr"
                     />
                   </div>
 
                   {/* utm_content */}
                   <div className="space-y-1">
-                    <label className="text-[10px] font-semibold text-gray-500">
+                    <label className="text-[10px] font-semibold text-slate-400">
                       utm_content (اختیاری)
                     </label>
                     <input
@@ -403,20 +403,20 @@ export function Step5LandingUtm({
                         )
                       }
                       placeholder="شناسه بنر یا پست..."
-                      className="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs text-left font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      className="w-full bg-[#111D2E] border border-[#1F2E45] rounded-lg px-2.5 py-1.5 text-xs text-left font-mono text-slate-100 placeholder:text-slate-500 focus:border-[#719BDF] focus:outline-none"
                       dir="ltr"
                     />
                   </div>
                 </div>
 
                 {/* پیش‌نمایش URL نهایی تولیدشده */}
-                <div className="bg-white p-3 rounded-xl border border-gray-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="bg-[#111D2E] p-3 rounded-xl border border-[#1F2E45] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <span className="text-[10px] text-gray-400 block mb-0.5">
+                    <span className="text-[10px] text-slate-400 block mb-0.5">
                       آدرس کامل رهگیری (Final Tracking URL):
                     </span>
                     <p
-                      className="text-xs text-blue-800 font-mono truncate select-all text-left"
+                      className="text-xs text-[#719BDF] font-mono truncate select-all text-left"
                       dir="ltr"
                     >
                       {cfg.finalUrl}
@@ -426,13 +426,13 @@ export function Step5LandingUtm({
                   <button
                     type="button"
                     onClick={() => handleCopyUrl(cfg.finalUrl)}
-                    className="flex items-center gap-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 shrink-0 self-end sm:self-auto transition-colors"
+                    className="flex items-center gap-1.5 bg-[#18263A] hover:bg-[#1F2E45] text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-semibold border border-[#1F2E45] shrink-0 self-end sm:self-auto transition-colors"
                     title="کپی لینک"
                   >
                     {copiedUrl === cfg.finalUrl ? (
                       <>
-                        <Check size={14} className="text-emerald-600" />
-                        <span className="text-emerald-700">کپی شد!</span>
+                        <Check size={14} className="text-emerald-400" />
+                        <span className="text-emerald-400">کپی شد!</span>
                       </>
                     ) : (
                       <>

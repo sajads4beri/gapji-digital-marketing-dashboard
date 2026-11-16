@@ -225,7 +225,7 @@ export function CampaignsTable({
         cell: ({ row }) => (
           <Link
             href={`/campaigns/${row.id}`}
-            className="font-bold text-gray-900 hover:text-blue-600 transition-colors block text-right"
+            className="font-bold text-slate-100 hover:text-[#719BDF] transition-colors block text-right"
             title="مشاهده صفحه جزئیات کمپین"
           >
             {row.name}
@@ -240,7 +240,7 @@ export function CampaignsTable({
         hideable: true,
         minWidth: '110px',
         cell: ({ row }) => (
-          <span className="inline-block bg-gray-100 text-gray-700 px-2.5 py-0.5 rounded-lg text-xs font-medium">
+          <span className="inline-block bg-[#18263A] text-slate-300 border border-[#1F2E45] px-2.5 py-0.5 rounded-lg text-xs font-medium">
             {row.channel}
           </span>
         ),
@@ -256,7 +256,7 @@ export function CampaignsTable({
         cell: ({ row }) => (
           <div className="inline-flex items-center justify-center">
             {statusUpdatingId === row.id ? (
-              <Loader2 size={14} className="animate-spin text-blue-600" />
+              <Loader2 size={14} className="animate-spin text-[#719BDF]" />
             ) : (
               <div
                 className="relative group inline-flex items-center cursor-pointer"
@@ -274,11 +274,11 @@ export function CampaignsTable({
                   aria-label={`تغییر وضعیت کمپین ${row.name}`}
                   className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                 >
-                  <option value="active">فعال</option>
-                  <option value="paused">متوقف</option>
-                  <option value="completed">تکمیل شده</option>
-                  <option value="draft">پیش‌نویس</option>
-                  <option value="archived">بایگانی</option>
+                  <option value="active" className="bg-[#111D2E] text-slate-100">فعال</option>
+                  <option value="paused" className="bg-[#111D2E] text-slate-100">متوقف</option>
+                  <option value="completed" className="bg-[#111D2E] text-slate-100">تکمیل شده</option>
+                  <option value="draft" className="bg-[#111D2E] text-slate-100">پیش‌نویس</option>
+                  <option value="archived" className="bg-[#111D2E] text-slate-100">بایگانی</option>
                 </select>
               </div>
             )}
@@ -294,7 +294,7 @@ export function CampaignsTable({
         align: 'right',
         minWidth: '130px',
         cell: ({ row }) => (
-          <span className="font-semibold text-gray-900 tabular-nums">
+          <span className="font-semibold text-slate-200 tabular-nums font-display">
             {row.budget.toLocaleString('fa-IR')}
           </span>
         ),
@@ -308,7 +308,7 @@ export function CampaignsTable({
         align: 'right',
         minWidth: '130px',
         cell: ({ row }) => (
-          <span className="font-medium text-gray-700 tabular-nums">
+          <span className="font-medium text-slate-300 tabular-nums font-display">
             {row.spend.toLocaleString('fa-IR')}
           </span>
         ),
@@ -322,7 +322,7 @@ export function CampaignsTable({
         align: 'right',
         minWidth: '100px',
         cell: ({ row }) => (
-          <span className="text-gray-700 tabular-nums">
+          <span className="text-slate-400 tabular-nums font-display">
             {row.impressions.toLocaleString('fa-IR')}
           </span>
         ),
@@ -336,7 +336,7 @@ export function CampaignsTable({
         align: 'right',
         minWidth: '100px',
         cell: ({ row }) => (
-          <span className="text-gray-700 tabular-nums">
+          <span className="text-slate-400 tabular-nums font-display">
             {row.clicks.toLocaleString('fa-IR')}
           </span>
         ),
@@ -350,7 +350,7 @@ export function CampaignsTable({
         align: 'right',
         minWidth: '100px',
         cell: ({ row }) => (
-          <span className="font-bold text-gray-900 tabular-nums">
+          <span className="font-bold text-slate-100 tabular-nums font-display">
             {row.conversions.toLocaleString('fa-IR')}
           </span>
         ),
@@ -368,7 +368,7 @@ export function CampaignsTable({
           <div className="flex items-center justify-center gap-1">
             <Link
               href={`/campaigns/${row.id}`}
-              className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+              className="p-1.5 text-slate-400 hover:text-[#719BDF] hover:bg-[#719BDF]/10 rounded-lg transition-colors cursor-pointer"
               title="مشاهده جزئیات کامل کمپین"
               aria-label={`مشاهده جزئیات کمپین ${row.name}`}
             >
@@ -377,7 +377,7 @@ export function CampaignsTable({
 
             <Link
               href={`/campaigns/${row.id}/edit`}
-              className="p-1.5 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
+              className="p-1.5 text-slate-400 hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors cursor-pointer"
               title="ویرایش کمپین"
               aria-label={`ویرایش کمپین ${row.name}`}
             >
@@ -387,7 +387,7 @@ export function CampaignsTable({
             <button
               type="button"
               onClick={() => setCampaignToDelete(row)}
-              className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
               title="حذف کمپین"
               aria-label={`حذف کمپین ${row.name}`}
             >
@@ -419,9 +419,9 @@ export function CampaignsTable({
             'فیلترهای جستجو یا تاریخ را تغییر دهید یا کمپین جدیدی ثبت کنید.',
         }}
         toolbarActions={
-          <div className="text-xs text-gray-500 font-medium px-1">
+          <div className="text-xs text-slate-400 font-medium px-1">
             مجموعاً{' '}
-            <span className="font-bold text-gray-800">
+            <span className="font-bold text-slate-100 font-display">
               {campaigns.length.toLocaleString('fa-IR')}
             </span>{' '}
             کمپین
@@ -436,7 +436,7 @@ export function CampaignsTable({
                 setBulkTargetIds(selectedIds);
                 setIsBulkStatusModalOpen(true);
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-blue-700 bg-white hover:bg-blue-100/60 border border-blue-300 transition-colors shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-[#719BDF] bg-[#111D2E] hover:bg-[#18263A] border border-[#719BDF]/30 transition-colors shadow-xs cursor-pointer"
             >
               <Edit3 size={13} />
               <span>تغییر وضعیت گروهی</span>
@@ -449,7 +449,7 @@ export function CampaignsTable({
                 setBulkTargetIds(selectedIds);
                 setIsBulkDeleteModalOpen(true);
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-red-700 bg-white hover:bg-red-50 border border-red-300 transition-colors shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 transition-colors shadow-xs cursor-pointer"
             >
               <Trash2 size={13} />
               <span>
@@ -499,7 +499,7 @@ export function CampaignsTable({
               type="button"
               onClick={() => setIsBulkStatusModalOpen(false)}
               disabled={isBulkOperating}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-[#18263A] hover:bg-[#20314A] border border-[#1F2E45] transition-colors cursor-pointer"
             >
               انصراف
             </button>
@@ -507,7 +507,7 @@ export function CampaignsTable({
               type="button"
               onClick={handleConfirmBulkStatusChange}
               disabled={isBulkOperating}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#719BDF] to-[#3B82F6] hover:brightness-110 shadow-[0_0_15px_rgba(113,155,223,0.25)] transition-colors disabled:opacity-50 cursor-pointer"
             >
               {isBulkOperating && (
                 <Loader2 size={13} className="animate-spin" />
@@ -519,22 +519,22 @@ export function CampaignsTable({
       >
         <div className="space-y-2 py-2">
           {[
-            { value: 'active', label: 'فعال', color: 'text-emerald-700' },
-            { value: 'paused', label: 'متوقف', color: 'text-amber-700' },
+            { value: 'active', label: 'فعال', color: 'text-emerald-400' },
+            { value: 'paused', label: 'متوقف', color: 'text-amber-400' },
             {
               value: 'completed',
               label: 'تکمیل شده',
-              color: 'text-blue-700',
+              color: 'text-[#719BDF]',
             },
-            { value: 'draft', label: 'پیش‌نویس', color: 'text-slate-700' },
-            { value: 'archived', label: 'بایگانی', color: 'text-gray-600' },
+            { value: 'draft', label: 'پیش‌نویس', color: 'text-slate-300' },
+            { value: 'archived', label: 'بایگانی', color: 'text-slate-400' },
           ].map((opt) => (
             <label
               key={opt.value}
               className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
                 bulkTargetStatus === opt.value
-                  ? 'border-blue-500 bg-blue-50/60 font-bold'
-                  : 'border-gray-200 hover:bg-gray-50 text-gray-700'
+                  ? 'border-[#719BDF] bg-[#719BDF]/10 font-bold'
+                  : 'border-[#1F2E45] bg-[#18263A]/40 hover:bg-[#18263A] text-slate-300'
               }`}
             >
               <div className="flex items-center gap-2.5">
@@ -546,12 +546,12 @@ export function CampaignsTable({
                   onChange={(e) =>
                     setBulkTargetStatus(e.target.value as CampaignStatusType)
                   }
-                  className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 cursor-pointer"
+                  className="w-4 h-4 text-[#719BDF] focus:ring-[#719BDF]/30 border-[#1F2E45] bg-[#18263A] cursor-pointer"
                 />
                 <span className={`text-xs ${opt.color}`}>{opt.label}</span>
               </div>
               {bulkTargetStatus === opt.value && (
-                <CheckCircle2 size={16} className="text-blue-600" />
+                <CheckCircle2 size={16} className="text-[#719BDF]" />
               )}
             </label>
           ))}

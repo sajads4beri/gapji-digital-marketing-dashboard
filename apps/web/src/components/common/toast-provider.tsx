@@ -191,7 +191,7 @@ const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, onDismiss }) =>
         }
       `}</style>
       <div
-        className="fixed bottom-5 left-5 z-[9999] pointer-events-none flex flex-col gap-2.5 max-w-full sm:max-w-md w-full px-4 sm:px-0"
+        className="fixed bottom-5 end-5 z-[9999] pointer-events-none flex flex-col gap-2.5 max-w-full sm:max-w-md w-full px-4 sm:px-0"
         aria-label="اعلان‌های سیستم"
       >
         {toasts.map((item) => (

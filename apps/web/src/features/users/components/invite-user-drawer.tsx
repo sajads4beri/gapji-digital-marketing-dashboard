@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { useToast } from '@/components/common/toast-provider';
-import { userService } from '../users.mock';
+import { userService } from '../users.api';
 import {
   UserItem,
   UserRole,
@@ -36,7 +36,6 @@ export function InviteUserDrawer({
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [errors, setErrors] = React.useState<{ email?: string; role?: string }>({});
 
-  // بازنشانی فرم هنگام باز شدن
   React.useEffect(() => {
     if (isOpen) {
       setEmail('');
@@ -60,7 +59,7 @@ export function InviteUserDrawer({
       }
     }
 
-    if (!role || !USER_ROLES.includes(role)) {
+    if (!role) {
       newErrors.role = 'انتخاب نقش کاربری الزامی است.';
     }
 
@@ -70,31 +69,23 @@ export function InviteUserDrawer({
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (isSubmitting) return;
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm() || isSubmitting) return;
 
     try {
       setIsSubmitting(true);
-      const createdUser = await userService.inviteUser({
+      const created = await userService.inviteUser({
         email: email.trim(),
         fullName: fullName.trim() || undefined,
         phoneNumber: phoneNumber.trim() || undefined,
         role,
       });
 
-      toast.success(`دعوت‌نامه با موفقیت برای «${createdUser.email}» ارسال شد.`);
-      onSuccess?.(createdUser);
+      toast.success(`دعوت‌نامه با موفقیت برای «${created.email}» ارسال گردید.`);
+      onSuccess?.(created);
       onClose();
     } catch (err: any) {
-      const message = err?.message || 'خطا در ثبت و ارسال دعوت‌نامه.';
-      toast.error(message);
-      setErrors((prev) => ({
-        ...prev,
-        email: message.includes('ایمیل') ? message : prev.email,
-      }));
+      console.error('Error inviting user:', err);
+      toast.error(err?.message || 'خطا در ارسال دعوت‌نامه کاربر.');
     } finally {
       setIsSubmitting(false);
     }
@@ -102,7 +93,7 @@ export function InviteUserDrawer({
 
   const roleOptions = USER_ROLES.map((r) => ({
     value: r,
-    label: USER_ROLE_LABELS[r],
+    label: `${USER_ROLE_LABELS[r]} (${r})`,
   }));
 
   return (
@@ -113,12 +104,12 @@ export function InviteUserDrawer({
       placement="right"
       title={
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-100">
+          <div className="w-9 h-9 rounded-xl bg-[#719BDF]/15 text-[#719BDF] flex items-center justify-center shrink-0 border border-[#719BDF]/30">
             <UserPlus size={18} />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900">دعوت کاربر جدید</h3>
-            <p className="text-[11px] text-slate-500 font-normal">
+            <h3 className="text-sm font-bold text-slate-100 font-display">دعوت کاربر جدید</h3>
+            <p className="text-[11px] text-slate-400 font-normal">
               ارسال پیوند عضویت و تخصیص نقش سازمانی
             </p>
           </div>
@@ -132,6 +123,7 @@ export function InviteUserDrawer({
             size="sm"
             onClick={onClose}
             disabled={isSubmitting}
+            className="border-[#1F2E45] bg-[#18263A] text-slate-300 hover:bg-[#1F2E45]"
           >
             انصراف
           </Button>
@@ -141,17 +133,17 @@ export function InviteUserDrawer({
             size="sm"
             onClick={handleSubmit}
             isLoading={isSubmitting}
-            className="bg-purple-600 hover:bg-purple-700 focus:ring-purple-500"
+            className="bg-gradient-to-r from-[#719BDF] to-[#3B82F6] hover:from-[#5e8bd8] hover:to-[#2563eb] text-white border-0 shadow-[0_0_15px_rgba(113,155,223,0.25)]"
           >
             ارسال دعوت‌نامه
           </Button>
         </div>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-4 py-2" dir="rtl">
-        {/* راهنمای کوتاه */}
-        <div className="bg-purple-50/60 p-3 rounded-xl border border-purple-100 text-[11px] text-purple-800 flex items-start gap-2">
-          <Info size={16} className="text-purple-600 shrink-0 mt-0.5" />
+      <form onSubmit={handleSubmit} className="space-y-4 py-2 text-slate-100" dir="rtl">
+        {/* راهنمای کوتاه با استایل Midnight Executive */}
+        <div className="bg-[#18263A]/80 p-3 rounded-xl border border-[#1F2E45] text-[11px] text-slate-300 flex items-start gap-2">
+          <Info size={16} className="text-[#719BDF] shrink-0 mt-0.5" />
           <span>
             کاربر دعوت‌شده با دریافت پیوند فعال‌سازی به سامانه دسترسی خواهد داشت و وضعیت اولیه او به صورت «دعوت‌شده» ثبت می‌شود.
           </span>
@@ -159,9 +151,9 @@ export function InviteUserDrawer({
 
         {/* فیلد ایمیل */}
         <div className="space-y-1">
-          <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
+          <label className="text-xs font-bold text-slate-300 flex items-center gap-1">
             <span>نشانی ایمیل</span>
-            <span className="text-rose-500">*</span>
+            <span className="text-[#D66B73]">*</span>
           </label>
           <div className="relative">
             <Input
@@ -174,13 +166,13 @@ export function InviteUserDrawer({
               placeholder="user@example.com"
               dir="ltr"
               disabled={isSubmitting}
-              className={`text-left font-mono text-xs ${
-                errors.email ? 'border-rose-400 focus:ring-rose-400' : ''
+              className={`text-left font-mono text-xs bg-[#111D2E] border-[#1F2E45] text-slate-100 placeholder:text-slate-500 ${
+                errors.email ? 'border-[#D66B73] focus:ring-[#D66B73]/20' : ''
               }`}
             />
           </div>
           {errors.email && (
-            <p className="text-[11px] text-rose-600 font-medium flex items-center gap-1 mt-1">
+            <p className="text-[11px] text-[#D66B73] font-medium flex items-center gap-1 mt-1">
               <AlertTriangle size={12} />
               <span>{errors.email}</span>
             </p>
@@ -189,9 +181,9 @@ export function InviteUserDrawer({
 
         {/* فیلد نام و نام خانوادگی */}
         <div className="space-y-1">
-          <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
+          <label className="text-xs font-bold text-slate-300 flex items-center gap-1">
             <span>نام و نام خانوادگی</span>
-            <span className="text-slate-400 text-[10px] font-normal">(اختیاری)</span>
+            <span className="text-slate-500 text-[10px] font-normal">(اختیاری)</span>
           </label>
           <Input
             type="text"
@@ -199,18 +191,18 @@ export function InviteUserDrawer({
             onChange={(e) => setFullName(e.target.value)}
             placeholder="مثال: پرهام رادمنش"
             disabled={isSubmitting}
-            className="text-xs"
+            className="text-xs bg-[#111D2E] border-[#1F2E45] text-slate-100 placeholder:text-slate-500"
           />
-          <p className="text-[10px] text-slate-400">
+          <p className="text-[10px] text-slate-500">
             در صورت خالی ماندن، نام کاربری به طور خودکار از روی ایمیل تنظیم می‌شود.
           </p>
         </div>
 
         {/* فیلد شماره موبایل */}
         <div className="space-y-1">
-          <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
+          <label className="text-xs font-bold text-slate-300 flex items-center gap-1">
             <span>شماره تماس</span>
-            <span className="text-slate-400 text-[10px] font-normal">(اختیاری)</span>
+            <span className="text-slate-500 text-[10px] font-normal">(اختیاری)</span>
           </label>
           <Input
             type="tel"
@@ -219,15 +211,15 @@ export function InviteUserDrawer({
             placeholder="۰۹۱۲۳۴۵۶۷۸۹"
             dir="ltr"
             disabled={isSubmitting}
-            className="text-left font-mono text-xs"
+            className="text-left font-mono text-xs bg-[#111D2E] border-[#1F2E45] text-slate-100 placeholder:text-slate-500"
           />
         </div>
 
         {/* فیلد انتخاب نقش */}
         <div className="space-y-1 pt-1">
-          <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
+          <label className="text-xs font-bold text-slate-300 flex items-center gap-1">
             <span>نقش سازمانی</span>
-            <span className="text-rose-500">*</span>
+            <span className="text-[#D66B73]">*</span>
           </label>
           <Select
             value={role}
@@ -239,14 +231,15 @@ export function InviteUserDrawer({
             disabled={isSubmitting}
           />
           {errors.role && (
-            <p className="text-[11px] text-rose-600 font-medium">{errors.role}</p>
+            <p className="text-[11px] text-[#D66B73] font-medium">{errors.role}</p>
           )}
+
           {/* توضیحات نقش انتخاب‌شده */}
-          <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-[11px] text-slate-600 mt-2">
-            <span className="font-bold text-slate-800 block mb-0.5">
+          <div className="bg-[#111D2E] p-3 rounded-xl border border-[#1F2E45] text-[11px] text-slate-300 mt-2">
+            <span className="font-bold text-[#719BDF] block mb-0.5">
               شرح دسترسی {USER_ROLE_LABELS[role]}:
             </span>
-            <span>{USER_ROLE_DESCRIPTIONS[role]}</span>
+            <span className="text-slate-400">{USER_ROLE_DESCRIPTIONS[role]}</span>
           </div>
         </div>
       </form>

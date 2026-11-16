@@ -3,84 +3,87 @@ import type { LeadStatus } from '../types';
 import { LEAD_STATUS_LABELS } from '../types';
 
 export interface LeadStatusBadgeProps {
- status: LeadStatus;
- className?: string;
- showDot?: boolean;
+  status: LeadStatus;
+  label?: string;
+  color?: string;
+  statusConfig?: {
+    label?: string;
+    color?: string;
+    isActive?: boolean;
+  };
+  className?: string;
+  showDot?: boolean;
 }
+
+const COLOR_CLASSES: Record<string, { badge: string; dot: string }> = {
+  blue: { badge: 'bg-blue-500/10 text-[#719BDF] border-blue-500/30', dot: 'bg-[#719BDF] shadow-sm shadow-[#719BDF]/50' },
+  indigo: { badge: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30', dot: 'bg-indigo-400' },
+  purple: { badge: 'bg-purple-500/10 text-purple-400 border-purple-500/30', dot: 'bg-purple-400' },
+  amber: { badge: 'bg-amber-500/10 text-amber-400 border-amber-500/30', dot: 'bg-amber-400' },
+  emerald: { badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30', dot: 'bg-emerald-400' },
+  rose: { badge: 'bg-[#D66B73]/10 text-[#D66B73] border-[#D66B73]/30', dot: 'bg-[#D66B73]' },
+  teal: { badge: 'bg-teal-500/10 text-teal-400 border-teal-500/30', dot: 'bg-teal-400' },
+  cyan: { badge: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30', dot: 'bg-cyan-400' },
+  orange: { badge: 'bg-orange-500/10 text-orange-400 border-orange-500/30', dot: 'bg-orange-400' },
+  slate: { badge: 'bg-slate-500/10 text-slate-300 border-slate-500/30', dot: 'bg-slate-400' },
+};
 
 /**
  * تعیین استایل رنگی نشان وضعیت لید منطبق بر هویت بصری سیستم
  */
-export function getLeadStatusBadgeClasses(status: LeadStatus): {
- badge: string;
- dot: string;
+export function getLeadStatusBadgeClasses(status: LeadStatus, colorOverride?: string): {
+  badge: string;
+  dot: string;
 } {
- switch (status) {
- case 'new':
- return {
- badge:
- 'bg-blue-50 text-blue-700 border-blue-200 ',
- dot: 'bg-blue-500',
- };
- case 'in_progress':
- return {
- badge:
- 'bg-indigo-50 text-indigo-700 border-indigo-200 ',
- dot: 'bg-indigo-500',
- };
- case 'qualified':
- return {
- badge:
- 'bg-purple-50 text-purple-700 border-purple-200 ',
- dot: 'bg-purple-500',
- };
- case 'proposal':
- return {
- badge:
- 'bg-amber-50 text-amber-700 border-amber-200 ',
- dot: 'bg-amber-500',
- };
- case 'won':
- return {
- badge:
- 'bg-emerald-50 text-emerald-700 border-emerald-200 ',
- dot: 'bg-emerald-500',
- };
- case 'lost':
- return {
- badge:
- 'bg-rose-50 text-rose-700 border-rose-200 ',
- dot: 'bg-rose-500',
- };
- default:
- return {
- badge:
- 'bg-slate-100 text-slate-700 border-slate-200 ',
- dot: 'bg-slate-400',
- };
- }
+  if (colorOverride && COLOR_CLASSES[colorOverride]) {
+    return COLOR_CLASSES[colorOverride];
+  }
+  switch (status) {
+    case 'new':
+      return COLOR_CLASSES.blue;
+    case 'in_progress':
+      return COLOR_CLASSES.indigo;
+    case 'qualified':
+      return COLOR_CLASSES.purple;
+    case 'proposal':
+      return COLOR_CLASSES.amber;
+    case 'won':
+      return COLOR_CLASSES.emerald;
+    case 'lost':
+      return COLOR_CLASSES.rose;
+    default:
+      return COLOR_CLASSES[status] || COLOR_CLASSES.slate;
+  }
 }
 
 export function LeadStatusBadge({
- status,
- className = '',
- showDot = true,
+  status,
+  label: customLabel,
+  color,
+  statusConfig,
+  className = '',
+  showDot = true,
 }: LeadStatusBadgeProps) {
- const label = LEAD_STATUS_LABELS[status] || status;
- const classes = getLeadStatusBadgeClasses(status);
+  const displayLabel =
+    customLabel ||
+    statusConfig?.label ||
+    LEAD_STATUS_LABELS[status] ||
+    status;
+  const effectiveColor = color || statusConfig?.color;
+  const classes = getLeadStatusBadgeClasses(status, effectiveColor);
 
- return (
- <span
- className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-xs font-semibold ${classes.badge} ${className}`}
- dir="rtl"
- >
- {showDot && (
- <span
- className={`w-1.5 h-1.5 rounded-full ${classes.dot} shrink-0`}
- aria-hidden="true"
- />
- )}
- <span className="truncate">{label}</span>
- </span>
- );
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-xs font-semibold ${classes.badge} ${className}`}
+      dir="rtl"
+    >
+      {showDot && (
+        <span
+          className={`w-1.5 h-1.5 rounded-full ${classes.dot} shrink-0`}
+          aria-hidden="true"
+        />
+      )}
+      <span className="truncate">{displayLabel}</span>
+    </span>
+  );
 }

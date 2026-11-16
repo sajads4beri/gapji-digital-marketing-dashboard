@@ -6,7 +6,7 @@ import { Modal } from '@/components/common/modal';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import { useToast } from '@/components/common/toast-provider';
-import { userService } from '../users.mock';
+import { userService } from '../users.api';
 import {
   UserItem,
   UserRole,
@@ -64,7 +64,8 @@ export function ChangeRoleModal({
       onSuccess?.(updated);
       onClose();
     } catch (err: any) {
-      toast.error(err?.message || 'خطا در تغییر نقش کاربری.');
+      console.error('Error changing user role:', err);
+      toast.error(err?.message || 'خطا در تغییر نقش کاربر.');
     } finally {
       setIsLoading(false);
     }
@@ -74,7 +75,7 @@ export function ChangeRoleModal({
 
   const roleOptions = USER_ROLES.map((r) => ({
     value: r,
-    label: USER_ROLE_LABELS[r],
+    label: `${USER_ROLE_LABELS[r]} (${r})`,
   }));
 
   return (
@@ -84,12 +85,12 @@ export function ChangeRoleModal({
       size="md"
       title={
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-200">
+          <div className="w-10 h-10 rounded-xl bg-[#719BDF]/15 text-[#719BDF] flex items-center justify-center shrink-0 border border-[#719BDF]/30">
             <Shield size={20} />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900">تغییر نقش کاربری</h3>
-            <p className="text-xs text-slate-500 font-normal mt-0.5">
+            <h3 className="text-sm font-bold text-slate-100 font-display">تغییر نقش کاربری</h3>
+            <p className="text-xs text-slate-400 font-normal mt-0.5">
               کاربر: {user.fullName} ({user.email})
             </p>
           </div>
@@ -103,6 +104,7 @@ export function ChangeRoleModal({
             size="sm"
             onClick={onClose}
             disabled={isLoading}
+            className="border-[#1F2E45] bg-[#18263A] text-slate-300 hover:bg-[#1F2E45]"
           >
             انصراف
           </Button>
@@ -114,25 +116,25 @@ export function ChangeRoleModal({
             onClick={handleSubmit}
             isLoading={isLoading}
             disabled={isSameRole || isLastAdminDemotionBlocked}
-            className="bg-purple-600 hover:bg-purple-700 focus:ring-purple-500"
+            className="bg-gradient-to-r from-[#719BDF] to-[#3B82F6] hover:from-[#5e8bd8] hover:to-[#2563eb] text-white border-0 shadow-[0_0_15px_rgba(113,155,223,0.25)]"
           >
             ذخیره تغییرات
           </Button>
         </div>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-4 py-1" dir="rtl">
+      <form onSubmit={handleSubmit} className="space-y-4 py-1 text-slate-100" dir="rtl">
         {/* اطلاعات نقش فعلی */}
-        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/80 flex items-center justify-between text-xs">
-          <span className="text-slate-500">نقش فعلی کاربر:</span>
-          <span className="font-bold text-slate-800 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
+        <div className="bg-[#18263A] p-3 rounded-xl border border-[#1F2E45] flex items-center justify-between text-xs">
+          <span className="text-slate-400">نقش فعلی کاربر:</span>
+          <span className="font-bold text-[#719BDF] bg-[#111D2E] px-2.5 py-1 rounded-lg border border-[#1F2E45]">
             {USER_ROLE_LABELS[user.role]}
           </span>
         </div>
 
         {/* انتخابگر نقش جدید */}
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-slate-700 block">
+          <label className="text-xs font-bold text-slate-300 block">
             نقش جدید سازمانی:
           </label>
           <Select
@@ -145,23 +147,23 @@ export function ChangeRoleModal({
 
         {/* هشدار ممانعت از خلع نقش آخرین ادمین */}
         {isLastAdminDemotionBlocked && (
-          <div className="bg-amber-50 p-3.5 rounded-xl border border-amber-200 text-xs text-amber-900 space-y-1.5 animate-in fade-in">
-            <div className="flex items-center gap-1.5 font-bold text-amber-800">
-              <ShieldAlert size={16} className="text-amber-600 shrink-0" />
+          <div className="bg-amber-500/15 p-3.5 rounded-xl border border-amber-500/30 text-xs text-amber-300 space-y-1.5 animate-in fade-in">
+            <div className="flex items-center gap-1.5 font-bold text-amber-400">
+              <ShieldAlert size={16} className="shrink-0" />
               <span>عملیات غیرمجاز: آخرین ادمین فعال</span>
             </div>
-            <p className="leading-relaxed text-[11px]">
+            <p className="leading-relaxed text-[11px] text-amber-200">
               کاربر «{user.fullName}» تنها ادمین فعال سامانه است. شما نمی‌توانید نقش او را تغییر دهید مگر اینکه ابتدا کاربر فعال دیگری را به عنوان ادمین تعریف فرمایید.
             </p>
           </div>
         )}
 
         {/* شرح دسترسی‌های نقش انتخاب‌شده */}
-        <div className="bg-purple-50/60 p-3.5 rounded-xl border border-purple-100 text-xs text-purple-900 space-y-1">
-          <span className="font-bold text-purple-950 block">
+        <div className="bg-[#111D2E] p-3.5 rounded-xl border border-[#1F2E45] text-xs space-y-1">
+          <span className="font-bold text-[#719BDF] block">
             دسترسی‌های نقش {USER_ROLE_LABELS[selectedRole]}:
           </span>
-          <p className="text-[11px] text-purple-800 leading-relaxed">
+          <p className="text-[11px] text-slate-400 leading-relaxed">
             {USER_ROLE_DESCRIPTIONS[selectedRole]}
           </p>
         </div>

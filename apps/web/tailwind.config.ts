@@ -11,8 +11,7 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: [
-          'var(--font-iransans)',
-          'IRANSans',
+          'var(--font-vazirmatn)',
           'Vazirmatn',
           'system-ui',
           '-apple-system',
@@ -20,6 +19,12 @@ const config: Config = {
           'Segoe UI',
           'Roboto',
           'Tahoma',
+          'sans-serif',
+        ],
+        display: [
+          'var(--font-vazirmatn)',
+          'Vazirmatn',
+          'system-ui',
           'sans-serif',
         ],
       },
@@ -57,10 +62,25 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        midnight: {
+          950: '#080F1C', // Ultra Deep Page BG
+          900: '#0B1423', // Sidebar BG
+          850: '#0F1A2C', // Deep Sub-surface
+          800: '#111D2E', // Primary Card Surface
+          750: '#142236',
+          700: '#18263A', // Elevated / Modal Surface
+          600: '#1F2E45', // Borders / Dividers
+          500: '#2A3C58', // Muted borders / inputs
+        },
+        icy: {
+          DEFAULT: '#719BDF',
+          light: '#96B9F2',
+          glow: 'rgba(113, 155, 223, 0.18)',
+        },
         gapji: {
-          primary: '#2563eb',
-          dark: '#1e293b',
-          accent: '#0ea5e9',
+          primary: '#719BDF',
+          dark: '#080F1C',
+          accent: '#38BDF8',
         },
       },
       borderRadius: {

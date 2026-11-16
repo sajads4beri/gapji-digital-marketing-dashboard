@@ -30,14 +30,14 @@ export function CostSummaryBar({
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm animate-pulse space-y-4"
+            className="bg-[#111D2E]/80 backdrop-blur-md p-6 rounded-2xl border border-[#1F2E45] shadow-xl animate-pulse space-y-4"
           >
             <div className="flex justify-between items-center">
-              <div className="h-4 bg-gray-200 rounded w-24" />
-              <div className="w-10 h-10 bg-gray-100 rounded-xl" />
+              <div className="h-4 bg-[#18263A] rounded w-24" />
+              <div className="w-10 h-10 bg-[#18263A] rounded-xl" />
             </div>
-            <div className="h-8 bg-gray-200 rounded w-36" />
-            <div className="h-4 bg-gray-100 rounded w-28" />
+            <div className="h-8 bg-[#18263A] rounded w-36" />
+            <div className="h-4 bg-[#18263A] rounded w-28" />
           </div>
         ))}
       </div>
@@ -49,6 +49,9 @@ export function CostSummaryBar({
     stats.totalSpendToman > 0
       ? Math.round((stats.directAdSpendToman / stats.totalSpendToman) * 100)
       : 0;
+
+  const pendingSpend = (stats.pendingInvoicesAmountToman || 0) + (stats.draftSpendToman || 0);
+  const totalCount = (stats as any).totalCount ?? (stats.spendByCampaign ? stats.spendByCampaign.reduce((sum, c) => sum + (c.count || 0), 0) : 0);
 
   return (
     <div
@@ -63,9 +66,9 @@ export function CostSummaryBar({
         <KpiCard
           title="مجموع هزینه‌های قطعی"
           value={
-            <span className="flex items-baseline gap-1">
+            <span className="flex items-baseline gap-1 font-display">
               <span>{formatMoneyDisplay(stats.totalSpendToman) || '۰'}</span>
-              <span className="text-xs font-normal text-gray-500">تومان</span>
+              <span className="text-xs font-normal text-slate-400">تومان</span>
             </span>
           }
           subtitle="مجموع مصارف پرداخت‌شده و تعهدشده"
@@ -79,7 +82,7 @@ export function CostSummaryBar({
               : undefined
           }
           icon={<DollarSign className="w-5 h-5" />}
-          color="text-blue-600"
+          color="text-[#719BDF]"
         />
       </div>
 
@@ -91,19 +94,19 @@ export function CostSummaryBar({
         <KpiCard
           title="هزینه رسانه‌ای مستقیم"
           value={
-            <span className="flex items-baseline gap-1">
+            <span className="flex items-baseline gap-1 font-display">
               <span>{formatMoneyDisplay(stats.directAdSpendToman) || '۰'}</span>
-              <span className="text-xs font-normal text-gray-500">تومان</span>
+              <span className="text-xs font-normal text-slate-400">تومان</span>
             </span>
           }
           subtitle="تبلیغات گوگل ادز، متا، پیامک و کلیکی"
           change={{
-            value: `${directAdSharePercent}٪`,
+            value: `${directAdSharePercent}٪ از کل`,
             type: 'neutral',
-            label: 'سهم از کل بودجه',
+            label: 'سهم هزینه مدیا',
           }}
           icon={<Target className="w-5 h-5" />}
-          color="text-indigo-600"
+          color="text-indigo-400"
         />
       </div>
 
@@ -113,18 +116,18 @@ export function CostSummaryBar({
         className={onCardClick ? 'cursor-pointer' : ''}
       >
         <KpiCard
-          title="فاکتورهای در انتظار پرداخت"
+          title="در انتظار تسویه / پیش‌نویس"
           value={
-            <span className="flex items-baseline gap-1">
-              <span>{formatMoneyDisplay(stats.pendingInvoicesAmountToman) || '۰'}</span>
-              <span className="text-xs font-normal text-gray-500">تومان</span>
+            <span className="flex items-baseline gap-1 font-display">
+              <span>{formatMoneyDisplay(pendingSpend) || '۰'}</span>
+              <span className="text-xs font-normal text-slate-400">تومان</span>
             </span>
           }
-          subtitle="مبالغ معوق و تسویه‌نشده مجریان"
+          subtitle="فاکتورهای تاییدشده در صف تسویه مالی"
           change={
-            stats.pendingInvoicesAmountToman > 0
+            pendingSpend > 0
               ? {
-                  value: 'نیازمند تسویه',
+                  value: 'نیازمند اقدام',
                   type: 'negative',
                 }
               : {
@@ -133,35 +136,21 @@ export function CostSummaryBar({
                 }
           }
           icon={<Clock className="w-5 h-5" />}
-          color="text-amber-600"
+          color="text-amber-400"
         />
       </div>
 
-      {/* ۴. تعداد کل رکوردهای هزینه */}
+      {/* ۴. تعداد کل تراکنش‌ها */}
       <div
         onClick={() => onCardClick?.('count')}
         className={onCardClick ? 'cursor-pointer' : ''}
       >
         <KpiCard
-          title="تعداد رکوردهای هزینه"
-          value={
-            <span className="flex items-baseline gap-1">
-              <span>{stats.totalItemsCount.toLocaleString('fa-IR')}</span>
-              <span className="text-xs font-normal text-gray-500">ردیف</span>
-            </span>
-          }
-          subtitle="کل اسناد مالی و پیش‌نویس‌ها"
-          change={
-            stats.draftSpendToman > 0
-              ? {
-                  value: `${formatMoneyDisplay(stats.draftSpendToman)} ت`,
-                  type: 'neutral',
-                  label: 'پیش‌نویس‌ها',
-                }
-              : undefined
-          }
+          title="تعداد اسناد و تراکنش‌ها"
+          value={<span className="font-display">{totalCount.toLocaleString('fa-IR')} ردیف</span>}
+          subtitle="کل اسناد مالی بازاریابی ثبت‌شده"
           icon={<Layers className="w-5 h-5" />}
-          color="text-emerald-600"
+          color="text-teal-400"
         />
       </div>
     </div>

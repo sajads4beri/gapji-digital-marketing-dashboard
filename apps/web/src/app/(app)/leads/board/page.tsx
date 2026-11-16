@@ -30,14 +30,15 @@ import {
  KanbanLostLeadModal,
 } from '@/features/leads';
 import { useAuth } from '@/features/auth';
+import { organizationService, type OrgLeadStatusItem } from '@/features/organization';
 
-const KANBAN_STATUS_ORDER: LeadStatus[] = [
- 'new',
- 'in_progress',
- 'qualified',
- 'proposal',
- 'won',
- 'lost',
+const DEFAULT_PIPELINE_STATUSES: OrgLeadStatusItem[] = [
+ { id: 'default-new', key: 'new', label: 'جدید', order: 1, color: 'blue', group: 'open' as any, isActive: true, isSystem: true, usageCount: 0, createdAt: '', updatedAt: '' },
+ { id: 'default-in_progress', key: 'in_progress', label: 'تماس گرفته شد', order: 2, color: 'indigo', group: 'open' as any, isActive: true, isSystem: true, usageCount: 0, createdAt: '', updatedAt: '' },
+ { id: 'default-qualified', key: 'qualified', label: 'واجد شرایط', order: 3, color: 'purple', group: 'open' as any, isActive: true, isSystem: true, usageCount: 0, createdAt: '', updatedAt: '' },
+ { id: 'default-proposal', key: 'proposal', label: 'پیشنهاد', order: 4, color: 'amber', group: 'open' as any, isActive: true, isSystem: true, usageCount: 0, createdAt: '', updatedAt: '' },
+ { id: 'default-won', key: 'won', label: 'مشتری', order: 5, color: 'emerald', group: 'won' as any, isActive: true, isSystem: true, usageCount: 0, createdAt: '', updatedAt: '' },
+ { id: 'default-lost', key: 'lost', label: 'ردشده', order: 6, color: 'rose', group: 'lost' as any, isActive: true, isSystem: true, usageCount: 0, createdAt: '', updatedAt: '' },
 ];
 
 function LeadsBoardContent() {
@@ -85,6 +86,10 @@ function LeadsBoardContent() {
  const [leads, setLeads] = React.useState<LeadDetail[]>([]);
  const [loading, setLoading] = React.useState(true);
  const [error, setError] = React.useState<string | null>(null);
+
+ // وضعیت‌های پیکربندی‌شده پایپ‌لاین سازمان (B2.5.4)
+ const [pipelineStatuses, setPipelineStatuses] = React.useState<OrgLeadStatusItem[]>(DEFAULT_PIPELINE_STATUSES);
+ const [pendingTargetStatus, setPendingTargetStatus] = React.useState<string>('won');
 
  // ۳. وضعیت تعاملات Drag & Drop
  const [draggingLeadId, setDraggingLeadId] = React.useState<string | null>(null);
@@ -155,9 +160,105 @@ function LeadsBoardContent() {
  isRouteDenied,
  ]);
 
+  const fetchStatuses = React.useCallback(async () => {
+  try {
+   const items = await organizationService.getListItems('lead_statuses');
+   if (items && items.length > 0) {
+    setPipelineStatuses(items as OrgLeadStatusItem[]);
+   }
+  } catch (err) {
+   console.error('Failed to load lead status configurations:', err);
+  }
+ }, []);
+
  React.useEffect(() => {
- fetchLeads();
- }, [fetchLeads]);
+  fetchLeads();
+  fetchStatuses();
+ }, [fetchLeads, fetchStatuses]);
+
+ // مرتب‌سازی وضعیت‌های فعال بر اساس sortOrder
+ const activeStatuses = React.useMemo(() => {
+  return pipelineStatuses
+   .filter((s) => s.isActive)
+   .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+ }, [pipelineStatuses]);
+
+ // گزینه‌های مجاز برای تغییر وضعیت
+ const availableStatusesOptions = React.useMemo(() => {
+  return activeStatuses.map((s) => ({ key: s.key, label: s.label }));
+ }, [activeStatuses]);
+
+ // دیکشنری وضعیت‌ها جهت دسترسی سریع به مشخصات
+ const statusLookup = React.useMemo(() => {
+  const map = new Map<string, OrgLeadStatusItem>();
+  for (const s of pipelineStatuses) {
+   map.set(s.key, s);
+   map.set(s.id, s);
+  }
+  return map;
+ }, [pipelineStatuses]);
+
+ // تابع نگاشت انحصاری هر لید به تنها یک ستون کانبان (B2.5.4.1: جلوگیری از تکرار یا حذف لید)
+ const resolveLeadColumnKey = React.useCallback(
+  (lead: LeadDetail): string => {
+   // ۱. اگر شناسه statusConfigId در تنظیمات سازمان وجود دارد، کلید آن ستون قطعی است
+   if (lead.statusConfigId && statusLookup.has(lead.statusConfigId)) {
+    return statusLookup.get(lead.statusConfigId)!.key;
+   }
+   // ۲. تطابق کلید متنی با وضعیت‌های پایپ‌لاین
+   const key = lead.statusKey || lead.status;
+   if (key && statusLookup.has(key)) {
+    return statusLookup.get(key)!.key;
+   }
+   // ۳. در صورت وضعیت یتیم یا میراثی که در تنظیمات نیست، حفظ کلید اصلی به عنوان ستون میراثی
+   return key || 'unknown';
+  },
+  [statusLookup]
+ );
+
+ // ستون‌های نمایشی بورد کانبان: وضعیت‌های فعال + وضعیت‌های غیرفعال دارای لید + وضعیت‌های یتیم/میراثی دارای لید
+ const displayColumns = React.useMemo(() => {
+  const activeKeys = new Set(activeStatuses.map((s) => s.key));
+  const cols = [...activeStatuses];
+
+  // ۱. ستون‌های غیرفعال موجود در تنظیمات سازمان که لید تاریخی در آن‌ها وجود دارد
+  const inactiveWithLeads = pipelineStatuses.filter(
+   (s) => !s.isActive && leads.some((l) => resolveLeadColumnKey(l) === s.key)
+  );
+  for (const inact of inactiveWithLeads) {
+   if (!activeKeys.has(inact.key)) {
+    cols.push(inact);
+    activeKeys.add(inact.key);
+   }
+  }
+
+  // ۲. شناسایی لیدهای دارای وضعیت‌های یتیم یا میراثی تعریف‌نشده در تنظیمات سازمان
+  const orphanedKeys = new Set<string>();
+  for (const lead of leads) {
+   const colKey = resolveLeadColumnKey(lead);
+   if (!activeKeys.has(colKey)) {
+    orphanedKeys.add(colKey);
+   }
+  }
+
+  Array.from(orphanedKeys).forEach((orphanKey) => {
+   cols.push({
+    id: `orphaned-${orphanKey}`,
+    key: orphanKey,
+    label: `نامشخص / میراثی (${orphanKey})`,
+    color: 'slate',
+    order: 999,
+    isActive: false,
+    isSystem: false,
+    usageCount: 0,
+    createdAt: '',
+    updatedAt: '',
+   } as OrgLeadStatusItem);
+   activeKeys.add(orphanKey);
+  });
+
+  return cols;
+ }, [activeStatuses, pipelineStatuses, leads, resolveLeadColumnKey]);
 
  // ۷. به‌روزرسانی پارامترهای فیلتر در URL
  const updateUrlParams = React.useCallback(
@@ -193,14 +294,7 @@ function LeadsBoardContent() {
  id: 'status',
  label: 'مرحله برد',
  type: 'multi-select',
- options: [
- { label: 'جدید', value: 'new' },
- { label: 'تماس گرفته شد', value: 'in_progress' },
- { label: 'واجد شرایط', value: 'qualified' },
- { label: 'پیشنهاد', value: 'proposal' },
- { label: 'مشتری', value: 'won' },
- { label: 'ردشده', value: 'lost' },
- ],
+ options: pipelineStatuses.map((s) => ({ label: s.label, value: s.key })),
  },
  {
  id: 'assignedToId',
@@ -239,7 +333,7 @@ function LeadsBoardContent() {
  ],
  },
  ],
- []
+ [pipelineStatuses]
  );
 
  const selectedFilters: Record<string, string | string[]> = React.useMemo(() => {
@@ -350,8 +444,10 @@ function LeadsBoardContent() {
   );
  }
 
+ const targetConfig = statusLookup.get(targetStatus);
+ const statusLabel = targetConfig?.label || LEAD_STATUS_LABELS[targetStatus as keyof typeof LEAD_STATUS_LABELS] || targetStatus;
  toast.success(
- `وضعیت «${targetLead.fullName}» به «${LEAD_STATUS_LABELS[targetStatus]}» منتقل شد.`
+ `وضعیت «${targetLead.fullName}» به «${statusLabel}» منتقل شد.`
  );
  } catch (err: any) {
  // ۳. بازگردانی وضعیت در صورت بروز خطا (Rollback on failure)
@@ -387,13 +483,16 @@ function LeadsBoardContent() {
  const lead = leads.find((l) => l.id === leadId);
  if (!lead || lead.status === targetStatus) return;
 
- // قوانین ویژه وضعیت‌های نهایی won و lost طبق بخش ۶ سند
- if (targetStatus === 'won') {
+ const targetConfig = statusLookup.get(targetStatus);
+ // قوانین ویژه وضعیت‌های نهایی won و lost طبق گروه یا کلید وضعیت
+ if (targetConfig?.group === 'won' || targetStatus === 'won') {
  setWonModalLead(lead);
+ setPendingTargetStatus(targetConfig?.key || targetStatus);
  return;
  }
- if (targetStatus === 'lost') {
+ if (targetConfig?.group === 'lost' || targetStatus === 'lost') {
  setLostModalLead(lead);
+ setPendingTargetStatus(targetConfig?.key || targetStatus);
  return;
  }
 
@@ -406,12 +505,15 @@ function LeadsBoardContent() {
  const lead = leads.find((l) => l.id === leadId);
  if (!lead || lead.status === targetStatus) return;
 
- if (targetStatus === 'won') {
+ const targetConfig = statusLookup.get(targetStatus);
+ if (targetConfig?.group === 'won' || targetStatus === 'won') {
  setWonModalLead(lead);
+ setPendingTargetStatus(targetConfig?.key || targetStatus);
  return;
  }
- if (targetStatus === 'lost') {
+ if (targetConfig?.group === 'lost' || targetStatus === 'lost') {
  setLostModalLead(lead);
+ setPendingTargetStatus(targetConfig?.key || targetStatus);
  return;
  }
 
@@ -423,7 +525,7 @@ function LeadsBoardContent() {
  if (!wonModalLead || isModalSubmitting) return;
  try {
  setIsModalSubmitting(true);
- await executeStatusChange(wonModalLead.id, 'won', { dealValue });
+ await executeStatusChange(wonModalLead.id, (pendingTargetStatus as LeadStatus) || 'won', { dealValue });
  setWonModalLead(null);
  } finally {
  setIsModalSubmitting(false);
@@ -435,7 +537,7 @@ function LeadsBoardContent() {
  if (!lostModalLead || isModalSubmitting) return;
  try {
  setIsModalSubmitting(true);
- await executeStatusChange(lostModalLead.id, 'lost', { lostReason });
+ await executeStatusChange(lostModalLead.id, (pendingTargetStatus as LeadStatus) || 'lost', { lostReason });
  setLostModalLead(null);
  } finally {
  setIsModalSubmitting(false);
@@ -486,34 +588,36 @@ function LeadsBoardContent() {
  return (
  <div className="space-y-6" dir="rtl">
  {/* هدر صفحه و انتخاب نمای کاربری */}
- <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
- <div>
+ <div className="relative overflow-hidden rounded-2xl border border-[#1F2E45] bg-[#111D2E]/80 backdrop-blur-md p-6 shadow-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+ <div className="absolute top-0 right-0 -ms-16 -mt-16 w-64 h-64 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+ <div className="relative z-10">
  <Breadcrumb
  items={[
  { label: 'فروش و لید', href: '/leads' },
  { label: 'برد پیگیری لید' },
  ]}
  />
- <h1 className="mt-2 text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
+ <h1 className="mt-2 text-xl sm:text-2xl font-extrabold text-slate-100 tracking-tight font-display flex items-center gap-2">
+ <span className="w-2.5 h-6 bg-gradient-to-b from-[#719BDF] to-blue-600 rounded-full inline-block" />
  برد پیگیری لیدها
  </h1>
- <p className="mt-1 text-xs sm:text-sm text-gray-500 ">
+ <p className="mt-1 text-xs sm:text-sm text-slate-400">
  گردش کار لیدها، مدیریت مراحل مذاکره فروش و نظارت بصری بر ارزش معاملات
  </p>
  </div>
 
  {/* سوییچر تغییر نما (صندوق / برد) و دکمه لید جدید */}
- <div className="flex items-center gap-2.5 shrink-0">
- <div className="flex items-center p-1 bg-gray-100 rounded-xl border border-gray-200 ">
+ <div className="relative z-10 flex items-center gap-2.5 shrink-0">
+ <div className="flex items-center p-1 bg-[#18263A] rounded-xl border border-[#1F2E45]">
  <Link
  href="/leads"
- className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-600 hover:text-gray-900 transition-all "
+ className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all"
  >
  <Inbox size={14} />
  <span>صندوق لیدها</span>
  </Link>
  <span
- className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-blue-600 shadow-2xs "
+ className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-[#111D2E] text-[#719BDF] border border-[#1F2E45] shadow-sm"
  >
  <Kanban size={14} />
  <span>برد پیگیری</span>
@@ -524,12 +628,12 @@ function LeadsBoardContent() {
  type="button"
  variant="primary"
  disabled
- className="cursor-not-allowed opacity-75 flex items-center gap-2 text-xs"
+ className="cursor-not-allowed opacity-50 flex items-center gap-2 text-xs bg-[#18263A] text-slate-400 border border-[#1F2E45]"
  title="فرم ثبت لید جدید در مراحل بعدی اضافه می‌شود."
  >
  <Plus size={15} />
  <span>لید جدید</span>
- <span className="text-[10px] bg-white/20 text-white px-1.5 py-0.5 rounded font-normal">
+ <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-normal">
  به‌زودی
  </span>
  </Button>
@@ -537,6 +641,7 @@ function LeadsBoardContent() {
  </div>
 
  {/* نوار فیلترها (FilterBar) هماهنگ با URL */}
+ <div className="bg-[#111D2E]/80 backdrop-blur-md p-4 rounded-2xl border border-[#1F2E45] shadow-xl">
  <FilterBar
  showSearch
  searchPlaceholder="جستجو بر اساس نام، شماره تماس، شرکت یا ایمیل..."
@@ -552,24 +657,28 @@ function LeadsBoardContent() {
  hasActiveFilters={hasActiveFilters}
  onClearAll={handleClearAll}
  />
+ </div>
 
  {/* نوار پیمایش سریع بین ستون‌ها در موبایل */}
  <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto pb-1 select-none scrollbar-none">
- {KANBAN_STATUS_ORDER.map((st) => {
- const colLeads = leads.filter((l) => l.status === st);
+ {displayColumns.map((col) => {
+ const st = col.key;
+ const colLeads = leads.filter(
+  (l) => resolveLeadColumnKey(l) === st
+ );
  const isActive = mobileActiveColumn === st;
  return (
  <button
- key={st}
+ key={col.id || st}
  type="button"
- onClick={() => scrollToMobileColumn(st)}
+ onClick={() => scrollToMobileColumn(st as LeadStatus)}
  className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
  isActive
  ? 'bg-blue-600 text-white border-blue-600 shadow-2xs'
  : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 '
  }`}
  >
- <span>{LEAD_STATUS_LABELS[st]}</span>
+ <span>{col.label}</span>
  <span
  className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
  isActive
@@ -640,18 +749,24 @@ function LeadsBoardContent() {
  className="flex gap-4 overflow-x-auto pb-5 snap-x snap-mandatory select-none scrollbar-thin scrollbar-thumb-gray-200 "
  dir="rtl"
  >
- {KANBAN_STATUS_ORDER.map((status) => {
- const columnLeads = leads.filter((lead) => lead.status === status);
+ {displayColumns.map((col) => {
+ const status = col.key;
+ const columnLeads = leads.filter(
+  (lead) => resolveLeadColumnKey(lead) === status
+ );
  return (
  <div
- key={status}
+ key={col.id || status}
  ref={(el) => {
  columnRefs.current[status] = el;
  }}
  className="snap-start flex-1 min-w-[280px]"
  >
  <KanbanColumn
- status={status}
+ status={status as LeadStatus}
+ statusConfig={col}
+ availableStatuses={availableStatusesOptions}
+ isDropDisabled={!col.isActive}
  leads={columnLeads}
  isDragOver={dragOverColumn === status}
  draggingLeadId={draggingLeadId}

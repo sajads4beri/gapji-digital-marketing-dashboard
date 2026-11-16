@@ -82,8 +82,8 @@ export function TaskItemRow({
     <div
       onClick={handleRowClick}
       dir="rtl"
-      className={`group relative flex items-center justify-between p-3.5 sm:p-4 bg-white hover:bg-slate-50/80 border border-slate-200/80 rounded-xl transition-all duration-150 cursor-pointer shadow-2xs hover:shadow-xs gap-3 ${
-        isDone ? 'bg-slate-50/50' : ''
+      className={`group relative flex items-center justify-between p-3.5 sm:p-4 bg-[#111D2E] hover:bg-[#18263A] border border-[#1F2E45] rounded-2xl transition-all duration-150 cursor-pointer shadow-md hover:shadow-lg gap-3 ${
+        isDone ? 'opacity-70 bg-[#111D2E]/60' : ''
       } ${className}`}
     >
       {/* بخش راست: چک‌باکس و مشخصات تسک */}
@@ -94,14 +94,14 @@ export function TaskItemRow({
           onClick={handleCheckboxClick}
           disabled={isToggling}
           aria-label={isDone ? 'علامت به عنوان انجام‌نشده' : 'علامت به عنوان انجام‌شده'}
-          className={`shrink-0 w-5 h-5 rounded-md border flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${
+          className={`shrink-0 w-5 h-5 rounded-md border flex items-center justify-center transition-colors focus:outline-none focus:ring-1 focus:ring-[#719BDF] ${
             isDone
-              ? 'bg-emerald-600 border-emerald-600 text-white'
-              : 'border-slate-300 hover:border-blue-500 bg-white'
+              ? 'bg-emerald-500 border-emerald-500 text-white'
+              : 'border-[#1F2E45] hover:border-[#719BDF] bg-[#0B1423]'
           } ${isToggling ? 'opacity-60 cursor-wait' : ''}`}
         >
           {isToggling ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-500" />
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-400" />
           ) : isDone ? (
             <Check className="w-3.5 h-3.5 stroke-[2.5]" />
           ) : null}
@@ -111,10 +111,10 @@ export function TaskItemRow({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             <span
-              className={`text-sm font-medium transition-colors ${
+              className={`text-xs sm:text-sm font-semibold transition-colors ${
                 isDone
-                  ? 'line-through text-slate-400'
-                  : 'text-slate-900 group-hover:text-blue-600'
+                  ? 'line-through text-slate-500'
+                  : 'text-slate-100 group-hover:text-[#719BDF]'
               }`}
             >
               {task.title}
@@ -125,17 +125,17 @@ export function TaskItemRow({
 
             {/* برچسب تأخیر در صورت عقب‌افتادگی */}
             {isOverdue && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#D66B73]/15 text-[#D66B73] border border-[#D66B73]/30">
                 {formatOverdueBadgeText(overdueDays)}
               </span>
             )}
           </div>
 
           {/* ردیف دوم مشخصات: موجودیت مرتبط، زیرتسک‌ها، کامنت‌ها */}
-          <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-500 flex-wrap">
+          <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-400 flex-wrap">
             {/* موجودیت مرتبط (کمپین / لید / وبینار) */}
             {task.relatedTo && (
-              <span className="inline-flex items-center gap-1 text-slate-600 bg-slate-100/80 px-2 py-0.5 rounded-md">
+              <span className="inline-flex items-center gap-1 text-slate-300 bg-[#18263A] border border-[#1F2E45] px-2 py-0.5 rounded-lg text-[11px]">
                 {getRelatedIcon(task.relatedTo.type)}
                 <span className="max-w-[140px] truncate">
                   {task.relatedTo.title || task.relatedTo.id}
@@ -145,8 +145,8 @@ export function TaskItemRow({
 
             {/* نشان SOP */}
             {task.sop && (
-              <span className="inline-flex items-center gap-1 text-slate-600 bg-slate-100/80 px-2 py-0.5 rounded-md">
-                <FileText className="w-3.5 h-3.5 text-amber-500" />
+              <span className="inline-flex items-center gap-1 text-amber-300 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-lg text-[11px]">
+                <FileText className="w-3.5 h-3.5 text-amber-400" />
                 <span className="max-w-[120px] truncate">
                   {task.sop.title || 'SOP'}
                 </span>
@@ -155,8 +155,8 @@ export function TaskItemRow({
 
             {/* چک‌لیست زیرتسک‌ها */}
             {subtasksCount > 0 && (
-              <span className="inline-flex items-center gap-1 text-slate-500">
-                <CheckSquare className="w-3.5 h-3.5 text-slate-400" />
+              <span className="inline-flex items-center gap-1 text-slate-400 text-[11px]">
+                <CheckSquare className="w-3.5 h-3.5 text-slate-500" />
                 <span>
                   {completedSubtasksCount} از {subtasksCount}
                 </span>
@@ -165,8 +165,8 @@ export function TaskItemRow({
 
             {/* تعداد کامنت‌ها */}
             {task.comments.length > 0 && (
-              <span className="inline-flex items-center gap-1 text-slate-500">
-                <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
+              <span className="inline-flex items-center gap-1 text-slate-400 text-[11px]">
+                <MessageSquare className="w-3.5 h-3.5 text-slate-500" />
                 <span>{task.comments.length}</span>
               </span>
             )}
@@ -175,7 +175,7 @@ export function TaskItemRow({
       </div>
 
       {/* بخش چپ: تاریخ سررسید و آواتار مسئول */}
-      <div className="flex items-center gap-3 shrink-0 mr-2">
+      <div className="flex items-center gap-3 shrink-0 ms-2">
         {/* وضعیت تسک در صورتی که عقب‌افتاده نباشد */}
         {!isOverdue && (
           <div className="hidden sm:block">
@@ -188,10 +188,10 @@ export function TaskItemRow({
           <div
             className={`flex items-center gap-1 text-xs select-none ${
               isOverdue
-                ? 'text-rose-600 font-medium'
+                ? 'text-[#D66B73] font-bold'
                 : isDone
-                ? 'text-slate-400'
-                : 'text-slate-500'
+                ? 'text-slate-500'
+                : 'text-slate-400'
             }`}
           >
             <Calendar className="w-3.5 h-3.5" />
@@ -200,7 +200,7 @@ export function TaskItemRow({
         )}
 
         {/* آواتار مسئول */}
-        <div className="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-medium text-slate-700 overflow-hidden shrink-0">
+        <div className="w-7 h-7 rounded-full bg-[#18263A] border border-[#1F2E45] flex items-center justify-center text-xs font-bold text-slate-300 overflow-hidden shrink-0">
           {task.assignee ? (
             task.assignee.avatarUrl ? (
               <img
@@ -212,7 +212,7 @@ export function TaskItemRow({
               <span>{task.assignee.name.substring(0, 1)}</span>
             )
           ) : (
-            <span className="text-[10px] text-slate-400">—</span>
+            <span className="text-[10px] text-slate-500">—</span>
           )}
         </div>
       </div>

@@ -2,8 +2,18 @@
 
 import React from 'react';
 import { CampaignFormData } from '../../../types';
-import { MoneyInput, PersianDatePicker } from '@/components/ui';
+import { MoneyInput, PersianDatePicker, Select } from '@/components/ui';
 import { Info, HelpCircle } from 'lucide-react';
+import { organizationService } from '@/features/organization';
+
+const DEFAULT_CAMPAIGN_TYPE_OPTIONS = [
+  { value: 'چندکاناله (Omnichannel)', label: 'چندکاناله — ترکیبی (Omnichannel)' },
+  { value: 'گوگل ادز', label: 'تبلیغات جستجوی گوگل (Google Ads)' },
+  { value: 'اینستاگرام', label: 'اینستاگرام و شبکه‌های اجتماعی' },
+  { value: 'یکتانت', label: 'تبلیغات همسان و کلیکی (یکتانت)' },
+  { value: 'ایمیل مارکتینگ', label: 'ایمیل مارکتینگ (Email Marketing)' },
+  { value: 'پیامک', label: 'کمپین پیامک هوشمند (SMS)' },
+];
 
 interface Step1BasicInfoProps {
   formData: CampaignFormData;
@@ -16,22 +26,38 @@ export function Step1BasicInfo({
   onUpdateFormData,
   errors = {},
 }: Step1BasicInfoProps) {
+  const [channelOptions, setChannelOptions] = React.useState(DEFAULT_CAMPAIGN_TYPE_OPTIONS);
+
+  React.useEffect(() => {
+    organizationService
+      .getListItems('campaign_types')
+      .then((items) => {
+        const activeTypes = items
+          .filter((t) => t.isActive)
+          .map((t) => ({ value: t.label, label: t.label }));
+        if (activeTypes.length > 0) {
+          setChannelOptions(activeTypes);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   return (
-    <div className="bg-white rounded-2xl border border-gray-200/80 p-6 sm:p-7 shadow-sm space-y-6">
+    <div className="bg-[#111D2E]/80 backdrop-blur-md rounded-2xl border border-[#1F2E45] p-6 sm:p-7 shadow-xl space-y-6">
       {/* هدر مرحله */}
-      <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+      <div className="flex items-center justify-between pb-4 border-b border-[#1F2E45]">
         <div>
-          <div className="flex items-center gap-2 text-blue-600 mb-1">
+          <div className="flex items-center gap-2 text-[#719BDF] mb-1">
             <Info size={20} />
-            <h3 className="text-base font-bold text-gray-900">
+            <h3 className="text-base font-bold text-slate-100 font-display">
               اطلاعات پایه کمپین
             </h3>
           </div>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-slate-400">
             نام، اهداف کلیدی، بودجه و بازه زمانی اجرای کمپین را تعیین فرمایید.
           </p>
         </div>
-        <span className="text-xs bg-gray-100 text-gray-600 font-medium px-2.5 py-1 rounded-full">
+        <span className="text-xs bg-[#18263A] text-slate-300 border border-[#1F2E45] font-medium px-2.5 py-1 rounded-full">
           مرحله ۱ از ۶
         </span>
       </div>
@@ -39,22 +65,22 @@ export function Step1BasicInfo({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* ۱. نام کمپین */}
         <div className="space-y-1.5 md:col-span-2">
-          <label className="block text-xs font-bold text-gray-700">
-            نام کمپین <span className="text-red-500">*</span>
+          <label className="block text-xs font-semibold text-slate-300">
+            نام کمپین <span className="text-[#D66B73]">*</span>
           </label>
           <input
             type="text"
             value={formData.name}
             onChange={(e) => onUpdateFormData({ name: e.target.value })}
             placeholder="مثال: کمپین جذب لید پاییزی — محصولات دیجیتال"
-            className={`w-full bg-gray-50 border rounded-xl px-4 py-2.5 text-sm text-gray-900 transition-all focus:outline-none ${
+            className={`w-full bg-[#111D2E] border rounded-xl px-4 py-2.5 text-xs text-slate-100 placeholder:text-slate-500 transition-all focus:outline-none ${
               errors.name
-                ? 'border-red-300 ring-2 ring-red-100'
-                : 'border-gray-200 focus:ring-2 focus:ring-blue-500 focus:bg-white'
+                ? 'border-[#D66B73] ring-1 ring-[#D66B73]/20'
+                : 'border-[#1F2E45] focus:border-[#719BDF] focus:ring-1 focus:ring-[#719BDF]/20'
             }`}
           />
           {errors.name && (
-            <p className="text-[11px] text-red-600 font-medium mt-1">
+            <p className="text-xs text-[#D66B73] font-medium mt-1">
               {errors.name}
             </p>
           )}
@@ -63,64 +89,41 @@ export function Step1BasicInfo({
         {/* ۲. هدف کمپین */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label className="block text-xs font-bold text-gray-700">
-              هدف کلیدی کمپین <span className="text-red-500">*</span>
+            <label className="block text-xs font-semibold text-slate-300">
+              هدف کلیدی کمپین <span className="text-[#D66B73]">*</span>
             </label>
             <span
-              className="text-gray-400 hover:text-gray-600 cursor-help"
+              className="text-slate-500 hover:text-slate-300 cursor-help"
               title="هدف کمپین، الگوریتم‌های پیشنهاد بودجه و شاخص‌های سنجش موفقیت را تنظیم می‌کند."
             >
               <HelpCircle size={13} />
             </span>
           </div>
-          <select
+          <Select
             value={formData.objective}
             onChange={(e) => onUpdateFormData({ objective: e.target.value })}
-            className={`w-full bg-gray-50 border rounded-xl px-3 py-2.5 text-sm text-gray-800 transition-all focus:outline-none ${
-              errors.objective
-                ? 'border-red-300 ring-2 ring-red-100'
-                : 'border-gray-200 focus:ring-2 focus:ring-blue-500 focus:bg-white'
-            }`}
-          >
-            <option value="lead_generation">دریافت لید و سرنخ فروش (Lead Gen)</option>
-            <option value="direct_sales">فروش مستقیم محصول (E-Commerce)</option>
-            <option value="brand_awareness">آگاهی و شناخت برند (Brand Awareness)</option>
-            <option value="website_traffic">افزایش ترافیک وبسایت (Website Traffic)</option>
-            <option value="app_install">نصب اپلیکیشن (App Install)</option>
-          </select>
-          {errors.objective && (
-            <p className="text-[11px] text-red-600 font-medium mt-1">
-              {errors.objective}
-            </p>
-          )}
+            error={errors.objective}
+            options={[
+              { value: 'lead_generation', label: 'دریافت لید و سرنخ فروش (Lead Gen)' },
+              { value: 'direct_sales', label: 'فروش مستقیم محصول (E-Commerce)' },
+              { value: 'brand_awareness', label: 'آگاهی و شناخت برند (Brand Awareness)' },
+              { value: 'website_traffic', label: 'افزایش ترافیک وبسایت (Website Traffic)' },
+              { value: 'app_install', label: 'نصب اپلیکیشن (App Install)' },
+            ]}
+          />
         </div>
 
         {/* ۳. نوع / کانال اصلی کمپین */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-bold text-gray-700">
-            نوع / کانال اصلی کمپین <span className="text-red-500">*</span>
+          <label className="block text-xs font-semibold text-slate-300">
+            نوع / کانال اصلی کمپین <span className="text-[#D66B73]">*</span>
           </label>
-          <select
+          <Select
             value={formData.channel}
             onChange={(e) => onUpdateFormData({ channel: e.target.value })}
-            className={`w-full bg-gray-50 border rounded-xl px-3 py-2.5 text-sm text-gray-800 transition-all focus:outline-none ${
-              errors.channel
-                ? 'border-red-300 ring-2 ring-red-100'
-                : 'border-gray-200 focus:ring-2 focus:ring-blue-500 focus:bg-white'
-            }`}
-          >
-            <option value="چندکاناله (Omnichannel)">چندکاناله — ترکیبی (Omnichannel)</option>
-            <option value="گوگل ادز">تبلیغات جستجوی گوگل (Google Ads)</option>
-            <option value="اینستاگرام">اینستاگرام و شبکه‌های اجتماعی</option>
-            <option value="یکتانت">تبلیغات همسان و کلیکی (یکتانت)</option>
-            <option value="ایمیل مارکتینگ">ایمیل مارکتینگ (Email Marketing)</option>
-            <option value="پیامک">کمپین پیامک هوشمند (SMS)</option>
-          </select>
-          {errors.channel && (
-            <p className="text-[11px] text-red-600 font-medium mt-1">
-              {errors.channel}
-            </p>
-          )}
+            error={errors.channel}
+            options={channelOptions}
+          />
         </div>
 
         {/* ۴. بودجه کل کمپین */}
@@ -135,7 +138,7 @@ export function Step1BasicInfo({
 
         {/* ۵. مسئول کمپین */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-bold text-gray-700">
+          <label className="block text-xs font-semibold text-slate-300">
             مسئول / مدیر کمپین
           </label>
           <input
@@ -143,7 +146,7 @@ export function Step1BasicInfo({
             value={formData.ownerName || ''}
             onChange={(e) => onUpdateFormData({ ownerName: e.target.value })}
             placeholder="نام کارشناس یا مدیر مارکتینگ"
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition-all"
+            className="w-full bg-[#111D2E] border border-[#1F2E45] rounded-xl px-4 py-2.5 text-xs text-slate-100 placeholder:text-slate-500 focus:border-[#719BDF] focus:ring-1 focus:ring-[#719BDF]/20 focus:outline-none transition-all"
           />
         </div>
 
@@ -179,7 +182,7 @@ export function Step1BasicInfo({
 
         {/* ۸. توضیحات کمپین */}
         <div className="space-y-1.5 md:col-span-2">
-          <label className="block text-xs font-bold text-gray-700">
+          <label className="block text-xs font-semibold text-slate-300">
             توضیحات و یادداشت کمپین
           </label>
           <textarea
@@ -187,7 +190,7 @@ export function Step1BasicInfo({
             value={formData.description || ''}
             onChange={(e) => onUpdateFormData({ description: e.target.value })}
             placeholder="اهداف ویژه، شرایط تخفیف یا یادداشت‌های هماهنگی بین اعضای تیم..."
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition-all resize-none"
+            className="w-full bg-[#111D2E] border border-[#1F2E45] rounded-xl p-3 text-xs text-slate-100 placeholder:text-slate-500 focus:border-[#719BDF] focus:ring-1 focus:ring-[#719BDF]/20 focus:outline-none transition-all resize-none"
           />
         </div>
       </div>

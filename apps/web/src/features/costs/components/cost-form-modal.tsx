@@ -28,6 +28,7 @@ import {
 } from '../types';
 import { costService } from '../index';
 import { campaignService } from '@/features/campaigns';
+import { organizationService } from '@/features/organization';
 
 export interface CostFormModalProps {
   isOpen: boolean;
@@ -48,6 +49,9 @@ export function CostFormModal({
   // وضعیت‌های فرم
   const [title, setTitle] = React.useState('');
   const [category, setCategory] = React.useState<CostCategory>('ad_media');
+  const [categoryOptions, setCategoryOptions] = React.useState(
+    COST_CATEGORIES.map((c) => ({ value: c, label: COST_CATEGORY_LABELS[c] })),
+  );
   const [channel, setChannel] = React.useState<CostChannel | ''>('google_ads');
   const [campaignId, setCampaignId] = React.useState<string>('');
   const [amount, setAmount] = React.useState<number>(0);
@@ -70,6 +74,18 @@ export function CostFormModal({
         .then((list: any[]) => {
           if (list && Array.isArray(list)) {
             setAvailableCampaigns(list.map((c) => ({ id: c.id, name: c.name })));
+          }
+        })
+        .catch(() => {});
+
+      organizationService
+        .getListItems('cost_categories')
+        .then((items) => {
+          const activeCategories = items
+            .filter((cat) => cat.isActive)
+            .map((cat) => ({ value: cat.key as CostCategory, label: cat.label }));
+          if (activeCategories.length > 0) {
+            setCategoryOptions(activeCategories);
           }
         })
         .catch(() => {});
@@ -230,8 +246,8 @@ export function CostFormModal({
 
         {/* ۱. عنوان هزینه */}
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-            عنوان / شرح هزینه <span className="text-red-500">*</span>
+          <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+            عنوان / شرح هزینه <span className="text-[#D66B73]">*</span>
           </label>
           <Input
             value={title}
@@ -249,10 +265,7 @@ export function CostFormModal({
             value={category}
             onChange={(e) => setCategory(e.target.value as CostCategory)}
             disabled={isSubmitting}
-            options={COST_CATEGORIES.map((c) => ({
-              value: c,
-              label: COST_CATEGORY_LABELS[c],
-            }))}
+            options={categoryOptions}
           />
 
           <Select
@@ -287,8 +300,8 @@ export function CostFormModal({
           />
 
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-              تاریخ وقوع هزینه <span className="text-red-500">*</span>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              تاریخ وقوع هزینه <span className="text-[#D66B73]">*</span>
             </label>
             <PersianDatePicker
               mode="single"
@@ -301,7 +314,7 @@ export function CostFormModal({
         </div>
 
         {/* ۴. ردیف مبالغ و ارز */}
-        <div className="p-4 bg-gray-50/70 rounded-xl border border-gray-200/70 space-y-3">
+        <div className="p-4 bg-[#0B1423]/60 rounded-xl border border-[#1F2E45] space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {/* انتخاب ارز */}
             <div>
@@ -319,8 +332,8 @@ export function CostFormModal({
 
             {/* مبلغ */}
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                مبلغ پرداختی ({COST_CURRENCY_LABELS[currency]}) <span className="text-red-500">*</span>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                مبلغ پرداختی ({COST_CURRENCY_LABELS[currency]}) <span className="text-[#D66B73]">*</span>
               </label>
               <Input
                 type="number"
@@ -336,9 +349,9 @@ export function CostFormModal({
 
             {/* نرخ تبدیل ارز خارجی */}
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                 نرخ تبدیل به تومان
-                {!isForeignCurrency && <span className="text-gray-400 font-normal mr-1">(ثابت)</span>}
+                {!isForeignCurrency && <span className="text-slate-500 font-normal ms-1">(ثابت)</span>}
               </label>
               <Input
                 type="number"
@@ -347,15 +360,15 @@ export function CostFormModal({
                 value={exchangeRate}
                 onChange={(e) => setExchangeRate(parseFloat(e.target.value) || 0)}
                 disabled={!isForeignCurrency || isSubmitting}
-                className={!isForeignCurrency ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}
+                className={!isForeignCurrency ? 'bg-[#0B1423] text-slate-500 cursor-not-allowed' : ''}
               />
             </div>
           </div>
 
           {/* پیش‌نمایش معادل تومانی */}
-          <div className="flex items-center justify-between text-xs pt-2 border-t border-gray-200/60 text-gray-600">
+          <div className="flex items-center justify-between text-xs pt-2 border-t border-[#1F2E45] text-slate-400">
             <span>معادل نهایی محاسباتی در سیستم:</span>
-            <span className="font-bold text-sm text-gray-900 bg-white px-2.5 py-1 rounded-lg border border-gray-200">
+            <span className="font-bold text-sm text-slate-100 font-display bg-[#111D2E] px-2.5 py-1 rounded-lg border border-[#1F2E45]">
               {formatMoneyDisplay(previewToman) || '۰'} تومان
             </span>
           </div>
@@ -364,7 +377,7 @@ export function CostFormModal({
         {/* ۵. فروشنده، شماره فاکتور و وضعیت پرداخت */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
               فروشنده / آژانس مجری
             </label>
             <Input
@@ -376,7 +389,7 @@ export function CostFormModal({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
               شماره فاکتور / کد پیگیری
             </label>
             <Input
@@ -401,26 +414,27 @@ export function CostFormModal({
 
         {/* ۶. توضیحات تکمیلی */}
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+          <label className="block text-xs font-semibold text-slate-300 mb-1.5">
             توضیحات و یادداشت تکمیلی
           </label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
-            className="w-full text-xs rounded-xl border border-gray-300 p-2.5 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full text-xs rounded-xl bg-[#111D2E] text-slate-100 placeholder:text-slate-500 border border-[#1F2E45] p-2.5 focus:border-[#719BDF] focus:outline-none focus:ring-1 focus:ring-[#719BDF]/20"
             placeholder="هرگونه یادداشت حسابداری یا شرایط تسویه..."
             disabled={isSubmitting}
           />
         </div>
 
         {/* دکمه‌های اقدام */}
-        <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100">
+        <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#1F2E45]">
           <Button
             type="button"
             variant="ghost"
             onClick={onClose}
             disabled={isSubmitting}
+            className="text-slate-400 hover:text-white"
           >
             انصراف
           </Button>
@@ -429,7 +443,7 @@ export function CostFormModal({
             type="submit"
             variant="primary"
             disabled={isSubmitting}
-            className="min-w-[120px]"
+            className="min-w-[120px] bg-gradient-to-r from-blue-600 to-[#719BDF] text-white shadow-lg shadow-blue-500/20"
           >
             {isSubmitting ? (
               <span className="flex items-center gap-2">

@@ -1,0 +1,2442 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <title>GAPJI FULL PROJECT FORENSIC AUDIT — B2.5.0</title>
+    
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap');
+
+    @page {
+        size: A4;
+        margin: 14mm 12mm 14mm 12mm;
+    }
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: 'Vazirmatn', Tahoma, 'Segoe UI', Arial, sans-serif;
+        direction: rtl;
+        text-align: right;
+        background-color: #ffffff;
+        color: #1e293b;
+        font-size: 12px;
+        line-height: 1.6;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Page Breaks */
+    .page-break {
+        page-break-before: always;
+        break-before: page;
+        height: 0;
+        margin: 0;
+    }
+
+    /* Cover Page */
+    .cover-page {
+        padding: 60px 40px 40px 40px;
+        text-align: center;
+        min-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .cover-badge {
+        display: inline-block;
+        background-color: #e0f2fe;
+        color: #0369a1;
+        font-weight: bold;
+        font-size: 13px;
+        padding: 6px 18px;
+        border-radius: 9999px;
+        margin-bottom: 24px;
+        border: 1px solid #bae6fd;
+    }
+
+    .cover-title {
+        font-size: 26px;
+        font-weight: 900;
+        color: #0f172a;
+        margin-bottom: 12px;
+        line-height: 1.4;
+    }
+
+    .cover-subtitle {
+        font-size: 16px;
+        font-weight: 600;
+        color: #3b82f6;
+        margin-bottom: 35px;
+    }
+
+    .cover-meta-grid {
+        width: 100%;
+        max-width: 650px;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 35px;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        text-align: right;
+    }
+
+    .cover-meta-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px dashed #cbd5e1;
+        font-size: 12px;
+    }
+
+    .cover-meta-item:last-child {
+        border-bottom: none;
+    }
+
+    .cover-meta-label {
+        font-weight: bold;
+        color: #475569;
+    }
+
+    .cover-meta-val {
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    .cover-summary-box {
+        max-width: 650px;
+        background-color: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 8px;
+        padding: 16px;
+        text-align: justify;
+        font-size: 12px;
+        line-height: 1.7;
+        color: #166534;
+    }
+
+    /* Section Styles */
+    .section-container {
+        padding: 15px 0;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+        border-bottom: 2px solid #0f172a;
+        padding-bottom: 8px;
+    }
+
+    .section-number {
+        background-color: #0f172a;
+        color: #ffffff;
+        font-weight: bold;
+        font-size: 11px;
+        padding: 4px 10px;
+        border-radius: 4px;
+    }
+
+    .section-header h2 {
+        font-size: 17px;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .paragraph-lead {
+        font-size: 13px;
+        font-weight: 500;
+        color: #334155;
+        margin-bottom: 16px;
+        line-height: 1.7;
+    }
+
+    /* Grid Layouts */
+    .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 14px;
+    }
+
+    /* Cards */
+    .card {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 14px;
+        margin-bottom: 14px;
+        break-inside: avoid;
+    }
+
+    .card-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #f1f5f9;
+        padding-bottom: 6px;
+    }
+
+    .stat-card {
+        text-align: center;
+        padding: 16px;
+    }
+
+    .stat-title {
+        font-size: 11px;
+        color: #64748b;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .stat-value {
+        font-size: 22px;
+        font-weight: 900;
+        line-height: 1.2;
+        margin-bottom: 4px;
+    }
+
+    .stat-sub {
+        font-size: 10px;
+        color: #64748b;
+    }
+
+    .border-top-primary { border-top: 4px solid #2563eb; }
+    .border-top-success { border-top: 4px solid #10b981; }
+    .border-top-warning { border-top: 4px solid #f59e0b; }
+    .border-top-danger  { border-top: 4px solid #ef4444; }
+
+    /* Tables */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        margin-bottom: 16px;
+    }
+
+    .data-table, .compliance-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+        text-align: right;
+    }
+
+    .data-table th, .compliance-table th {
+        background-color: #1e293b;
+        color: #ffffff;
+        font-weight: 700;
+        padding: 8px 10px;
+        border: 1px solid #334155;
+        font-size: 11px;
+    }
+
+    .data-table td, .compliance-table td {
+        padding: 7px 9px;
+        border: 1px solid #e2e8f0;
+        vertical-align: top;
+    }
+
+    .data-table tr:nth-child(even), .compliance-table tr:nth-child(even) {
+        background-color: #f8fafc;
+    }
+
+    /* Badges */
+    .badge {
+        display: inline-block;
+        padding: 3px 7px;
+        font-size: 10px;
+        font-weight: 700;
+        border-radius: 4px;
+        white-space: nowrap;
+        border: 1px solid transparent;
+    }
+
+    .badge-success { background-color: #dcfce7; color: #166534; border-color: #bbf7d0; }
+    .badge-warning { background-color: #fef3c7; color: #92400e; border-color: #fde68a; }
+    .badge-info    { background-color: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
+    .badge-danger  { background-color: #fee2e2; color: #991b1b; border-color: #fecaca; }
+    .badge-purple  { background-color: #f3e8ff; color: #6b21a8; border-color: #e9d5ff; }
+    .badge-secondary { background-color: #f1f5f9; color: #475569; border-color: #e2e8f0; }
+
+    /* Utilities */
+    .dir-ltr { direction: ltr; text-align: left; }
+    .code-font { font-family: Consolas, 'Courier New', monospace; }
+    .text-center { text-align: center; }
+    .text-xs { font-size: 10.5px; }
+    .text-sm { font-size: 11.5px; }
+    .text-muted { color: #64748b; }
+    .text-primary { color: #1d4ed8; }
+    .text-success { color: #15803d; }
+    .text-warning { color: #b45309; }
+    .text-danger { color: #b91c1c; }
+    .font-bold { font-weight: bold; }
+    .nowrap { white-space: nowrap; }
+    .mb-2 { margin-bottom: 8px; }
+    .mb-3 { margin-bottom: 12px; }
+    .mb-4 { margin-bottom: 16px; }
+    .mb-6 { margin-bottom: 24px; }
+    .mt-2 { margin-top: 8px; }
+
+    /* Lists */
+    .styled-list {
+        list-style: none;
+        padding-right: 0;
+    }
+
+    .styled-list li {
+        position: relative;
+        padding-right: 18px;
+        margin-bottom: 6px;
+        line-height: 1.5;
+    }
+
+    .styled-list li::before {
+        content: "■";
+        position: absolute;
+        right: 0;
+        top: 1px;
+        color: #3b82f6;
+        font-size: 9px;
+    }
+
+    /* TOC */
+    .toc-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 20px;
+    }
+
+    .toc-list {
+        list-style: none;
+    }
+
+    .toc-list li {
+        margin-bottom: 8px;
+        font-size: 11.5px;
+        border-bottom: 1px dashed #cbd5e1;
+        padding-bottom: 4px;
+    }
+
+    .toc-list a {
+        text-decoration: none;
+        color: #1e293b;
+        font-weight: 500;
+    }
+
+    /* Timeline */
+    .timeline-container {
+        position: relative;
+        padding-right: 25px;
+        border-right: 2px solid #cbd5e1;
+        margin-right: 10px;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 18px;
+        break-inside: avoid;
+    }
+
+    .timeline-badge {
+        position: absolute;
+        right: -37px;
+        top: 0;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background-color: #2563eb;
+        color: #ffffff;
+        font-size: 9px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .timeline-content {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 10px 14px;
+    }
+
+    .timeline-content h4 {
+        font-size: 12px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 3px;
+    }
+
+    /* Workflows */
+    .workflow-card {
+        background-color: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 12px;
+        margin-bottom: 14px;
+        break-inside: avoid;
+    }
+
+    .workflow-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+
+    .workflow-num {
+        background-color: #2563eb;
+        color: #ffffff;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: bold;
+    }
+
+    .code-flow-box {
+        background-color: #f8fafc;
+        border-right: 3px solid #2563eb;
+        padding: 8px 12px;
+        margin-top: 6px;
+        border-radius: 0 4px 4px 0;
+    }
+
+    .code-flow-step {
+        font-size: 11px;
+        margin-bottom: 4px;
+        line-height: 1.4;
+    }
+
+    /* Calculations */
+    .calc-box {
+        background-color: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 6px;
+        padding: 12px 16px;
+        text-align: center;
+    }
+
+    .formula-line {
+        font-size: 12px;
+        color: #1e3a8a;
+    }
+
+    .formula-result {
+        font-size: 16px;
+    }
+
+    .metric-progress-card {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Roadmap */
+    .roadmap-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+    }
+
+    .roadmap-phase {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 12px;
+    }
+
+    .border-red { border-top: 4px solid #ef4444; }
+    .border-amber { border-top: 4px solid #f59e0b; }
+    .border-blue { border-top: 4px solid #3b82f6; }
+
+    /* FAQ / Learning */
+    .faq-item {
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px dashed #e2e8f0;
+    }
+
+    .faq-item:last-child {
+        border-bottom: none;
+    }
+
+    .faq-item strong {
+        color: #0f172a;
+        font-size: 12px;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .trace-example {
+        background-color: #f8fafc;
+        border-right: 3px solid #10b981;
+        padding: 8px 12px;
+        border-radius: 0 4px 4px 0;
+    }
+</style>
+
+</head>
+<body>
+    
+<!-- COVER PAGE -->
+<div class="cover-page">
+    <div class="cover-badge">سند رسمی ارزیابی و انتقال دانش معماری محصول</div>
+    <h1 class="cover-title">گزارش جامع ممیزی فارنزیک و سنجش انطباق محصول</h1>
+    <h2 class="cover-subtitle">پلتفرم مدیریت و مانیتورینگ فرآیندهای دیجیتال مارکتینگ و فروش گپجی (Gapji)</h2>
+    
+    <div class="cover-meta-grid">
+        <div class="cover-meta-item">
+            <span class="cover-meta-label">کد عیب‌یابی و ممیزی:</span>
+            <span class="cover-meta-val">B2.5.0 — Forensic Audit & Baseline</span>
+        </div>
+        <div class="cover-meta-item">
+            <span class="cover-meta-label">تاریخ ممیزی و اعتبارسنجی:</span>
+            <span class="cover-meta-val">۲۰ آبان ۱۴۰۵ (10 Nov 2026)</span>
+        </div>
+        <div class="cover-meta-item">
+            <span class="cover-meta-label">مخزن فرانت‌اند (Git Worktree):</span>
+            <span class="cover-meta-val dir-ltr">F:\marketing platform (feature/frontend-foundation @ fd780ea)</span>
+        </div>
+        <div class="cover-meta-item">
+            <span class="cover-meta-label">مخزن بک‌اند (Git Worktree):</span>
+            <span class="cover-meta-val dir-ltr">F:\marketing-platform-backend (feature/backend-foundation @ 4a53906)</span>
+        </div>
+        <div class="cover-meta-item">
+            <span class="cover-meta-label">مخزن مرکزی ریموت (GitHub):</span>
+            <span class="cover-meta-val dir-ltr">github.com/saleharashh/gapji-digital-marketing-dashboard</span>
+        </div>
+        <div class="cover-meta-item">
+            <span class="cover-meta-label">درصد پیشرفت کلی پیاده‌سازی MVP:</span>
+            <span class="cover-meta-val text-success">۵۰٫۵۰٪ (۲۰٫۲۰ از ۴۰ نیازمندی واجد شرایط)</span>
+        </div>
+    </div>
+
+    <div class="cover-summary-box">
+        <p><strong>هدف اصلی این سند:</strong> این گزارش با هدف ایجاد شفافیت فنی و عملیاتی ۱۰۰٪ بر پایه شواهد قطعی کد، تاریخچه Git، معماری پایگاه‌داده و اجرای مستقیم تست‌ها تدوین شده است تا کارفرما و مدیران پروژه بتوانند بدون ابهام از وضعیت فعلی سیستم، کارهای تکمیل‌شده، بخش‌های ماک‌شده، بدهی‌های فنی، نقاط ضعف امنیتی و اولویت‌های دقیق توسعه آگاه شوند.</p>
+    </div>
+</div>
+
+<!-- PAGE BREAK -->
+<div class="page-break"></div>
+
+<!-- TABLE OF CONTENTS -->
+<div class="section-container">
+    <div class="section-header">
+        <span class="section-number">فهرست</span>
+        <h2>فهرست تفصیلی مطالب و ساختار سند ممیزی</h2>
+    </div>
+    
+    <div class="toc-grid">
+        <div class="toc-column">
+            <ul class="toc-list">
+                <li><a href="#sec-exec-summary">۱. خلاصه مدیریتی و کلیدی ممیزی (Executive Summary)</a></li>
+                <li><a href="#sec-scope-method">۲. دامنه، منابع استناد و روش‌شناسی ممیزی فارنزیک</a></li>
+                <li><a href="#sec-history">۳. بازسازی تاریخچه توسعه و خط زمانی فازها (B2.1 تا B2.4.6)</a></li>
+                <li><a href="#sec-connected-arch">۴. معماری یکپارچه سیستم و جریان داده (Connected Architecture)</a></li>
+                <li><a href="#sec-tech-stack">۵. پشته فناوری، وابستگی‌ها و زیرساخت اجرایی</a></li>
+                <li><a href="#sec-workflows">۶. تحلیل و دیاگرام‌های جریان کاری End-to-End</a></li>
+                <li><a href="#sec-compliance-matrix">۷. ماتریس تطابق نیازمندی‌های سند رسمی محصول (۴۰ نیازمندی)</a></li>
+                <li><a href="#sec-modules-eval">۸. ارزیابی تفصیلی ماژول به ماژول (۱۹ ماژول اصلی)</a></li>
+                <li><a href="#sec-module-guide">۹. راهنمای دانش ماژول‌ها و نقشه مسئولیت فایل‌های کلیدی</a></li>
+                <li><a href="#sec-route-inv">۱۰. سیاهه جامع روت‌ها و صفحات فرانت‌اند (۱۶ مسیر)</a></li>
+                <li><a href="#sec-api-inv">۱۱. سیاهه جامع اندپوینت‌های API بک‌اند (NestJS)</a></li>
+                <li><a href="#sec-db-audit">۱۲. ممیزی دیتابیس، اسکیما و مایگریشن‌های Prisma (۴۷ مدل)</a></li>
+            </ul>
+        </div>
+        <div class="toc-column">
+            <ul class="toc-list">
+                <li><a href="#sec-sec-audit">۱۳. بررسی عمیق معماری امنیت، احراز هویت و ایزولاسیون سازمانی</a></li>
+                <li><a href="#sec-test-results">۱۴. نتایج اجرای تست‌ها، اعتبارسنجی‌ها و کیفیت سنجی (۳۴۵ تست)</a></li>
+                <li><a href="#sec-tech-debt">۱۵. شناسایی بدهی‌های فنی، نقاط ضعف و ریسک‌های معماری</a></li>
+                <li><a href="#sec-calc-progress">۱۶. محاسبات شفاف درصد پیشرفت لایه‌های فنی و MVP</a></li>
+                <li><a href="#sec-gap-roadmap">۱۷. تحلیل جامع شکاف‌ها و نقشه راه اولویت‌بندی شده (P0 تا P3)</a></li>
+                <li><a href="#sec-what-to-know">۱۸. آن‌چه کارفرما باید درباره گپجی بداند (صادقانه و بدون روتوش)</a></li>
+                <li><a href="#sec-current-pos">۱۹. موقعیت دقیق فعلی توسعه و توصیه گام بعدی</a></li>
+                <li><a href="#sec-nav-guide">۲۰. راهنمای عملی ناوبری در کدهای پروژه و ردیابی امکانات</a></li>
+                <li><a href="#sec-git-safety">۲۱. وضعیت مخازن گیت، یکپارچگی خط‌پایه و تایید ایمنی</a></li>
+                <li><a href="#sec-verdict">۲۲. حکم نهایی ممیزی و خلاصه یادگیری کارفرما</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- PAGE BREAK -->
+<div class="page-break"></div>
+
+<!-- 1. EXECUTIVE SUMMARY -->
+<div class="section-container" id="sec-exec-summary">
+    <div class="section-header">
+        <span class="section-number">بخش ۱</span>
+        <h2>خلاصه مدیریتی و کلیدی ممیزی (Executive Summary)</h2>
+    </div>
+
+    <p class="paragraph-lead">پلتفرم بازاریابی دیجیتال گپجی (Gapji Digital Marketing Platform) یک سامانه یکپارچه مانیتورینگ عملکرد تبلیغات، مدیریت کمپین‌ها، ردیابی هزینه‌ها، مدیریت چرخه حیات لیدهای فروش و هماهنگی وظایف تیمی است که بر پایه معماری مدرن وب طراحی شده است.</p>
+
+    <div class="grid-3 mb-6">
+        <div class="card stat-card border-top-primary">
+            <div class="stat-title">پیشرفت کلی محصول (MVP)</div>
+            <div class="stat-value text-primary">۵۰٫۵۰٪</div>
+            <div class="stat-sub">۲۰٫۲۰ از ۴۰ نیازمندی رسمی</div>
+        </div>
+        <div class="card stat-card border-top-success">
+            <div class="stat-title">تست‌های یکپارچگی موفق</div>
+            <div class="stat-value text-success">۳۴۵ تست</div>
+            <div class="stat-sub">۲۶۶ بک‌اند + ۷۹ فرانت‌اند (۰ خطا)</div>
+        </div>
+        <div class="card stat-card border-top-warning">
+            <div class="stat-title">ماژول‌های متصل به دیتابیس</div>
+            <div class="stat-value text-warning">۵ ماژول</div>
+            <div class="stat-sub">احراز هویت، کمپین، هزینه، داشبورد، لید</div>
+        </div>
+    </div>
+
+    <div class="card mb-6">
+        <h3 class="card-title">یافته‌های کلیدی در یک نگاه</h3>
+        <ul class="styled-list">
+            <li><strong>هسته داده‌ای و پایگاه‌داده (Database Layer):</strong> اسکیما و مایگریشن‌های Prisma با ۴۷ مدل، ۲۵ اینام، کلیدهای ترکیبی ایزولاسیون مستاجر <code>(id, organizationId)</code> و محدودیت‌های کنترلی (Check Constraints) به صورت ۹۵٪ کامل و مستحکم پیاده‌سازی شده است.</li>
+            <li><strong>ماژول‌های عملیاتی واقعی (Real End-to-End):</strong> پنج جریان اصلی شامل احراز هویت با چرخش رفرش-توکن و کشف Replay، مدیریت کمپین‌ها و ویزارد، مدیریت و تجمیع هزینه‌های تبلیغاتی، چرخه حیات لیدها با بورد کانبان و داشبورد عملکردی با شاخص‌های جلالی، به طور کامل به پایگاه داده واقعی PostgreSQL متصل هستند و هیچ‌گونه ماک یا شبیه‌سازی در آن‌ها وجود ندارد.</li>
+            <li><strong>بخش‌های صرفاً نمایشی یا حافظه محلی (UI-Only / Local Mock):</strong> ماژول‌های «مدیریت تسک‌ها»، «کاربران و نقش‌ها» و «تنظیمات سازمان» در فرانت‌اند دارای ظاهر کامل و رفتار فرم هستند، اما کنترلر بک‌اند ندارند و تغییرات آنها در <code>localStorage</code> ذخیره می‌شود و با رفرش یا ورود کاربر دیگر در سرور ثبت نمی‌شود.</li>
+            <li><strong>ماژول‌های فازهای آتی (Not Implemented):</strong> ماژول‌های وبینار، پیامک، تقویم شمسی، تجهیزات، صورتجلسات، SOP، آموزش، ایده‌ها، پلتفرم‌ها، لندینگ/UTM، ایمپورت فراگیر و وب‌هوک وردپرس در اولویت‌های ۲ و ۳ سند محصول قرار دارند و هنوز پیاده‌سازی نشده‌اند (هرچند مدل‌های دیتابیس آن‌ها از پیش در Prisma ایجاد شده است).</li>
+            <li><strong>آمادگی استقرار (Readiness Verdict):</strong> سیستم برای «کاربرد آزمایشی کنترل‌شده» (Controlled Pilot) در ۵ ماژول اصلی آماده است، اما به دلیل فقدان کنترلر پایدار تسک‌ها و تنظیمات اعضای سازمان در بک‌اند، هنوز برای عرضه نهایی Production به مشتریان مستقل کامل نیست.</li>
+        </ul>
+    </div>
+</div>
+
+<!-- 2. SCOPE & METHODOLOGY -->
+<div class="section-container" id="sec-scope-method">
+    <div class="section-header">
+        <span class="section-number">بخش ۲</span>
+        <h2>دامنه، منابع استناد و روش‌شناسی ممیزی فارنزیک</h2>
+    </div>
+
+    <div class="card mb-6">
+        <h3 class="card-title">منابع استناد و خط‌پایه‌های ممیزی (Sources of Truth)</h3>
+        <div class="grid-2">
+            <div>
+                <p><strong>۱. سند رسمی نیازمندی‌های محصول:</strong></p>
+                <p class="text-sm">فایل پی‌دی‌اف ۲۹ صفحه‌ای <code>marketing-platform-phase1-frontend-pages-1.pdf</code> مرجع بی‌قید و شرط الزامات رابط کاربری، فرمول‌ها، سطوح دسترسی و اولویت‌بندی‌ها است. تمام ۲۹ صفحه سند سطر به سطر بازخوانی و ممیزی شد.</p>
+            </div>
+            <div>
+                <p><strong>۲. سند تصمیمات تصویب‌شده پروژه (PDR):</strong></p>
+                <p class="text-sm">اسناد موجود در پوشه <code>docs/</code> مخزن بک‌اند، به ویژه <code>PROJECT-DECISIONS.md</code> که حاوی تصمیمات تصویب‌شده کارفرما در خصوص مبالغ پولی، واحد پول سازمان، جلوگیری از گردکردن مبالغ و ساختار احراز هویت است.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-6">
+        <h3 class="card-title">روش‌شناسی سنجش و ارزیابی شواهد (Forensic Standards)</h3>
+        <p class="text-sm mb-4">برای جلوگیری از هرگونه تخمین یا گزارش کاذب، در این ممیزی صرفاً به کدهای موجود و شواهد قطعی استناد شده است و استاندارد طبقه‌بندی پنج‌گانه شواهد اعمال گردید:</p>
+        <div class="grid-2">
+            <ul class="styled-list text-xs">
+                <li><span class="font-bold text-success">CONFIRMED FACT:</span> حقایق اثبات‌شده با کدهای کامیت‌شده، اسکیما و تاریخچه گیت.</li>
+                <li><span class="font-bold text-primary">TESTED BEHAVIOR:</span> رفتاری که با اجرای واقعی ۳۴۵ تست یکپارچگی اثبات شد.</li>
+            </ul>
+            <ul class="styled-list text-xs">
+                <li><span class="font-bold text-warning">OBSERVED IMPLEMENTATION:</span> کد نوشته‌شده‌ای که بدون تست مستقل مشاهده شد.</li>
+                <li><span class="font-bold text-danger">PRODUCT DECISION REQUIRED:</span> مواردی که بدون تصمیم کارفرما قابل پیاده‌سازی نیست.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- PAGE BREAK -->
+<div class="page-break"></div>
+
+<!-- 3. RECONSTRUCTED HISTORY -->
+<div class="section-container" id="sec-history">
+    <div class="section-header">
+        <span class="section-number">بخش ۳</span>
+        <h2>بازسازی تاریخچه توسعه و خط زمانی فازهای پروژه</h2>
+    </div>
+
+    <p class="text-sm mb-4">با استناد به مستندات مهندسی در <code>docs/</code>، فایل‌های آزمون، تاریخچه درخت کاری و بررسی معماری، تاریخچه توسعه پلتفرم گپجی از ابتدا تا کامیت‌های منتشرشده به شرح زیر بازسازی می‌شود:</p>
+
+    <div class="timeline-container">
+        <div class="timeline-item">
+            <div class="timeline-badge">B2.1</div>
+            <div class="timeline-content">
+                <h4>فاز اکتشاف دامنه و تحلیل نیازمندی‌ها (Domain Discovery)</h4>
+                <div class="text-xs text-muted mb-2">مستند مرجع: docs/B2.1-DOMAIN-DISCOVERY-REPORT.md</div>
+                <p class="text-xs">در این فاز، ۲۹ صفحه سند محصول فرانت‌اند تجزیه و تحلیل شد. ۲۹ صفحه به ۳ فضای کاری (عملکرد، فروش و لید، اجرا و دانش) و تنظیمات تفکیک شدند و ۶ نقش کانونی (ادمین، مدیر مارکتینگ، کمپین‌چی، کارشناس فروش، تولید محتوا، کارفرما) استخراج گردیدند.</p>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="timeline-badge">B2.2</div>
+            <div class="timeline-content">
+                <h4>طراحی جامع مدل داده و اسکیما (Domain Data Modeling & Audits)</h4>
+                <div class="text-xs text-muted mb-2">مستندات: docs/B2.2-* تا B2.2.5 (۵ گزارش ممیزی پیاپی)</div>
+                <p class="text-xs">طراحی ۴۷ مدل Prisma و ایجاد اولین مایگریشن پایه (<code>foundation_database_schema</code>). طی ۵ ممیزی مستقل و رفع عیب سخت‌گیرانه، کلیدهای خارجی ترکیبی <code>(id, organizationId)</code> برای تضمین چندمستأجری و محدودیت‌های چِک در دیتابیس ثبت شدند.</p>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="timeline-badge">B2.3</div>
+            <div class="timeline-content">
+                <h4>معماری احراز هویت، نشست‌ها و چرخش رفرش-توکن (Authentication Engine)</h4>
+                <div class="text-xs text-muted mb-2">مستندات: docs/B2.3.0 تا B2.3.2.4 و مایگریشن auth_refresh_token_family</div>
+                <p class="text-xs">پیاده‌سازی هشینگ رمز عبور با الگوریتم امن Argon2id، چرخه عمر توکن‌های JWT (۱۵ دقیقه در حافظه)، توکن رفرش ۷ روزه در کوکی HttpOnly امن با هش SHA-256 در دیتابیس، کشف فوری حملات Replay و ابطال سشن، و ایزولاسیون کامل نشست‌ها.</p>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="timeline-badge">B2.4.2</div>
+            <div class="timeline-content">
+                <h4>چرخه حیات لیدها و برد کانبان (Lead Lifecycle & Kanban Execution)</h4>
+                <div class="text-xs text-muted mb-2">سورس‌ها: apps/api/src/modules/leads و apps/web/src/features/leads</div>
+                <p class="text-xs">اتصال برد کانبان فرانت‌اند به دیتابیس PostgreSQL. ثبت تغییر وضعیت لیدها با ثبت الزامی دلیل ردشدن و ارزش فروش، ثبت خودکار تاریخچه فعالیت‌ها در جدول <code>lead_activities</code> و انطباق مالکیت لید کارشناس فروش.</p>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="timeline-badge">B2.4.3</div>
+            <div class="timeline-content">
+                <h4>یکپارچه‌سازی ویزارد ساخت کمپین (Real Campaign Creation Integration)</h4>
+                <div class="text-xs text-muted mb-2">سورس‌ها: apps/api/src/modules/campaigns و apps/web/src/features/campaigns</div>
+                <p class="text-xs">اتصال ویزارد ۶ مرحله‌ای کمپین به NestJS و ذخیره کمپین‌ها در دیتابیس PostgreSQL. اعتبارسنجی ورودی‌های بودجه به صورت عدد صحیح ریالی/تومانی و محاسبه وضعیت سلامت کمپین.</p>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="timeline-badge">B2.4.4</div>
+            <div class="timeline-content">
+                <h4>مدیریت واقعی هزینه‌های تبلیغات و پاکسازی ماک‌ها (Cost Management & Mock Cleanup)</h4>
+                <div class="text-xs text-muted mb-2">سورس‌ها: apps/api/src/modules/costs و apps/web/src/features/costs</div>
+                <p class="text-xs">پیاده‌سازی ثبت سریع و ثبت دسته‌ای هزینه‌ها، ذخیره در جدول <code>costs</code> و به‌روزرسانی دینامیک و همزمان فیلد <code>spend</code> در کمپین متناظر. حذف تمام ماک‌های تستی در فرانت‌اند هزینه‌ها.</p>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="timeline-badge">B2.4.5</div>
+            <div class="timeline-content">
+                <h4>داشبورد اجرایی و اصلاح انطباق شاخص‌ها (Dashboard & Compliance Remediation)</h4>
+                <div class="text-xs text-muted mb-2">مستندات: فازهای B2.4.5 ، B2.4.5.1 ، B2.4.5.2 و B2.4.5.2.1</div>
+                <p class="text-xs">حذف کامل شبیه‌سازی‌ها از داشبورد؛ محاسبه ۶ کارت شاخص اصلی صفحه ۸ از داده‌های واقعی هزینه‌ها، لیدها و مشتریان برنده؛ پیاده‌سازی مرزهای ماه جلالی تقویم شمسی؛ ساخت قیف تبدیل ۵ مرحله‌ای غیرهم‌پوشان؛ و تصحیح وضعیت کلیک‌ها بر اساس فقدان سیستم لاگ کلیک.</p>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="timeline-badge">B2.4.6</div>
+            <div class="timeline-content">
+                <h4>کامیت و پوش امن مخازن به گیت‌هاب (Safe Commit & Push)</h4>
+                <div class="text-xs text-muted mb-2">کامیت فرانت: fd780ea | کامیت بک‌اند: 4a53906</div>
+                <p class="text-xs">استیجینگ تفکیک‌شده و پوش موفق شاخه‌های <code>feature/frontend-foundation</code> (۲۳۰ فایل) و <code>feature/backend-foundation</code> (۶۷ فایل) به مخزن اصلی گیت‌هاب با حفظ پاکیزگی کامل شاخه main.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PAGE BREAK -->
+<div class="page-break"></div>
+
+<!-- 4. CONNECTED SYSTEM ARCHITECTURE -->
+<div class="section-container" id="sec-connected-arch">
+    <div class="section-header">
+        <span class="section-number">بخش ۴</span>
+        <h2>معماری یکپارچه سیستم و جریان جریان داده (Connected System Architecture)</h2>
+    </div>
+
+    <p class="text-sm mb-4">پلتفرم گپجی به عنوان یک سامانه یکپارچه مونو-ریپو با جریان درخواست چندلایه‌ای طراحی شده است. هیچ لایه‌ای جدا از لایه‌های دیگر عمل نمی‌کند:</p>
+
+    <!-- ARCHITECTURE SVG DIAGRAM -->
+    <div class="diagram-wrapper">
+        <svg viewBox="0 0 850 420" width="100%" height="420" xmlns="http://www.w3.org/2000/svg" style="font-family: Vazirmatn, Tahoma, sans-serif; direction: rtl;">
+            <!-- Background -->
+            <rect width="850" height="420" fill="#f8fafc" rx="8" stroke="#cbd5e1" stroke-width="1"/>
+            
+            <!-- Layer 1: Client Browser -->
+            <rect x="30" y="25" width="220" height="370" fill="#ffffff" rx="6" stroke="#3b82f6" stroke-width="2"/>
+            <text x="140" y="55" font-size="14" font-weight="bold" fill="#1e3a8a" text-anchor="middle">مرورگر کاربر (Next.js 14)</text>
+            <rect x="45" y="75" width="190" height="40" fill="#eff6ff" rx="4" stroke="#93c5fd"/>
+            <text x="140" y="100" font-size="11" fill="#1e40af" text-anchor="middle">صفحات App Router (Client Components)</text>
+            <rect x="45" y="130" width="190" height="40" fill="#eff6ff" rx="4" stroke="#93c5fd"/>
+            <text x="140" y="155" font-size="11" fill="#1e40af" text-anchor="middle">کتابخانه کامپوننت‌های شادسن و فرم‌ها</text>
+            <rect x="45" y="185" width="190" height="40" fill="#eff6ff" rx="4" stroke="#93c5fd"/>
+            <text x="140" y="210" font-size="11" fill="#1e40af" text-anchor="middle">مدیریت State کلاینت (Zustand & AuthStore)</text>
+            <rect x="45" y="240" width="190" height="50" fill="#dbeafe" rx="4" stroke="#3b82f6"/>
+            <text x="140" y="262" font-size="11" font-weight="bold" fill="#1e3a8a" text-anchor="middle">کلاینت ارتباطی Axios و صف 401</text>
+            <text x="140" y="280" font-size="10" fill="#475569" text-anchor="middle">توکن JWT در حافظه + کوکی HttpOnly</text>
+            <rect x="45" y="305" width="190" height="40" fill="#eff6ff" rx="4" stroke="#93c5fd"/>
+            <text x="140" y="330" font-size="11" fill="#1e40af" text-anchor="middle">TanStack Query (Cache & Mutate)</text>
+
+            <!-- Arrow 1 -> 2 -->
+            <path d="M 250 200 L 310 200" stroke="#0284c7" stroke-width="2" marker-end="url(#arrow)"/>
+            <text x="280" y="190" font-size="10" fill="#0284c7" text-anchor="middle">REST / JSON</text>
+
+            <!-- Layer 2: API Gateway & NestJS -->
+            <rect x="315" y="25" width="260" height="370" fill="#ffffff" rx="6" stroke="#0284c7" stroke-width="2"/>
+            <text x="445" y="55" font-size="14" font-weight="bold" fill="#0369a1" text-anchor="middle">بک‌اند سرور (NestJS 10 API)</text>
+            <rect x="330" y="75" width="230" height="35" fill="#f0f9ff" rx="4" stroke="#7dd3fc"/>
+            <text x="445" y="98" font-size="11" fill="#0369a1" text-anchor="middle">JWT AuthGuard & Refresh Cookie Interceptor</text>
+            <rect x="330" y="120" width="230" height="35" fill="#f0f9ff" rx="4" stroke="#7dd3fc"/>
+            <text x="445" y="143" font-size="11" fill="#0369a1" text-anchor="middle">RolesGuard (کنترل سطح دسترسی ۶ نقش)</text>
+            <rect x="330" y="165" width="230" height="35" fill="#f0f9ff" rx="4" stroke="#7dd3fc"/>
+            <text x="445" y="188" font-size="11" fill="#0369a1" text-anchor="middle">اعتبارسنجی ورودی‌ها (ValidationPipe & DTO)</text>
+            <rect x="330" y="210" width="230" height="75" fill="#e0f2fe" rx="4" stroke="#0284c7"/>
+            <text x="445" y="232" font-size="11" font-weight="bold" fill="#0369a1" text-anchor="middle">کنترلرها و ماژول‌های ۵ گانه عملیاتی</text>
+            <text x="445" y="250" font-size="10" fill="#0284c7" text-anchor="middle">Auth | Campaigns | Costs | Leads | Dashboard</text>
+            <text x="445" y="270" font-size="9" fill="#64748b" text-anchor="middle">قوانین کسب‌وکار، نرمال‌سازی ریالی و تراکنش‌ها</text>
+            <rect x="330" y="295" width="230" height="40" fill="#f0f9ff" rx="4" stroke="#7dd3fc"/>
+            <text x="445" y="320" font-size="11" fill="#0369a1" text-anchor="middle">PrismaService & Exception Filter</text>
+
+            <!-- Arrow 2 -> 3 -->
+            <path d="M 575 200 L 625 200" stroke="#059669" stroke-width="2"/>
+            <text x="600" y="190" font-size="10" fill="#059669" text-anchor="middle">SQL Engine</text>
+
+            <!-- Layer 3: Database -->
+            <rect x="630" y="25" width="190" height="370" fill="#ffffff" rx="6" stroke="#10b981" stroke-width="2"/>
+            <text x="725" y="55" font-size="14" font-weight="bold" fill="#065f46" text-anchor="middle">پایگاه داده (PostgreSQL 16)</text>
+            <rect x="645" y="75" width="160" height="50" fill="#ecfdf5" rx="4" stroke="#6ee7b7"/>
+            <text x="725" y="98" font-size="11" font-weight="bold" fill="#065f46" text-anchor="middle">احراز هویت و نشست‌ها</text>
+            <text x="725" y="115" font-size="9" fill="#047857" text-anchor="middle">users, sessions, refresh_tokens</text>
+            <rect x="645" y="135" width="160" height="50" fill="#ecfdf5" rx="4" stroke="#6ee7b7"/>
+            <text x="725" y="158" font-size="11" font-weight="bold" fill="#065f46" text-anchor="middle">کمپین‌ها و تخصیص‌ها</text>
+            <text x="725" y="175" font-size="9" fill="#047857" text-anchor="middle">campaigns, platforms, audiences</text>
+            <rect x="645" y="195" width="160" height="50" fill="#ecfdf5" rx="4" stroke="#6ee7b7"/>
+            <text x="725" y="218" font-size="11" font-weight="bold" fill="#065f46" text-anchor="middle">هزینه‌های تبلیغاتی</text>
+            <text x="725" y="235" font-size="9" fill="#047857" text-anchor="middle">costs, cost_categories</text>
+            <rect x="645" y="255" width="160" height="50" fill="#ecfdf5" rx="4" stroke="#6ee7b7"/>
+            <text x="725" y="278" font-size="11" font-weight="bold" fill="#065f46" text-anchor="middle">لیدها و خط زمانی</text>
+            <text x="725" y="295" font-size="9" fill="#047857" text-anchor="middle">leads, lead_activities, calls</text>
+            <rect x="645" y="315" width="160" height="40" fill="#ecfdf5" rx="4" stroke="#6ee7b7"/>
+            <text x="725" y="340" font-size="10" fill="#065f46" text-anchor="middle">۴۷ مدل داده‌ای + ۲۵ اینام</text>
+        </svg>
+    </div>
+</div>
+
+<!-- 5. TECH STACK & INFRASTRUCTURE -->
+<div class="section-container" id="sec-tech-stack">
+    <div class="section-header">
+        <span class="section-number">بخش ۵</span>
+        <h2>پشته فناوری، وابستگی‌ها و زیرساخت اجرایی</h2>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>لایه فنی</th>
+                <th>فناوری انتخاب‌شده</th>
+                <th>نسخه فعال</th>
+                <th>علت انتخاب و نقش در پروژه</th>
+                <th>وضعیت</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>مدیریت مونو-ریپو</strong></td>
+                <td>pnpm Workspace</td>
+                <td>9.15.4</td>
+                <td>اشتراک‌گذاری کدها بین وب و API، لینک پکیج <code>@gapji/shared</code>، سرعت بالای نصب و مدیریت حافظه دیسک.</td>
+                <td><span class="badge badge-success">فعال و تست‌شده</span></td>
+            </tr>
+            <tr>
+                <td><strong>فرانت‌اند وب</strong></td>
+                <td>Next.js (App Router)</td>
+                <td>14.2.3</td>
+                <td>معماری مدرن React 18، روتینگ ماژولار با گروه‌های <code>(app)</code> و <code>(auth)</code>، پشتیبانی محلی از فونت و SSR.</td>
+                <td><span class="badge badge-success">فعال و تست‌شده</span></td>
+            </tr>
+            <tr>
+                <td><strong>طراحی و استایل</strong></td>
+                <td>Tailwind CSS + shadcn/ui</td>
+                <td>3.4.3</td>
+                <td>کلاس‌های منطقی RTL (start/end, ms/me)، کامپوننت‌های دسترسی‌پذیر Radix، سازگاری کامل با تم تاریک/روشن.</td>
+                <td><span class="badge badge-success">فعال و تست‌شده</span></td>
+            </tr>
+            <tr>
+                <td><strong>مدیریت سرور-استیت</strong></td>
+                <td>TanStack Query & Form</td>
+                <td>v5</td>
+                <td>کش‌سازی داده‌های سرور، Invalidation دقیق کوئری‌ها پس از ثبت تغییرات، به‌روزرسانی خوش‌بینانه در کانبان.</td>
+                <td><span class="badge badge-success">فعال و تست‌شده</span></td>
+            </tr>
+            <tr>
+                <td><strong>اعتبارسنجی کلاینت</strong></td>
+                <td>Zod</td>
+                <td>3.23.8</td>
+                <td>تعریف اسکیماهای فرم، استخراج خودکار تایپ‌های TypeScript، اعتبارسنجی شماره موبایل و مبالغ ریالی.</td>
+                <td><span class="badge badge-success">فعال و تست‌شده</span></td>
+            </tr>
+            <tr>
+                <td><strong>بک‌اند سرویس‌ها</strong></td>
+                <td>NestJS</td>
+                <td>10.3.0</td>
+                <td>معماری سازمانی ماژولار تزریق وابستگی (DI)، گاردها، پایپ‌های اعتبارسنجی Joi و سوییگر برای اسناد API.</td>
+                <td><span class="badge badge-success">فعال و تست‌شده</span></td>
+            </tr>
+            <tr>
+                <td><strong>پایگاه داده و ORM</strong></td>
+                <td>PostgreSQL + Prisma ORM</td>
+                <td>Postgres 16 / Prisma 5.22</td>
+                <td>پایگاه داده رابطه‌ای سازمانی با پشتیبانی از JSONB، ایندکس‌های یکتای جزئی، کلیدهای ترکیبی و مایگریشن تایپ‌سیف.</td>
+                <td><span class="badge badge-success">فعال و تست‌شده</span></td>
+            </tr>
+            <tr>
+                <td><strong>امنیت و رمزنگاری</strong></td>
+                <td>Argon2id + JWT + Passport</td>
+                <td>Argon2 0.40.3</td>
+                <td>برنده‌ترین الگوریتم هشینگ رمز عبور جهان مقاوم در برابر GPU/ASIC، مدیریت خانواده توکن‌های رفرش در PostgreSQL.</td>
+                <td><span class="badge badge-success">فعال و تست‌شده</span></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+    <div class="page-break"></div>
+    
+<!-- 6. END-TO-END WORKFLOWS -->
+<div class="section-container" id="sec-workflows">
+    <div class="section-header">
+        <span class="section-number">بخش ۶</span>
+        <h2>تحلیل و دیاگرام‌های جریان کاری فرآیندهای اصلی (End-to-End Workflows)</h2>
+    </div>
+
+    <p class="text-sm mb-4">برای درک کامل کارفرما، ۶ فرآیند حیاتی سیستم از لحظه تعامل در مرورگر تا اجرای کوئری در پایگاه داده و برعکس با ذکر دقیق فایل‌ها، توابع و رفتار فنی تشریح می‌شوند:</p>
+
+    <!-- Workflow 1 -->
+    <div class="workflow-card">
+        <div class="workflow-header">
+            <span class="workflow-num">۱</span>
+            <h4>فرآیند ورود کاربر، تمدید سشن و ابطال نشست (Authentication & Session Lifecycle)</h4>
+        </div>
+        <p class="text-xs mb-3"><strong>مسیر اجرایی:</strong> صفحه <code>/login</code> &larr; ارسال نام کاربری و رمز به <code>POST /api/auth/login</code> &larr; اعتبارسنجی با Argon2id &larr; تولید سشن و هش توکن رفرش در PostgreSQL &larr; دریافت JWT Access Token در حافظه و ذخیره Refresh Token در کوکی امن HttpOnly.</p>
+        <div class="code-flow-box">
+            <div class="code-flow-step">
+                <strong>۱. ارسال فرم لاگین:</strong> کامپوننت <code>apps/web/src/app/(auth)/login/page.tsx</code> با متد <code>loginWithCredentials</code> درخواست را بدون ذخیره توکن در localStorage ارسال می‌کند.
+            </div>
+            <div class="code-flow-step">
+                <strong>۲. پردازش در کنترلر بک‌اند:</strong> تابع <code>login()</code> در <code>auth.controller.ts</code> کوکی <code>gapji_refresh_token</code> را با فلگ‌های <code>httpOnly: true, secure: true, sameSite: 'lax'</code> تنظیم می‌کند.
+            </div>
+            <div class="code-flow-step">
+                <strong>۳. ارسال درخواست‌های بعدی:</strong> اینترسپتور <code>apps/web/src/lib/api.ts</code> توکن موجود در <code>memoryAccessToken</code> را در هدر <code>Authorization: Bearer</code> الصاق می‌کند.
+            </div>
+            <div class="code-flow-step">
+                <strong>۴. تمدید سشن (401 Interceptor):</strong> در صورت منقضی شدن اکسس توکن، کلاینت درخواست‌ها را در <code>failedQueue</code> متوقف کرده، با <code>POST /api/auth/refresh</code> توکن جدید گرفته و صف را آزاد می‌کند.
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflow 2 -->
+    <div class="workflow-card">
+        <div class="workflow-header">
+            <span class="workflow-num">۲</span>
+            <h4>فرآیند ساخت و انتشار کمپین از طریق ویزارد (Campaign Creation & Validation)</h4>
+        </div>
+        <p class="text-xs mb-3"><strong>مسیر اجرایی:</strong> صفحه <code>/campaigns/new</code> &larr; تکمیل ۶ مرحله ویزارد &larr; اعتبارسنجی مبالغ مالی بدون اعشار با تبدیل فارسی به انگلیسی &larr; ارسال به <code>POST /api/campaigns</code> &larr; ذخیره در جدول <code>campaigns</code> &larr; ریدایرکت به لیست کمپین‌ها.</p>
+        <div class="code-flow-box">
+            <div class="code-flow-step">
+                <strong>۱. مدیریت ویزارد:</strong> کامپوننت <code>apps/web/src/features/campaigns/components/wizard/campaign-wizard-form.tsx</code> وضعیت مراحل را با TanStack Form و Zod مدیریت کرده و هر ۳۰ ثانیه در درفت محلی ذخیره می‌کند.
+            </div>
+            <div class="code-flow-step">
+                <strong>۲. اعتبارسنجی و تبدیل ریالی:</strong> پایپ اعتبارسنجی <code>create-campaign.dto.ts</code> اعداد فارسی را به انگلیسی تبدیل کرده و الزام <code>@IsInt()</code> و <code>@Min(0)</code> را بررسی می‌کند.
+            </div>
+            <div class="code-flow-step">
+                <strong>۳. ذخیره در دیتابیس:</strong> سرویس <code>campaigns.service.ts</code> با Prisma رکورد را با وضعیت اولیه <code>active</code> و سلامت <code>healthy</code> در PostgreSQL ایجاد می‌کند.
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflow 3 -->
+    <div class="workflow-card">
+        <div class="workflow-header">
+            <span class="workflow-num">۳</span>
+            <h4>فرآیند ثبت هزینه تبلیغاتی و همگام‌سازی بودجه (Cost Attribution & Auto Spend Sync)</h4>
+        </div>
+        <p class="text-xs mb-3"><strong>مسیر اجرایی:</strong> صفحه <code>/performance/costs</code> &larr; ثبت هزینه سریع یا دسته‌ای &larr; <code>POST /api/costs</code> &larr; ذخیره در جدول <code>costs</code> &larr; فراخوانی خودکار <code>recalculateCampaignSpend()</code> &larr; به‌روزرسانی فیلد <code>spend</code> در کمپین متناظر.</p>
+        <div class="code-flow-box">
+            <div class="code-flow-step">
+                <strong>۱. ثبت هزینه:</strong> کامپوننت <code>quick-cost-drawer.tsx</code> با انتخاب کمپین و پلتفرم مبلغ را ارسال می‌کند.
+            </div>
+            <div class="code-flow-step">
+                <strong>۲. تضمین همگام‌سازی تراکنشی:</strong> متد <code>recalculateCampaignSpend()</code> در <code>costs.service.ts</code> مجموع رکوردهای هزینه آن کمپین را کوئری گرفته و فیلد <code>spend</code> رکورد کمپین را در دیتابیس دقیقاً به روز می‌کند تا داشبورد و جدول کمپین‌ها بدون ناسازگاری به روز شوند.
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflow 4 -->
+    <div class="workflow-card">
+        <div class="workflow-header">
+            <span class="workflow-num">۴</span>
+            <h4>فرآیند چرخه حیات لید و تعاملات برد کانبان (Lead Kanban & Status Lifecycle)</h4>
+        </div>
+        <p class="text-xs mb-3"><strong>مسیر اجرایی:</strong> صفحه <code>/leads/board</code> &larr; درگ کارت به ستون دیگر &larr; باز شدن مودال اجباری مبلغ فروش یا دلیل ردشدن &larr; <code>PATCH /api/leads/:id/status</code> &larr; ثبت خودکار در <code>lead_activities</code> &larr; نمایش در خط زمانی لید.</p>
+        <div class="code-flow-box">
+            <div class="code-flow-step">
+                <strong>۱. کشیدن و رها کردن در بورد:</strong> با کامپوننت <code>kanban-card.tsx</code> کارت جابجا می‌شود.
+            </div>
+            <div class="code-flow-step">
+                <strong>۲. کنترل‌های محصولی اجباری:</strong> در صورت انتقال به «مشتری» مودال <code>kanban-won-deal-modal.tsx</code> مبلغ فروش را می‌گیرد. در صورت انتقال به «ردشده» مودال <code>kanban-lost-lead-modal.tsx</code> علت ردشدن را اجباری می‌کند.
+            </div>
+            <div class="code-flow-step">
+                <strong>۳. لاگ تاریخچه فعالیت:</strong> متد <code>updateStatus()</code> در <code>leads.service.ts</code> هم وضعیت لید را تغییر می‌دهد و هم یک رکورد جدید از نوع <code>status_change</code> در جدول <code>lead_activities</code> درج می‌نماید.
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflow 5 -->
+    <div class="workflow-card">
+        <div class="workflow-header">
+            <span class="workflow-num">۵</span>
+            <h4>فرآیند استخراج تحلیلی شاخص‌های داشبورد (Dashboard Performance Analytics)</h4>
+        </div>
+        <p class="text-xs mb-3"><strong>مسیر اجرایی:</strong> صفحه <code>/performance/dashboard</code> &larr; انتخاب فیلتر بازه تاریخ شمسی &larr; <code>GET /api/dashboard/overview</code> &larr; محاسبه مرزهای ماه شمسی در بک‌اند &larr; کوئری‌های همزمان روی جداول هزینه‌ها و لیدها &larr; تولید ۶ کارت شاخص، ۲ نمودار روند و قیف ۵ مرحله‌ای.</p>
+        <div class="code-flow-box">
+            <div class="code-flow-step">
+                <strong>۱. تطابق تقویم جلالی:</strong> سرویس <code>dashboard.service.ts</code> با کتابخانه <code>date-fns-jalali</code> اول ماه شمسی (مثلاً ۱ آبان) را به تاریخ UTC تبدیل می‌کند، نه ۱ نوامبر میلادی.
+            </div>
+            <div class="code-flow-step">
+                <strong>۲. تجمیع دقیق مبالغ:</strong> فیلد <code>totalSpend</code> مستقیماً از جمع مبالغ واقعی ثبت‌شده در جدول هزینه‌ها به دست می‌آید؛ در صورت صفر بودن هزینه، شاخص‌های وابسته CPL و ROAS به جای خطای تقسیم بر صفر، به صورت <code>null</code> بازگردانده می‌شوند.
+            </div>
+            <div class="code-flow-step">
+                <strong>۳. قیف تبدیل ۵ مرحله‌ای:</strong> مرحله کلیک به دلیل نبود سیستم رهگیری کلیک به عنوان null ارسال می‌شود و مراحل لید، واجد شرایط، پیشنهاد و مشتری کاملاً غیرهم‌پوشان محاسبه می‌گردند.
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflow 6 -->
+    <div class="workflow-card">
+        <div class="workflow-header">
+            <span class="workflow-num">۶</span>
+            <h4>فرآیند اعمال دسترسی نقش‌ها و ایزولاسیون سازمانی (RBAC & Multi-Tenant Enforcement)</h4>
+        </div>
+        <p class="text-xs mb-3"><strong>مسیر اجرایی:</strong> درخواست کلاینت &larr; <code>JwtAuthGuard</code> استخراج کاربر &larr; <code>RolesGuard</code> بررسی دکوراتور <code>@Roles()</code> &larr; تزریق خودکار شرط <code>organizationId</code> در تمام کوئری‌های Prisma.</p>
+        <div class="code-flow-box">
+            <div class="code-flow-step">
+                <strong>۱. انطباق ۶ نقش:</strong> نقش‌های <code>admin, marketing_manager, campaign_manager, sales_agent, content_creator, client</code> به تفکیک روی کنترلرها بررسی می‌شوند. مثلاً کارشناس فروش تنها به لیدهای منتسب به خودش دسترسی دارد.
+            </div>
+            <div class="code-flow-step">
+                <strong>۲. ایزولاسیون پایگاه داده:</strong> تمام جستجوها، ویرایش‌ها و حذف‌ها با شرط ترکیبی <code>where: { id, organizationId }</code> اجرا می‌شوند تا نشت داده بین سازمان‌ها غیرممکن باشد.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PAGE BREAK -->
+<div class="page-break"></div>
+
+<!-- 7. PRODUCT REQUIREMENTS COMPLIANCE MATRIX -->
+<div class="section-container" id="sec-compliance-matrix">
+    <div class="section-header">
+        <span class="section-number">بخش ۷</span>
+        <h2>ماتریس تطابق نیازمندی‌های سند رسمی محصول (Product Requirements Compliance Matrix)</h2>
+    </div>
+
+    <p class="text-sm mb-4">در این جدول، تمامی ۴۰ نیازمندی استخراج‌شده از سند رسمی ۲۹ صفحه‌ای با وضعیت قطعی پیاده‌سازی، آدرس فایل شواهد، شکاف‌های موجود و کارهای باقی‌مانده ثبت شده‌اند:</p>
+
+    <div class="table-responsive">
+        <table class="compliance-table">
+            <thead>
+                <tr>
+                    <th style="width: 45px;">شناسه</th>
+                    <th style="width: 60px;">مرجع سند</th>
+                    <th style="width: 140px;">ماژول و عنوان</th>
+                    <th>شرح نیازمندی رسمی</th>
+                    <th>وضعیت فعلی در کد</th>
+                    <th style="width: 120px;">شواهد سورس‌کد</th>
+                    <th style="width: 110px;">وضعیت انطباق</th>
+                    <th style="width: 140px;">شکاف موجود (Gap)</th>
+                    <th style="width: 140px;">کارهای باقیمانده</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-01</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۳</td>
+            <td><strong>پوسته برنامه (Layout)</strong><br><span style="font-size: 11px; color: #475569;">هدر سراسری و ناوبری</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">لوگو، منوی تغییر سازمان، جستجوی سراسری (لید با نام/شماره، کمپین با نام)، زنگ اعلان با شمارنده، منوی کاربر (نام، نقش، پروفایل، خروج).</td>
+            <td style="font-size: 11px; line-height: 1.4;">هدر با سوییچ سازمان، منوی کاربر با آواتار و خروج، زنگ اعلان، و فیلد جستجو پیاده‌سازی شده است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/components/layout/header.tsx</td>
+            <td style="text-align: center;"><span class="badge badge-warning">پیاده‌سازی جزئی (۴۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">جستجوی سراسری و کلیک اعلان‌ها به اندپوینت واقعی بک‌اند برای لید/کمپین متصل نیستند؛ شمارنده اعلان به صورت فرانت‌اندی است.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">اتصال جستجوی سراسری به API جستجوی بک‌اند و تکمیل فیلتر لید/کمپین.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-02</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۳</td>
+            <td><strong>پوسته برنامه (Layout)</strong><br><span style="font-size: 11px; color: #475569;">سایدبار با تفکیک ۳ فضای کاری و تنظیمات</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">منوی کناری با ۳ گروه «عملکرد»، «فروش و لید»، «اجرا و دانش» و «تنظیمات» در پایین. نمایش آیتم فقط با داشتن دسترسی، قابلیت جمع‌شدن، منوی کشویی در موبایل.</td>
+            <td style="font-size: 11px; line-height: 1.4;">کامپوننت سایدبار با ۳ گروه کاری، حالت جمع‌شدن آیکونی، کنترل دسترسی براساس مجوزهای نقش و نسخه ریسپانسیو موبایل پیاده‌سازی شده است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/components/layout/sidebar.tsx, apps/web/src/components/layout/mobile-sidebar.tsx, apps/web/src/lib/permissions.ts</td>
+            <td style="text-align: center;"><span class="badge badge-success">تکمیل شده (۱۰۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">هیچ شکاف عمده‌ای در کامپوننت سایدبار وجود ندارد.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">نهایی‌سازی لینک‌های ماژول‌های فازهای آتی (پلتفرم‌ها، ایمپورت، تقویم و...).</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-03</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۳ و ۴</td>
+            <td><strong>اجزای مشترک UI</strong><br><span style="font-size: 11px; color: #475569;">سیستم اعلان Toast و کامپوننت‌های پایه</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">توست برای عملیات موفق، هشدار و خطا (خودبسته‌شونده ۵ ثانیه‌ای به جز خطا که تا کلیک کاربر باز می‌ماند). کامپوننت‌های فرم، وضعیت، دراور، مودال، تایید عملیات.</td>
+            <td style="font-size: 11px; line-height: 1.4;">سیستم توست با رفتار خطای ماندگار و موفقیت موقت، ConfirmDialog، Drawer، Modal، FormField پیاده‌سازی شده است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/components/common/toast.tsx, toast-provider.tsx, modal.tsx, drawer.tsx, confirm-modal.tsx</td>
+            <td style="text-align: center;"><span class="badge badge-success">تکمیل شده (۱۰۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">پیاده‌سازی با مشخصات سند مطابقت دارد.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">بررسی رفتاری روی صفحات جدید.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-04</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۳</td>
+            <td><strong>اجزای مشترک UI</strong><br><span style="font-size: 11px; color: #475569;">جدول داده تعاملی (DataTable)</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">قابلیت نمایش/پنهان‌سازی ستون‌ها، مرتب‌سازی با کلیک سرستون، صفحه‌بندی سمت سرور (۲۰/۵۰/۱۰۰)، انتخاب چندتایی با عملیات گروهی، حالت فشرده، اسکلتون لودینگ و حالت خالی.</td>
+            <td style="font-size: 11px; line-height: 1.4;">کامپوننت DataTable با امکانات سورت، صفحه‌بندی سرور، انتخاب ردیف‌ها، نوار ابزار و حالت‌های خالی و لودینگ طراحی شده است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/components/common/data-table/data-table.tsx, data-table-toolbar.tsx, data-table-pagination.tsx</td>
+            <td style="text-align: center;"><span class="badge badge-success">تکمیل شده (۱۰۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">عملیات گروهی در برخی صفحات فرانت‌اند نیاز به تکمیل اکشن‌های اختصاصی دارد.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">اتصال عملیات گروهی برای تخصیص لیدها.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-05</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۳ و ۴</td>
+            <td><strong>اجزای مشترک UI</strong><br><span style="font-size: 11px; color: #475569;">نوار فیلتر و انتخاب‌گر تاریخ شمسی (FilterBar & PersianDatePicker)</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">فیلتر بازه تاریخ شمسی با گزینه‌های سریع (امروز، ۷ روز، ۳۰ روز، این ماه، ماه قبل)، تقویم شمسی با شروع شنبه، تبدیل خودکار به ISO میلادی هنگام ارسال، ذخیره در آدرس URL.</td>
+            <td style="font-size: 11px; line-height: 1.4;">کامپوننت فیلتربار و دیت‌پیکر شمسی با پریست‌های سریع، تطابق مرزهای ماه جلالی، تبدیل ISO و نگهداری searchParams پیاده‌سازی شده است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/components/common/filter-bar.tsx, apps/web/src/components/ui/persian-date-picker.tsx, apps/web/src/lib/persian-date.ts</td>
+            <td style="text-align: center;"><span class="badge badge-success">تکمیل شده (۱۰۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">مطابق با الزامات سند محصول.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">ندارد.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-06</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۴ و ۵</td>
+            <td><strong>قواعد نمایش داده</strong><br><span style="font-size: 11px; color: #475569;">فرمت مقادیر مالی، درصدها و شماره موبایل</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">مبالغ با جداکننده هزارگان و اعداد فارسی، درصد با یک رقم اعشار (مثبت با + و منفی با −)، تاریخ شمسی، ماسک شماره موبایل برای نقش‌های غیرمجاز با دکمه کپی/تماس، خط تیره برای مقادیر نامشخص.</td>
+            <td style="font-size: 11px; line-height: 1.4;">توابع فرمت‌بندی مبالغ، اعداد فارسی، درصدها، دیت‌پیکر و ماسک‌سازی تلفن در قالب کتابخانه‌های کمکی و کامپوننت‌های مربوطه پیاده‌سازی شده‌اند.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/lib/persian-date.ts, apps/web/src/components/ui/money-input.tsx, apps/web/src/features/leads/components/leads-table.tsx</td>
+            <td style="text-align: center;"><span class="badge badge-success">تکمیل شده (۱۰۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">کامل است.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">تطبیق یکپارچه در ماژول‌های فازهای ۲ و ۳.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-07</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۶</td>
+            <td><strong>ورود و احراز هویت</strong><br><span style="font-size: 11px; color: #475569;">فرم ورود با ایمیل یا موبایل و رمز عبور</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">کارت مرکزی با لوگو و عنوان بدون سایدبار، ورودی ایمیل یا موبایل، رمز عبور با قابلیت نمایش/مخفی، خطای رمز اشتباه زیر فرم (نه توست)، لودینگ دکمه با اسپینر.</td>
+            <td style="font-size: 11px; line-height: 1.4;">صفحه ورود کامل با فیلد ایمیل/موبایل، نمایش ارور سرور زیر فیلد، اسپینر دکمه، اتصال به اندپوینت واقعی /api/auth/login و دریافت توکن JWT و کوکی رفرش-توکن.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/app/(auth)/login/page.tsx, apps/api/src/modules/auth/auth.controller.ts</td>
+            <td style="text-align: center;"><span class="badge badge-success">تکمیل شده (۱۰۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">ندارد.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">ندارد.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-08</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۶</td>
+            <td><strong>ورود و احراز هویت</strong><br><span style="font-size: 11px; color: #475569;">فراموشی رمز عبور و بازیابی</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">پیوند «رمز را فراموش کرده‌ام» و صفحه ارسال لینک بازیابی.</td>
+            <td style="font-size: 11px; line-height: 1.4;">صفحه و فرم فراموشی رمز عبور در مسیر /forgot-password با UI کامل وجود دارد.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/app/(auth)/forgot-password/page.tsx</td>
+            <td style="text-align: center;"><span class="badge badge-info">صرفاً ظاهر / ماک (۱۵٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">سرویس ارسال ایمیل یا پیامک لینک بازیابی در بک‌اند پیاده‌سازی نشده است.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">پیاده‌سازی سرویس توکن بازیابی و ارسال پیامک/ایمیل در بک‌اند.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-09</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۶</td>
+            <td><strong>ورود و احراز هویت</strong><br><span style="font-size: 11px; color: #475569;">انتخاب سازمان (چند سازمانی)</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">پس از ورود (در صورت چند سازمان): لیست کارت‌های سازمان با نام و نقش کاربر در آن، انتخاب سازمان و ذخیره آخرین سازمان انتخابی.</td>
+            <td style="font-size: 11px; line-height: 1.4;">صفحه انتخاب سازمان در /select-org با کارت‌های سازمان پیاده‌سازی شده و در بک‌اند منطق بررسی چندسازمانی در لاگین وجود دارد.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/app/(auth)/select-org/page.tsx, apps/api/src/modules/auth/auth.service.ts</td>
+            <td style="text-align: center;"><span class="badge badge-warning">پیاده‌سازی جزئی (۴۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">اندپوینت اختصاصی تعویض سشن سازمان در بک‌اند پیاده‌سازی نشده و در صورت چندسازمانی بودن لاگین مسدود می‌شود (DEC-AUTH-10).</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">پیاده‌سازی سوییچر سازمان و اندپوینت فعال‌سازی سشن برای سازمان هدف.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-10</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۶ و ۷</td>
+            <td><strong>صفحه خانه (Home)</strong><br><span style="font-size: 11px; color: #475569;">داشبورد خانه بر اساس نقش کاربر</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">شبکه ۱۲ ستونی ویجت‌ها بر اساس نقش (کارفرما، مدیر مارکتینگ، کمپین‌چی، کارشناس فروش، تولید محتوا/وبینار)، هر ویجت با لودینگ و خطای مستقل.</td>
+            <td style="font-size: 11px; line-height: 1.4;">کامپوننت RoleBasedHome با ویجت‌های مجزا برای هر نقش طراحی و در روت اصلی / تعبیه شده است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/app/(app)/page.tsx, apps/web/src/features/home/components/role-based-home.tsx</td>
+            <td style="text-align: center;"><span class="badge badge-warning">پیاده‌سازی جزئی (۴۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">ویجت‌های خانه به اندپوینت‌های اختصاصی خلاصه خانه متصل نیستند و از داده‌های کامپوننت‌های فرانت‌اند استفاده می‌کنند.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">ایجاد اندپوینت‌های خلاصه خانه در بک‌اند برای تجمیع فعالیت‌های اختصاصی هر نقش.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-11</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۷</td>
+            <td><strong>نوتیفیکیشن‌ها</strong><br><span style="font-size: 11px; color: #475569;">کشوی اعلان‌های هدر و صفحه تنظیمات</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">کشوی هدر با ۱۰ اعلان آخر، صفحه کامل با لیست و تب تنظیمات، جدول رویداد × کانال، علامت‌گذاری خوانده‌شده، شمارنده تا +۹۹.</td>
+            <td style="font-size: 11px; line-height: 1.4;">مدل Notification در دیتابیس وجود دارد، اما صفحه /notifications و کشوی واقعی هدر هنوز پیاده‌سازی نشده‌اند.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/api/prisma/schema.prisma (model Notification)</td>
+            <td style="text-align: center;"><span class="badge badge-danger">پیاده‌سازی نشده (۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">صفحه /notifications و کنترلر مربوطه در بک‌اند ایجاد نشده است.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">پیاده‌سازی ماژول نوتیفیکیشن در بک‌اند و فرانت‌اند (اولویت ۲).</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-12</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۸</td>
+            <td><strong>داشبورد اجرایی</strong><br><span style="font-size: 11px; color: #475569;">ساختار ۶ کارت شاخص اصلی عملکرد</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">هزینه کل، تعداد لید، CPL، نرخ تبدیل، CAC، ROAS؛ هرکدام با عدد، درصد تغییر نسبت به دوره قبل و پیشرفت هدف.</td>
+            <td style="font-size: 11px; line-height: 1.4;">۶ کارت با فرمول‌های دقیق تاییدشده، مقایسه با دوره قبل بر اساس تقویم جلالی، اتصال کامل به اندپوینت /api/dashboard/overview و دیتابیس PostgreSQL بدون هیچ ماک.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/features/dashboard/components/dashboard-kpi-grid.tsx, apps/api/src/modules/dashboard/dashboard.service.ts</td>
+            <td style="text-align: center;"><span class="badge badge-success">تکمیل شده (۱۰۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">ندارد.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">ندارد.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-13</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۸</td>
+            <td><strong>داشبورد اجرایی</strong><br><span style="font-size: 11px; color: #475569;">نمودارهای روند هزینه و روند لید</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">دو نمودار مستقل: روند هزینه (روزانه) و روند لید (روزانه) در بازه زمانی انتخابی با تولتیپ و محور تاریخ شمسی.</td>
+            <td style="font-size: 11px; line-height: 1.4;">نمودارهای SpendTrend و LeadTrend با تفکیک روزانه و تاریخ شمسی متصل به داده‌های واقعی دیتابیس پیاده‌سازی شده‌اند.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/features/dashboard/components/spend-trend-chart.tsx, lead-trend-chart.tsx</td>
+            <td style="text-align: center;"><span class="badge badge-success">تکمیل شده (۱۰۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">ندارد.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">ندارد.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-14</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۸</td>
+            <td><strong>داشبورد اجرایی</strong><br><span style="font-size: 11px; color: #475569;">قیف تبدیل ۵ مرحله‌ای و سهم پلتفرم‌ها</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">قیف تبدیل دقیق: کلیک، لید، واجد شرایط، پیشنهاد، مشتری (با عدد و درصد ریزش) + نمودار سهم پلتفرم‌ها.</td>
+            <td style="font-size: 11px; line-height: 1.4;">ویجت قیف تبدیل ۵ مرحله‌ای با مراحل غیرهم‌پوشان و ویجت سهم پلتفرم‌ها متصل به اندپوینت بک‌اند پیاده‌سازی شده است. مرحله کلیک در صورت عدم وجود کلیک با خط تیره نمایش می‌یابد.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/features/dashboard/components/conversion-funnel-widget.tsx, platform-share-widget.tsx</td>
+            <td style="text-align: center;"><span class="badge badge-success">تکمیل شده (۱۰۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">سامانه رهگیری لجر رویدادهای کلیک (Click Tracker) خارج از فاز اول است و کلیک‌ها به درستی null نمایش می‌یابند.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">اتصال لاگ کلیک‌ها در فاز اتصال UTM.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-15</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۸</td>
+            <td><strong>داشبورد اجرایی</strong><br><span style="font-size: 11px; color: #475569;">جدول کمپین‌های داشبورد و هشدارهای فوری</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">جدول کمپین‌ها (نام، وضعیت، هزینه، لید، CPL، نرخ تبدیل، سلامت) و بخش هشدارها با دکمه «ساخت تسک».</td>
+            <td style="font-size: 11px; line-height: 1.4;">جدول کمپین‌ها و ویجت هشدارهای فوری در داشبورد تعبیه شده و دکمه ساخت تسک به فرآیند ایجاد تسک هدایت می‌کند.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/features/dashboard/components/dashboard-campaigns-table.tsx, urgent-alerts-widget.tsx</td>
+            <td style="text-align: center;"><span class="badge badge-success">تکمیل شده (۱۰۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">ندارد.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">ندارد.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-16</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۸ و ۹</td>
+            <td><strong>مدیریت کمپین‌ها</strong><br><span style="font-size: 11px; color: #475569;">جدول و فیلترهای لیست کمپین‌ها</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">ستون‌های نام، نوع، وضعیت، بازه، بودجه، هزینه واقعی، درصد مصرف بودجه، لید، CPL، مسئول. فیلترهای نوع، وضعیت، مسئول، بازه، جستجو. دکمه کمپین جدید.</td>
+            <td style="font-size: 11px; line-height: 1.4;">صفحه /campaigns با جدول کامل، درصد مصرف بودجه پویا، نشان سلامت، جستجو و فیلترها و دکمه کپی/توقف متصل به دیتابیس پیاده‌سازی شده است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/app/(app)/campaigns/page.tsx, apps/web/src/components/campaigns-table.tsx, apps/api/src/modules/campaigns/campaigns.controller.ts</td>
+            <td style="text-align: center;"><span class="badge badge-success">تکمیل شده (۱۰۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">خروجی اکسل در فرانت‌اند فعال است اما اندپوینت سروری اکسل وجود ندارد.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">پیاده‌سازی تولید فایل اکسل سمت سرور در صورت نیاز.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-17</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۹ و ۱۰</td>
+            <td><strong>مدیریت کمپین‌ها</strong><br><span style="font-size: 11px; color: #475569;">ویزارد ۶ مرحله‌ای ساخت و ویرایش کمپین</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">مرحله ۱ اطلاعات پایه، مرحله ۲ مخاطب، مرحله ۳ تخصیص پلتفرم و بودجه، مرحله ۴ تارگت‌های KPI، مرحله ۵ لندینگ و UTM، مرحله ۶ مرور و انتشار. ذخیره خودکار ۳۰ ثانیه‌ای.</td>
+            <td style="font-size: 11px; line-height: 1.4;">صفحه /campaigns/new و /campaigns/[id]/edit با ویزارد کامل، خلاصه زنده بودجه و پلتفرم‌ها و اتصال مستقیم به POST /api/campaigns و PATCH پیاده‌سازی شده است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/app/(app)/campaigns/new/page.tsx, apps/web/src/app/(app)/campaigns/[id]/edit/page.tsx, apps/web/src/features/campaigns/components/wizard/</td>
+            <td style="text-align: center;"><span class="badge badge-success">تکمیل شده (۱۰۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">مراحل ۲ و ۵ (مخاطبان و لندینگ پیج) به مدل‌های دیتابیس کمپین در زمان ذخیره به صورت فیلدهای JSON یا متاداده ذخیره می‌شوند زیرا ماژول‌های مستقل آنها در فاز ۲ است.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">ارتباط ریلیشنال با جدول target_audiences و landing_pages پس از تکمیل ماژول‌های آنها.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-18</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۱۰ و ۱۱</td>
+            <td><strong>مدیریت کمپین‌ها</strong><br><span style="font-size: 11px; color: #475569;">صفحه جزئیات کمپین و تب‌های هشت‌گانه</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">هدر ثابت، تب‌های: خلاصه (KPIها، نقاط قوت و ضعف، اقدامات پیشنهادی)، پلتفرم‌ها، لیدها، لندینگ، پیامک، تقویم و تجهیزات، تسک‌ها، تحلیل.</td>
+            <td style="font-size: 11px; line-height: 1.4;">صفحه جزئیات در /campaigns/[id] با هدر اطلاعاتی، تب‌های خلاصه، لیدها، هزینه‌ها و اقدامات پیاده‌سازی شده است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/app/(app)/campaigns/[id]/page.tsx</td>
+            <td style="text-align: center;"><span class="badge badge-warning">پیاده‌سازی جزئی (۴۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">تب‌های پیامک، تقویم، تجهیزات و تحلیل بر اساس وابستگی به ماژول‌های فاز ۲ و ۳ هنوز به داده واقعی متصل نیستند.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">تکمیل تب‌های تحلیلی و وبینار/تجهیزات پس از راه‌اندازی ماژول‌های مربوطه.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-19</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۱۱</td>
+            <td><strong>پلتفرم‌ها</strong><br><span style="font-size: 11px; color: #475569;">مدیریت پلتفرم‌های تبلیغاتی</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">جدول پلتفرم‌ها (نام، نوع، روش دریافت داده، وضعیت، کمپین‌های فعال)، کشوی ویرایش با فیلدهای ورودی و خروجی گزارش، افزودن و غیرفعال‌سازی.</td>
+            <td style="font-size: 11px; line-height: 1.4;">مدل Platform در دیتابیس Prisma با تمام فیلدها و ارتباطات تعریف شده است. در فرانت‌اند تنظیمات پلتفرم‌ها در قالب Organization Settings پیاده‌سازی شده است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/api/prisma/schema.prisma (model Platform), apps/web/src/features/organization/</td>
+            <td style="text-align: center;"><span class="badge badge-warning">پیاده‌سازی جزئی (۴۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">صفحه مستقل /performance/platforms و کنترلر مجزای پلتفرم‌ها در بک‌اند پیاده‌سازی نشده است.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">ایجاد صفحه مستقل پلتفرم‌ها و CRUD مربوطه در بک‌اند (اولویت ۲).</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-20</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۱۱ و ۱۲</td>
+            <td><strong>مدیریت هزینه‌ها</strong><br><span style="font-size: 11px; color: #475569;">مدیریت هزینه‌های تبلیغات و همگام‌سازی</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">خلاصه هزینه فیلتر فعلی و تفکیک پلتفرم، جدول هزینه‌ها، فرم ثبت سریع و ثبت دسته‌ای، اتصال به کمپین، همگام‌سازی خودکار با هزینه کمپین.</td>
+            <td style="font-size: 11px; line-height: 1.4;">سیستم هزینه‌ها در /performance/costs با ثبت سریع، ثبت دسته‌ای، فیلترها، حذف، ویرایش و اتصال کامل به اندپوینت‌های /api/costs و آپدیت خودکار spend در PostgreSQL پیاده‌سازی و تست شده است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/app/(app)/performance/costs/page.tsx, apps/api/src/modules/costs/costs.service.ts, costs.controller.ts</td>
+            <td style="text-align: center;"><span class="badge badge-success">تکمیل شده (۱۰۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">ندارد.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">ندارد.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-21</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۱۲ و ۱۳</td>
+            <td><strong>ایمپورت داده (Import)</strong><br><span style="font-size: 11px; color: #475569;">ویزارد ۴ مرحله‌ای ورود داده و تاریخچه</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">لیست تاریخچه ایمپورت‌ها، ویزارد ۴ مرحله‌ای: انتخاب نوع و آپلود، نگاشت ستون‌ها به فیلدهای سیستم، پیش‌نمایش ۲۰ ردیف و لیست خطاها، نوار پیشرفت و تایید نهایی. رفتار با تکراری‌ها.</td>
+            <td style="font-size: 11px; line-height: 1.4;">مدل ImportJob در Prisma وجود دارد. در صفحه هزینه‌ها مودال ایمپورت فایل تعبیه شده است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/api/prisma/schema.prisma (model ImportJob), apps/web/src/features/costs/components/cost-import-modal.tsx</td>
+            <td style="text-align: center;"><span class="badge badge-warning">پیاده‌سازی جزئی (۴۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">ویزارد کامل ۴ مرحله‌ای مستقل در /performance/imports و موتور پردازش صف بک‌اند پیاده‌سازی نشده است.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">تکمیل ماژول ایمپورت همه‌منظوره برای هزینه‌ها و لیدها.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-22</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۱۳</td>
+            <td><strong>KPI و شاخص‌ها</strong><br><span style="font-size: 11px; color: #475569;">تعریف KPI، فرمول‌ساز و قواعد هشدار</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">۳ تب: KPIها، شاخص‌ها (پیش‌فرض و سفارشی با فرمول‌ساز)، قواعد هشدار (جمله‌ساز اگر شاخص از مقدار گذشت). تعیین جهت بهتر بودن.</td>
+            <td style="font-size: 11px; line-height: 1.4;">مدل‌های KpiMetric و KpiAlertRule در دیتابیس تعبیه شده‌اند. هشدارهای سیستم به صورت داینامیک محاسبه می‌شوند.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/api/prisma/schema.prisma (model KpiMetric, KpiAlertRule)</td>
+            <td style="text-align: center;"><span class="badge badge-danger">پیاده‌سازی نشده (۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">صفحه /performance/kpis و فرمول‌ساز در فرانت‌اند و اندپوینت‌های ساخت KPI سفارشی در بک‌اند پیاده‌سازی نشده‌اند.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">پیاده‌سازی صفحه KPIها و موتور ارزیابی فرمول‌ها (اولویت ۲).</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-23</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۱۳ و ۱۴</td>
+            <td><strong>مخاطبان (Audiences)</strong><br><span style="font-size: 11px; color: #475569;">مدیریت گروه‌های مخاطب و پرسونای کمپین</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">لیست کارتی مخاطبان (نام، سن، جنسیت، شهر، علایق)، جزئیات و کمپین‌های مرتبط، فرم افزودن/ویرایش.</td>
+            <td style="font-size: 11px; line-height: 1.4;">مدل TargetAudience و CampaignAudience در Prisma تعریف شده‌اند. در ویزارد کمپین مرحله انتخاب مخاطب تعبیه شده است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/api/prisma/schema.prisma (model TargetAudience)</td>
+            <td style="text-align: center;"><span class="badge badge-warning">پیاده‌سازی جزئی (۴۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">صفحه مستقل /performance/audiences پیاده‌سازی نشده است (اولویت ۳ سند محصول).</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">پیاده‌سازی کامل در فاز اولویت ۳.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-24</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۱۴</td>
+            <td><strong>لندینگ و UTM</strong><br><span style="font-size: 11px; color: #475569;">مدیریت لندینگ‌پیج‌ها و UTM ساز</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">جدول لندینگ‌ها با وضعیت اتصال و لیدها، سازنده UTM با پیش‌نمایش زنده و تاریخچه لینک‌ها، اعتبارسنجی https.</td>
+            <td style="font-size: 11px; line-height: 1.4;">مدل‌های LandingPage و UtmLink در Prisma وجود دارند. در ویزارد کمپین مرحله ساخت UTM تعبیه شده است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/api/prisma/schema.prisma (model LandingPage, UtmLink)</td>
+            <td style="text-align: center;"><span class="badge badge-warning">پیاده‌سازی جزئی (۴۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">صفحه مستقل /performance/landing با سازنده مستقل UTM وجود ندارد.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">پیاده‌سازی صفحه سازنده UTM و مدیریت لندینگ‌ها (اولویت ۲).</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-25</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۱۴ و ۱۵</td>
+            <td><strong>مدیریت لیدها</strong><br><span style="font-size: 11px; color: #475569;">جدول صندوق لیدها و مدیریت داده</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">جدول لیدها با شماره ماسک‌شده، فیلترها (وضعیت، کارشناس، کمپین، منبع، بدون پیگیری)، افزودن لید دستی، تشخیص شماره تکراری با خطای ۴۰۹ و لینک به لید قبلی، عملیات گروهی.</td>
+            <td style="font-size: 11px; line-height: 1.4;">صفحه /leads با جدول کامل، فیلترها، تشخیص شماره تکراری، ماسک شماره برای نقش‌های غیرمجاز، اتصال کامل به GET و POST /api/leads در بک‌اند پیاده‌سازی و تست شده است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/app/(app)/leads/page.tsx, apps/api/src/modules/leads/leads.controller.ts, leads.service.ts</td>
+            <td style="text-align: center;"><span class="badge badge-success">تکمیل شده (۱۰۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">عملیات گروهی تخصیص به کارشناس در بک‌اند به صورت چند درخواست یا اندپوینت تکمیلی نیاز به بایندینگ UI نهایی دارد.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">تکمیل اکشن صیصخت گروهی در فرانت‌اند.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-26</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۱۵ و ۱۶</td>
+            <td><strong>مدیریت لیدها</strong><br><span style="font-size: 11px; color: #475569;">برد کانبان ۶ ستونی لیدها با پایداری کامل</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">۶ ستون افقی با شمارنده و ارزش ستون، کشیدن کارت بین ستون‌ها، مودال اجباری دلیل ردشدن برای ستون ردشده، مودال اجباری مبلغ فروش برای ستون مشتری، بازگشت خوش‌بینانه کارت در خطا.</td>
+            <td style="font-size: 11px; line-height: 1.4;">برد کانبان در /leads/board با ۶ ستون، درگ‌اند‌دراپ، مودال ثبت ارزش فروش، مودال انتخاب دلیل ردشدن، ذخیره‌سازی لایف‌سایکل در دیتابیس و لاگ خودکار تاریخچه پیاده‌سازی و تایید شده است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/app/(app)/leads/board/page.tsx, apps/web/src/features/leads/components/kanban-card.tsx, apps/api/src/modules/leads/leads.service.ts</td>
+            <td style="text-align: center;"><span class="badge badge-success">تکمیل شده (۱۰۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">ندارد.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">ندارد.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-27</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۱۶</td>
+            <td><strong>مدیریت لیدها</strong><br><span style="font-size: 11px; color: #475569;">پروفایل لید و خط زمانی تعاملات (Lead Journey)</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">دو ستون: راست مشخصات و عملیات (ثبت تماس با نتیجه و مدت، یادداشت، یادآور)، چپ خط زمانی کلیه رویدادها (ثبت فرم، تخصیص، تماس‌ها، تغییر وضعیت)، نوار مسیر لید بالای صفحه.</td>
+            <td style="font-size: 11px; line-height: 1.4;">صفحه /leads/[id] با پروفایل کامل، خط زمانی فعالیت‌ها متصل به اندپوینت /api/leads/:id/activities، فرم ثبت تماس و تغییر وضعیت پیاده‌سازی شده است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/app/(app)/leads/[id]/page.tsx, apps/web/src/features/leads/components/lead-journey-timeline.tsx, apps/api/src/modules/leads/leads.controller.ts</td>
+            <td style="text-align: center;"><span class="badge badge-success">تکمیل شده (۱۰۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">ندارد.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">ندارد.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-28</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۱۶ و ۱۷</td>
+            <td><strong>پیامک (SMS)</strong><br><span style="font-size: 11px; color: #475569;">مدیریت ارسال‌های پیامک و دریافت لید</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">لیست ارسال‌ها، جزئیات هر ارسال، ایمپورت نتیجه ارسال، ساخت لید از پاسخ‌دهندگان، فیلتر شماره‌ها.</td>
+            <td style="font-size: 11px; line-height: 1.4;">مدل‌های SmsCampaign و SmsRecipient در دیتابیس تعریف شده‌اند. صفحه فرانت‌اند در اولویت ۳ سند محصول قرار دارد.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/api/prisma/schema.prisma (model SmsCampaign, SmsRecipient)</td>
+            <td style="text-align: center;"><span class="badge badge-danger">پیاده‌سازی نشده (۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">صفحه و کنترلر اختصاصی پیامک پیاده‌سازی نشده است (اولویت ۳).</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">پیاده‌سازی در فاز اولویت ۳.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-29</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۱۷</td>
+            <td><strong>وبینار (Webinars)</strong><br><span style="font-size: 11px; color: #475569;">مدیریت وبینارها و تبدیل حاضران به لید</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">لیست وبینارها، جزئیات با تب‌ها (اطلاعات، شرکت‌کنندگان، تجهیزات، تسک‌ها)، قیف ثبت‌نام تا لید، ایمپورت حضور و غیاب، تبدیل حاضران به لید.</td>
+            <td style="font-size: 11px; line-height: 1.4;">مدل‌های Webinar و WebinarAttendee در دیتابیس وجود دارند.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/api/prisma/schema.prisma (model Webinar, WebinarAttendee)</td>
+            <td style="text-align: center;"><span class="badge badge-danger">پیاده‌سازی نشده (۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">صفحات و کنترلر وبینار در فاز اولویت ۳ سند قرار داشته و هنوز پیاده‌سازی نشده است.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">پیاده‌سازی در فاز اولویت ۳.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-30</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۱۸</td>
+            <td><strong>مدیریت تسک‌ها (Tasks)</strong><br><span style="font-size: 11px; color: #475569;">مدیریت تسک‌ها در دو نمای لیست و کانبان</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">توییچ من/تیم و لیست/برد، گروه‌بندی (عقب‌افتاده، امروز، این هفته، بعداً، انجام‌شده)، ایجاد سریع، کشوی جزئیات با چک‌لیست زیرتسک‌ها و کامنت با @، نشان قرمز تأخیر.</td>
+            <td style="font-size: 11px; line-height: 1.4;">صفحه /work/tasks با ساختار کامل UI، نمای لیست و کانبان، فیلترها، کشوی تسک و سیستم ذخیره‌سازی محلی پیاده‌سازی شده است. در دیتابیس مدل‌های Task، TaskSubtask، TaskComment وجود دارند.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/app/(app)/work/tasks/page.tsx, apps/web/src/features/tasks/, apps/api/prisma/schema.prisma (model Task)</td>
+            <td style="text-align: center;"><span class="badge badge-info">صرفاً ظاهر / ماک (۱۵٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">کنترلر و سرویس تسک‌ها در بک‌اند NestJS پیاده‌سازی نشده و تسک‌های فرانت‌اند در TaskStorage محلی ذخیره می‌شوند.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">ایجاد TasksController و TasksService در بک‌اند و متصل کردن آن به جدول tasks در دیتابیس.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-31</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۱۸ و ۱۹</td>
+            <td><strong>تقویم کاری (Calendar)</strong><br><span style="font-size: 11px; color: #475569;">تقویم شمسی کمپین‌ها و رویدادها</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">نمای ماه و هفته، رویدادهای کمپین (نوار چندروزه)، وبینار، جلسه، ددلاین تسک، شروع شنبه، کشیدن برای تغییر تاریخ، نمای روزانه در موبایل.</td>
+            <td style="font-size: 11px; line-height: 1.4;">مدل CalendarEvent در دیتابیس تعریف شده است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/api/prisma/schema.prisma (model CalendarEvent)</td>
+            <td style="text-align: center;"><span class="badge badge-danger">پیاده‌سازی نشده (۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">صفحه /work/calendar و کنترلر بک‌اند پیاده‌سازی نشده‌اند (اولویت ۲).</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">پیاده‌سازی تقویم شمسی بر پایه FullCalendar یا کتابخانه سفارشی در فاز اولویت ۲.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-32</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۱۹ و ۲۰</td>
+            <td><strong>تجهیزات (Equipment)</strong><br><span style="font-size: 11px; color: #475569;">مدیریت کمبودها و قالب‌های تجهیزات</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">دو نما: کمبودها (پیش‌فرض) و همه. گروه‌بندی بر اساس تاریخ اجرا، قالب‌های تجهیزات، هشدار تجهیز غیرآماده با فاصله کمتر از ۳ روز.</td>
+            <td style="font-size: 11px; line-height: 1.4;">مدل‌های EquipmentItem، EquipmentTemplate و EventEquipment در دیتابیس Prisma موجود است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/api/prisma/schema.prisma</td>
+            <td style="text-align: center;"><span class="badge badge-danger">پیاده‌سازی نشده (۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">صفحه فرانت‌اند و کنترلر بک‌اند پیاده‌سازی نشده‌اند (اولویت ۳).</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">پیاده‌سازی در فاز اولویت ۳.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-33</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۲۰</td>
+            <td><strong>صورتجلسات (Meetings)</strong><br><span style="font-size: 11px; color: #475569;">ثبت جلسات و تبدیل مصوبات به تسک</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">لیست جلسات، فرم با عنوان، تاریخ، شرکت‌کنندگان، تصمیمات، جدول اقدام‌ها با دکمه «تبدیل به تسک»، ارسال صورتجلسه با پیش‌نمایش ایمیل، تاریخچه نسخه‌ها.</td>
+            <td style="font-size: 11px; line-height: 1.4;">مدل‌های Meeting و MeetingActionItem در دیتابیس موجود است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/api/prisma/schema.prisma</td>
+            <td style="text-align: center;"><span class="badge badge-danger">پیاده‌سازی نشده (۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">صفحه فرانت‌اند و کنترلر بک‌اند پیاده‌سازی نشده‌اند (اولویت ۲).</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">پیاده‌سازی در فاز اولویت ۲.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-34</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۲۰ و ۲۱</td>
+            <td><strong>SOP</strong><br><span style="font-size: 11px; color: #475569;">مدیریت دستورالعمل‌های استاندارد کاری</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">لیست کارتی با دسته‌بندی، مراحل شماره‌دار، چک‌لیست، دکمه برجسته «ساخت تسک از روی SOP»، تاریخچه نسخه‌ها، پرینت تمیز.</td>
+            <td style="font-size: 11px; line-height: 1.4;">مدل‌های Sop و SopVersion در دیتابیس Prisma وجود دارند.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/api/prisma/schema.prisma</td>
+            <td style="text-align: center;"><span class="badge badge-danger">پیاده‌سازی نشده (۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">صفحه فرانت‌اند و سرویس بک‌اند پیاده‌سازی نشده‌اند (اولویت ۲).</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">پیاده‌سازی در فاز اولویت ۲.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-35</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۲۱</td>
+            <td><strong>آموزش (Learning)</strong><br><span style="font-size: 11px; color: #475569;">سامانه آموزش داخلی و پیشرفت تیم</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">کتابخانه دوره‌ها، آموزش‌های من با نوار پیشرفت، ماتریس پیشرفت تیم برای مدیر، تخصیص آموزش به کاربر.</td>
+            <td style="font-size: 11px; line-height: 1.4;">مدل‌های LearningResource و UserLearningProgress در دیتابیس تعریف شده‌اند.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/api/prisma/schema.prisma</td>
+            <td style="text-align: center;"><span class="badge badge-danger">پیاده‌سازی نشده (۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">صفحه و اندپوینت‌های آموزش پیاده‌سازی نشده‌اند (اولویت ۳).</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">پیاده‌سازی در فاز اولویت ۳.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-36</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۲۱ و ۲۲</td>
+            <td><strong>ایده‌ها (Ideas)</strong><br><span style="font-size: 11px; color: #475569;">بانک ایده، رأی‌گیری و تبدیل به تسک</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">ثبت سریع ایده، فیلتر وضعیت، رأی‌دادن یک‌کلیکی، تبدیل به تسک، ثبت نتیجه اجرای ایده.</td>
+            <td style="font-size: 11px; line-height: 1.4;">مدل‌های Idea و IdeaVote در دیتابیس Prisma تعریف شده‌اند.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/api/prisma/schema.prisma</td>
+            <td style="text-align: center;"><span class="badge badge-danger">پیاده‌سازی نشده (۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">صفحه فرانت‌اند و کنترلر بک‌اند پیاده‌سازی نشده‌اند (اولویت ۳).</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">پیاده‌سازی در فاز اولویت ۳.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-37</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۲۲ و ۲۳</td>
+            <td><strong>گزارش فعالیت (Activity)</strong><br><span style="font-size: 11px; color: #475569;">لاگ فعالیت و گزارش عملکرد تیم</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">فیلتر کاربر و بازه، کارت‌های خلاصه تسک‌ها و تماس‌ها، جدول مقایسه، فید زنده فعالیت‌ها با تایم‌استمپ و لینک.</td>
+            <td style="font-size: 11px; line-height: 1.4;">مدل UserActivityLog در Prisma وجود دارد. لاگ رویدادهای لید در LeadActivity در بک‌اند فعال است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/api/prisma/schema.prisma (model UserActivityLog)</td>
+            <td style="text-align: center;"><span class="badge badge-warning">پیاده‌سازی جزئی (۴۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">صفحه مستقل /work/activity در فرانت‌اند ایجاد نشده است (اولویت ۳).</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">پیاده‌سازی صفحه تجمیعی فید فعالیت در فاز اولویت ۳.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-38</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۲۳</td>
+            <td><strong>کاربران و دسترسی‌ها</strong><br><span style="font-size: 11px; color: #475569;">مدیریت کاربران و ماتریس دسترسی</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">دو تب: کاربران و نقش‌ها و دسترسی‌ها. جدول کاربران (نام، ایمیل/موبایل، نقش، وضعیت، آخرین ورود)، ماتریس دسترسی عملیات × نقش، دعوت کاربر، تغییر نقش، غیرفعال‌سازی با تایید، الزام به وجود حداقل یک ادمین.</td>
+            <td style="font-size: 11px; line-height: 1.4;">صفحه /settings/users با تب کاربران، ماتریس دسترسی تعاملی، مودال‌های دعوت، تغییر نقش و غیرفعال‌سازی در فرانت‌اند پیاده‌سازی شده است. در بک‌اند احراز هویت ۶ نقش و انطباق دسترسی‌ها کامل است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/app/(app)/settings/users/page.tsx, apps/web/src/features/users/, apps/api/src/modules/auth/</td>
+            <td style="text-align: center;"><span class="badge badge-info">صرفاً ظاهر / ماک (۱۵٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">اندپوینت‌های CRUD اعضای سازمان در بک‌اند پیاده‌سازی نشده و عملیات دعوت/تغییر نقش در فرانت‌اند روی mock storage انجام می‌شود.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">ایجاد MembershipsController و UsersController در بک‌اند برای اتصال واقعی فرانت‌اند به جدول organization_memberships.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-39</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۲۳ و ۲۴</td>
+            <td><strong>تنظیمات سازمان</strong><br><span style="font-size: 11px; color: #475569;">تاکسونومی سازمان، وضعیت‌ها و واحد پول</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">تب‌های انواع کمپین، منابع لید، وضعیت‌های لید (گروه: باز/برنده/بازنده)، دلایل ردشدن، دسته‌بندی هزینه. تب عمومی (نام، لوگو، واحد پول: تومان/ریال، منطقه زمانی). منع حذف مقادیر پراستفاده.</td>
+            <td style="font-size: 11px; line-height: 1.4;">صفحه /settings/organization با تب‌های تاکسونومی و تب عمومی و کنترل وضعیت‌ها در فرانت‌اند وجود دارد. در دیتابیس جدول organization_taxonomies و lead_status_configs تعبیه شده است.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/web/src/app/(app)/settings/organization/page.tsx, apps/web/src/features/organization/, apps/api/prisma/schema.prisma</td>
+            <td style="text-align: center;"><span class="badge badge-info">صرفاً ظاهر / ماک (۱۵٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">اندپوینت‌های ویرایش تنظیمات سازمان و تاکسونومی در بک‌اند پیاده‌سازی نشده و تغییرات در localStorage ذخیره می‌شوند.</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">ایجاد OrganizationController و TaxonomiesController در بک‌اند برای ذخیره واقعی تنظیمات در PostgreSQL.</td>
+        </tr>
+        
+
+        <tr>
+            <td style="font-weight: bold; text-align: center;">REQ-40</td>
+            <td style="white-space: nowrap; font-size: 11px;">صفحه ۲۴</td>
+            <td><strong>اتصال وردپرس</strong><br><span style="font-size: 11px; color: #475569;">یکپارچه‌سازی وب‌هوک و کلید API وردپرس</span></td>
+            <td style="font-size: 11px; line-height: 1.4;">کارت وضعیت اتصال، کلید اتصال (نمایش فقط هنگام ساخت و ابطال کلید قبلی)، مراحل راه‌اندازی، جدول نگاشت فیلدها، لاگ درخواست‌های ردشده.</td>
+            <td style="font-size: 11px; line-height: 1.4;">مدل‌های WordpressIntegration و WordpressWebhookLog در دیتابیس با روابط کامل و کلیدهای هش‌شده تعریف شده‌اند.</td>
+            <td style="font-size: 10px; font-family: Consolas, monospace; direction: ltr; text-align: left;">apps/api/prisma/schema.prisma (model WordpressIntegration, WordpressWebhookLog)</td>
+            <td style="text-align: center;"><span class="badge badge-danger">پیاده‌سازی نشده (۰٪)</span></td>
+            <td style="font-size: 11px; line-height: 1.4; color: #b91c1c;">صفحه فرانت‌اند و کنترلر وب‌هوک وردپرس در بک‌اند پیاده‌سازی نشده‌اند (اولویت ۲).</td>
+            <td style="font-size: 11px; line-height: 1.4; color: #1e3a8a;">پیاده‌سازی وب‌هوک لید وردپرس و صفحه تنظیمات در اولویت ۲.</td>
+        </tr>
+        
+            </tbody>
+        </table>
+    </div>
+</div>
+
+    <div class="page-break"></div>
+    
+<!-- 8. MODULE-BY-MODULE ASSESSMENT -->
+<div class="section-container" id="sec-modules-eval">
+    <div class="section-header">
+        <span class="section-number">بخش ۸</span>
+        <h2>ارزیابی تفصیلی ماژول به ماژول (Module-by-Module Assessment)</h2>
+    </div>
+
+    <p class="text-sm mb-4">بررسی فنی ۱۹ ماژول محصول بر اساس نیازمندی، پیاده‌سازی فرانت‌اند، پیاده‌سازی بک‌اند، مدل دیتابیس، سطح اتصال، پوشش تست و برآورد زمان باقیمانده:</p>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ماژول</th>
+                <th>پیاده‌سازی فرانت‌اند</th>
+                <th>پیاده‌سازی بک‌اند</th>
+                <th>پایگاه داده (Prisma)</th>
+                <th>سطح اتصال API</th>
+                <th>تست‌های معتبر</th>
+                <th>وضعیت کلی</th>
+                <th>تخمین کار باقی‌مانده</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>۱. احراز هویت و نشست‌ها</strong></td>
+                <td>صفحات ورود، فراموشی رمز، انتخاب سازمان</td>
+                <td>ماژول Auth، رفرش-توکن، کشف Replay</td>
+                <td>User, Session, RefreshToken</td>
+                <td><span class="badge badge-success">اتصال کامل ۱۰۰٪</span></td>
+                <td>۲۳ تست یکپارچگی Postgres</td>
+                <td><span class="badge badge-success">تکمیل شده</span></td>
+                <td>۲ روز (ایمیل فراموشی رمز)</td>
+            </tr>
+            <tr>
+                <td><strong>۲. صفحه خانه بر اساس نقش</strong></td>
+                <td>کامپوننت‌های مجزا برای ۵ نقش</td>
+                <td>فاقد کنترلر اختصاصی خلاصه خانه</td>
+                <td>تغذیه از جداول لید و کمپین</td>
+                <td><span class="badge badge-warning">جزئی (فرانت‌اندی)</span></td>
+                <td>تست ساختار کامپوننت</td>
+                <td><span class="badge badge-warning">پیاده‌سازی جزئی</span></td>
+                <td>۳ روز (اندپوینت خلاصه)</td>
+            </tr>
+            <tr>
+                <td><strong>۳. نوتیفیکیشن‌ها و هشدارها</strong></td>
+                <td>طراحی نشده (فقط آیکون هدر)</td>
+                <td>فاقد کنترلر نوتیفیکیشن</td>
+                <td>Notification, Preference</td>
+                <td><span class="badge badge-danger">متصل نیست</span></td>
+                <td>ندارد</td>
+                <td><span class="badge badge-danger">پیاده‌سازی نشده</span></td>
+                <td>۴ روز (اولویت ۲)</td>
+            </tr>
+            <tr>
+                <td><strong>۴. داشبورد اجرایی عملکرد</strong></td>
+                <td>۶ کارت شاخص، ۲ چارت، قیف ۵ مرحله‌ای</td>
+                <td>داشبورد سرویس و فیلترهای جلالی</td>
+                <td>محاسبه از Costs, Leads, Campaigns</td>
+                <td><span class="badge badge-success">اتصال کامل ۱۰۰٪</span></td>
+                <td>۶۶ تست یکپارچگی جامع</td>
+                <td><span class="badge badge-success">تکمیل شده</span></td>
+                <td>۰ روز (کامل)</td>
+            </tr>
+            <tr>
+                <td><strong>۵. مدیریت کمپین‌ها</strong></td>
+                <td>جدول کمپین‌ها، وضعیت مصرف، فیلترها</td>
+                <td>CampaignsController (CRUD + Stats)</td>
+                <td>Campaign</td>
+                <td><span class="badge badge-success">اتصال کامل ۱۰۰٪</span></td>
+                <td>۵۴ تست یکپارچگی Postgres</td>
+                <td><span class="badge badge-success">تکمیل شده</span></td>
+                <td>۰ روز (کامل)</td>
+            </tr>
+            <tr>
+                <td><strong>۶. ویزارد ساخت کمپین</strong></td>
+                <td>ویزارد ۶ مرحله‌ای با ذخیره درفت</td>
+                <td>POST /api/campaigns با اعتبارسنجی</td>
+                <td>Campaign, PlatformAllocation</td>
+                <td><span class="badge badge-success">اتصال کامل ۱۰۰٪</span></td>
+                <td>۲۲ تست E2E فرانت‌اند</td>
+                <td><span class="badge badge-success">تکمیل شده</span></td>
+                <td>۲ روز (اتصال مدل مخاطب)</td>
+            </tr>
+            <tr>
+                <td><strong>۷. جزئیات کمپین</strong></td>
+                <td>هدر ثابت، تب‌های خلاصه، لید، هزینه</td>
+                <td>GET /api/campaigns/:id</td>
+                <td>Campaign, Lead, Cost</td>
+                <td><span class="badge badge-warning">جزئی (۴ از ۸ تب)</span></td>
+                <td>تست لودینگ و واکشی</td>
+                <td><span class="badge badge-warning">پیاده‌سازی جزئی</span></td>
+                <td>۴ روز (تب‌های تحلیلی)</td>
+            </tr>
+            <tr>
+                <td><strong>۸. مدیریت هزینه‌ها</strong></td>
+                <td>جدول هزینه‌ها، ثبت سریع و دسته‌ای</td>
+                <td>CostsController (CRUD + Batch + Stats)</td>
+                <td>Cost, CostCategory</td>
+                <td><span class="badge badge-success">اتصال کامل ۱۰۰٪</span></td>
+                <td>۵۳ تست یکپارچگی Postgres</td>
+                <td><span class="badge badge-success">تکمیل شده</span></td>
+                <td>۰ روز (کامل)</td>
+            </tr>
+            <tr>
+                <td><strong>۹. صندوق لیدها</strong></td>
+                <td>جدول لیدها، ماسک شماره، فیلترها</td>
+                <td>LeadsController (Create, Filter, List)</td>
+                <td>Lead, LeadActivity</td>
+                <td><span class="badge badge-success">اتصال کامل ۱۰۰٪</span></td>
+                <td>۷۰ تست یکپارچگی Postgres</td>
+                <td><span class="badge badge-success">تکمیل شده</span></td>
+                <td>۱ روز (اکشن گروهی)</td>
+            </tr>
+            <tr>
+                <td><strong>۱۰. چرخه حیات لید و کانبان</strong></td>
+                <td>برد کانبان ۶ ستونه با درگ و دراپ</td>
+                <td>PATCH /api/leads/:id/status</td>
+                <td>Lead, LeadActivity</td>
+                <td><span class="badge badge-success">اتصال کامل ۱۰۰٪</span></td>
+                <td>تست لایف‌سایکل و فعالیت</td>
+                <td><span class="badge badge-success">تکمیل شده</span></td>
+                <td>۰ روز (کامل)</td>
+            </tr>
+            <tr>
+                <td><strong>۱۱. جزئیات و مسیر لید</strong></td>
+                <td>پروفایل کامل، تایم‌لاین رویدادها، ثبت تماس</td>
+                <td>GET /api/leads/:id/activities</td>
+                <td>Lead, LeadActivity, LeadCall</td>
+                <td><span class="badge badge-success">اتصال کامل ۱۰۰٪</span></td>
+                <td>تست لاگ فعالیت‌ها</td>
+                <td><span class="badge badge-success">تکمیل شده</span></td>
+                <td>۰ روز (کامل)</td>
+            </tr>
+            <tr>
+                <td><strong>۱۲. مدیریت تسک‌ها</strong></td>
+                <td>نمای لیست و بورد با دراور و فیلترها</td>
+                <td>فاقد کنترلر در NestJS</td>
+                <td>Task, TaskSubtask, TaskComment</td>
+                <td><span class="badge badge-info">ماک محلی (Storage)</span></td>
+                <td>تست کامپوننت فرانت‌اند</td>
+                <td><span class="badge badge-info">صرفاً UI</span></td>
+                <td>۵ روز (کنترلر بک‌اند)</td>
+            </tr>
+            <tr>
+                <td><strong>۱۳. کاربران و دسترسی‌ها</strong></td>
+                <td>جدول اعضا و ماتریس دسترسی</td>
+                <td>تطبیق نقش در Auth، فاقد CRUD اعضا</td>
+                <td>User, OrganizationMembership</td>
+                <td><span class="badge badge-info">ماک محلی (Storage)</span></td>
+                <td>تست دسترسی‌های نقش</td>
+                <td><span class="badge badge-info">صرفاً UI</span></td>
+                <td>۴ روز (کنترلر اعضا)</td>
+            </tr>
+            <tr>
+                <td><strong>۱۴. تنظیمات سازمان</strong></td>
+                <td>تب‌های تاکسونومی و تب عمومی</td>
+                <td>فاقد کنترلر در NestJS</td>
+                <td>Organization, Taxonomy</td>
+                <td><span class="badge badge-info">ماک محلی (Storage)</span></td>
+                <td>تست ذخیره محلی</td>
+                <td><span class="badge badge-info">صرفاً UI</span></td>
+                <td>۳ روز (کنترلر سازمان)</td>
+            </tr>
+            <tr>
+                <td><strong>۱۵. پلتفرم‌های تبلیغاتی</strong></td>
+                <td>در تنظیمات سازمان ادغام شده</td>
+                <td>فاقد کنترلر اختصاصی</td>
+                <td>Platform</td>
+                <td><span class="badge badge-danger">متصل نیست</span></td>
+                <td>ندارد</td>
+                <td><span class="badge badge-danger">پیاده‌سازی نشده</span></td>
+                <td>۴ روز (اولویت ۲)</td>
+            </tr>
+            <tr>
+                <td><strong>۱۶. داده Import</strong></td>
+                <td>مودال ایمپورت در صفحه هزینه‌ها</td>
+                <td>فاقد ویزارد مستقل و Job Processor</td>
+                <td>ImportJob</td>
+                <td><span class="badge badge-warning">جزئی</span></td>
+                <td>ندارد</td>
+                <td><span class="badge badge-warning">پیاده‌سازی جزئی</span></td>
+                <td>۵ روز (اولویت ۱)</td>
+            </tr>
+            <tr>
+                <td><strong>۱۷. لندینگ و سازنده UTM</strong></td>
+                <td>در ویزارد کمپین ادغام شده</td>
+                <td>فاقد کنترلر اختصاصی لندینگ</td>
+                <td>LandingPage, UtmLink</td>
+                <td><span class="badge badge-warning">جزئی</span></td>
+                <td>ندارد</td>
+                <td><span class="badge badge-warning">پیاده‌سازی جزئی</span></td>
+                <td>۴ روز (اولویت ۲)</td>
+            </tr>
+            <tr>
+                <td><strong>۱۸. پیامک و وبینار</strong></td>
+                <td>طراحی نشده</td>
+                <td>فاقد کنترلر در NestJS</td>
+                <td>SmsCampaign, Webinar</td>
+                <td><span class="badge badge-danger">متصل نیست</span></td>
+                <td>ندارد</td>
+                <td><span class="badge badge-danger">پیاده‌سازی نشده</span></td>
+                <td>۸ روز (اولویت ۳)</td>
+            </tr>
+            <tr>
+                <td><strong>۱۹. سایر ماژول‌های فاز ۳</strong></td>
+                <td>(تقویم، تجهیزات، صورتجلسه، SOP، آموزش)</td>
+                <td>مدل‌های داده‌ای در Prisma موجود است</td>
+                <td>۱۰ مدل مرتبط در دیتابیس</td>
+                <td><span class="badge badge-danger">متصل نیست</span></td>
+                <td>ندارد</td>
+                <td><span class="badge badge-danger">پیاده‌سازی نشده</span></td>
+                <td>۱۵ روز (اولویت ۳)</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- PAGE BREAK -->
+<div class="page-break"></div>
+
+<!-- 9. MODULE KNOWLEDGE GUIDE & SOURCE MAP -->
+<div class="section-container" id="sec-module-guide">
+    <div class="section-header">
+        <span class="section-number">بخش ۹</span>
+        <h2>راهنمای دانش ماژول‌ها و نقشه مسئولیت فایل‌های کلیدی</h2>
+    </div>
+
+    <p class="text-sm mb-4">این راهنما به کارفرما و توسعه‌دهندگان جدید کمک می‌کند مسئولیت هر فایل و اثر تغییر آن بر کل سامانه را به سرعت درک کنند:</p>
+
+    <div class="grid-2">
+        <div class="card mb-4">
+            <h4 class="text-sm font-bold text-primary mb-2">فایل‌های کلیدی بک‌اند (NestJS)</h4>
+            <ul class="styled-list text-xs">
+                <li><code>prisma/schema.prisma</code>: سنگ‌بنای داده‌ای کل سیستم؛ تغییر در آن نیازمند اجرای <code>prisma generate</code> و مایگریشن دیتابیس است.</li>
+                <li><code>modules/auth/auth.service.ts</code>: قلب امنیتی احراز هویت؛ مدیریت توکن‌های رفرش، ورود، خروج، اعتبارسنجی رمزهای عبور و ردگیری Replay.</li>
+                <li><code>modules/campaigns/campaigns.service.ts</code>: منطق ساخت، ویرایش، حذف، نرمال‌سازی بودجه و محاسبه سلامت کمپین‌ها.</li>
+                <li><code>modules/costs/costs.service.ts</code>: ثبت هزینه‌ها و مسئول به‌روزرسانی دینامیک فیلد <code>spend</code> در کمپین متناظر.</li>
+                <li><code>modules/leads/leads.service.ts</code>: موتور چرخه حیات لید، اعمال مالکیت کارشناس فروش، ثبت لاگ فعالیت‌ها و ممانعت از شماره تکراری.</li>
+                <li><code>modules/dashboard/dashboard.service.ts</code>: تجمیع‌کننده تحلیلی؛ محاسبه ۶ شاخص اصلی بر مبنای تقویم جلالی بدون استفاده از داده‌های ساختگی.</li>
+            </ul>
+        </div>
+
+        <div class="card mb-4">
+            <h4 class="text-sm font-bold text-primary mb-2">فایل‌های کلیدی فرانت‌اند (Next.js)</h4>
+            <ul class="styled-list text-xs">
+                <li><code>src/lib/api.ts</code>: کلاینت مرکزی Axios با اینترسپتورهای توکن در حافظه و صف‌بندی بازسازی توکن ۴۰۱.</li>
+                <li><code>src/lib/permissions.ts</code>: موتور ارزیابی دسترسی‌ها بر پایه ماتریس نقش‌های ۶ گانه (تابع <code>hasPermission</code>).</li>
+                <li><code>src/lib/persian-date.ts</code>: توابع محاسبات تقویم جلالی، فرمت‌بندی تاریخ و محاسبه مرزهای هفته و ماه شمسی.</li>
+                <li><code>src/features/dashboard/components/conversion-funnel-widget.tsx</code>: نمایش گرافیکی قیف تبدیل ۵ مرحله‌ای.</li>
+                <li><code>src/features/leads/components/kanban-card.tsx</code>: کامپوننت کارت لید در بورد کانبان با پشتیبانی درگ و دراپ.</li>
+                <li><code>src/features/campaigns/components/wizard/campaign-wizard-form.tsx</code>: فرم ۶ مرحله‌ای ویزارد ساخت کمپین.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- 10. ROUTE INVENTORY -->
+<div class="section-container" id="sec-route-inv">
+    <div class="section-header">
+        <span class="section-number">بخش ۱۰</span>
+        <h2>سیاهه جامع روت‌ها و صفحات فرانت‌اند (Frontend Route Inventory)</h2>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>آدرس روت (Route)</th>
+                <th>فایل صفحه (Page.tsx)</th>
+                <th>نام صفحه و کارکرد</th>
+                <th>نقش‌های مجاز</th>
+                <th>منبع داده</th>
+                <th>وضعیت یکپارچگی</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>/login</code></td>
+                <td class="code-font dir-ltr text-xs">apps/web/src/app/(auth)/login/page.tsx</td>
+                <td>صفحه ورود با نام کاربری و رمز عبور</td>
+                <td>عمومی (پیش از ورود)</td>
+                <td>PostgreSQL / API</td>
+                <td><span class="badge badge-success">واقعی و متصل</span></td>
+            </tr>
+            <tr>
+                <td><code>/forgot-password</code></td>
+                <td class="code-font dir-ltr text-xs">apps/web/src/app/(auth)/forgot-password/page.tsx</td>
+                <td>درخواست بازیابی رمز عبور</td>
+                <td>عمومی</td>
+                <td>فرم بدون API</td>
+                <td><span class="badge badge-info">صرفاً ظاهر (ماک)</span></td>
+            </tr>
+            <tr>
+                <td><code>/select-org</code></td>
+                <td class="code-font dir-ltr text-xs">apps/web/src/app/(auth)/select-org/page.tsx</td>
+                <td>انتخاب سازمان فعال کاربر</td>
+                <td>کاربران لاگین‌شده</td>
+                <td>سشن احراز هویت</td>
+                <td><span class="badge badge-warning">نیمه متصل</span></td>
+            </tr>
+            <tr>
+                <td><code>/</code></td>
+                <td class="code-font dir-ltr text-xs">apps/web/src/app/(app)/page.tsx</td>
+                <td>داشبورد خانه بر اساس نقش کاربر</td>
+                <td>همه نقش‌ها</td>
+                <td>داده‌های فرانت‌اند</td>
+                <td><span class="badge badge-warning">نیمه متصل</span></td>
+            </tr>
+            <tr>
+                <td><code>/performance/dashboard</code></td>
+                <td class="code-font dir-ltr text-xs">apps/web/src/app/(app)/performance/dashboard/page.tsx</td>
+                <td>داشبورد تحلیلی و اجرایی بازاریابی</td>
+                <td>ادمین، مدیر مارکتینگ، کارفرما</td>
+                <td>PostgreSQL / API</td>
+                <td><span class="badge badge-success">واقعی و متصل</span></td>
+            </tr>
+            <tr>
+                <td><code>/campaigns</code></td>
+                <td class="code-font dir-ltr text-xs">apps/web/src/app/(app)/campaigns/page.tsx</td>
+                <td>لیست و فیلترهای کمپین‌ها</td>
+                <td>ادمین، مدیر مارکتینگ، کمپین‌چی، کارفرما</td>
+                <td>PostgreSQL / API</td>
+                <td><span class="badge badge-success">واقعی و متصل</span></td>
+            </tr>
+            <tr>
+                <td><code>/campaigns/new</code></td>
+                <td class="code-font dir-ltr text-xs">apps/web/src/app/(app)/campaigns/new/page.tsx</td>
+                <td>ویزارد ۶ مرحله‌ای ساخت کمپین جدید</td>
+                <td>ادمین، مدیر مارکتینگ، کمپین‌چی</td>
+                <td>PostgreSQL / API</td>
+                <td><span class="badge badge-success">واقعی و متصل</span></td>
+            </tr>
+            <tr>
+                <td><code>/campaigns/[id]</code></td>
+                <td class="code-font dir-ltr text-xs">apps/web/src/app/(app)/campaigns/[id]/page.tsx</td>
+                <td>جزئیات کمپین و تب‌های عملکرد</td>
+                <td>ادمین، مدیر مارکتینگ، کمپین‌چی، کارفرما</td>
+                <td>PostgreSQL / API</td>
+                <td><span class="badge badge-warning">نیمه متصل</span></td>
+            </tr>
+            <tr>
+                <td><code>/campaigns/[id]/edit</code></td>
+                <td class="code-font dir-ltr text-xs">apps/web/src/app/(app)/campaigns/[id]/edit/page.tsx</td>
+                <td>ویرایش کمپین در قالب ویزارد</td>
+                <td>ادمین، مدیر مارکتینگ، کمپین‌چی</td>
+                <td>PostgreSQL / API</td>
+                <td><span class="badge badge-success">واقعی و متصل</span></td>
+            </tr>
+            <tr>
+                <td><code>/performance/costs</code></td>
+                <td class="code-font dir-ltr text-xs">apps/web/src/app/(app)/performance/costs/page.tsx</td>
+                <td>مدیریت و ثبت هزینه‌های تبلیغات</td>
+                <td>ادمین، مدیر مارکتینگ، کمپین‌چی، کارفرما</td>
+                <td>PostgreSQL / API</td>
+                <td><span class="badge badge-success">واقعی و متصل</span></td>
+            </tr>
+            <tr>
+                <td><code>/leads</code></td>
+                <td class="code-font dir-ltr text-xs">apps/web/src/app/(app)/leads/page.tsx</td>
+                <td>صندوق لیدها و لیست ورودی‌ها</td>
+                <td>ادمین، مدیر مارکتینگ، کارشناس فروش</td>
+                <td>PostgreSQL / API</td>
+                <td><span class="badge badge-success">واقعی و متصل</span></td>
+            </tr>
+            <tr>
+                <td><code>/leads/board</code></td>
+                <td class="code-font dir-ltr text-xs">apps/web/src/app/(app)/leads/board/page.tsx</td>
+                <td>برد کانبان ۶ ستونی لیدها</td>
+                <td>ادمین، مدیر مارکتینگ، کارشناس فروش</td>
+                <td>PostgreSQL / API</td>
+                <td><span class="badge badge-success">واقعی و متصل</span></td>
+            </tr>
+            <tr>
+                <td><code>/leads/[id]</code></td>
+                <td class="code-font dir-ltr text-xs">apps/web/src/app/(app)/leads/[id]/page.tsx</td>
+                <td>پروفایل لید و خط زمانی تعاملات</td>
+                <td>ادمین، مدیر مارکتینگ، کارشناس فروش</td>
+                <td>PostgreSQL / API</td>
+                <td><span class="badge badge-success">واقعی و متصل</span></td>
+            </tr>
+            <tr>
+                <td><code>/work/tasks</code></td>
+                <td class="code-font dir-ltr text-xs">apps/web/src/app/(app)/work/tasks/page.tsx</td>
+                <td>مدیریت تسک‌ها (لیست و بورد)</td>
+                <td>همه نقش‌ها</td>
+                <td>حافظه محلی (LocalStorage)</td>
+                <td><span class="badge badge-info">صرفاً ظاهر (ماک)</span></td>
+            </tr>
+            <tr>
+                <td><code>/settings/users</code></td>
+                <td class="code-font dir-ltr text-xs">apps/web/src/app/(app)/settings/users/page.tsx</td>
+                <td>کاربران و ماتریس دسترسی نقش‌ها</td>
+                <td>صرفاً ادمین</td>
+                <td>حافظه محلی (LocalStorage)</td>
+                <td><span class="badge badge-info">صرفاً ظاهر (ماک)</span></td>
+            </tr>
+            <tr>
+                <td><code>/settings/organization</code></td>
+                <td class="code-font dir-ltr text-xs">apps/web/src/app/(app)/settings/organization/page.tsx</td>
+                <td>تنظیمات سازمان و تاکسونومی</td>
+                <td>صرفاً ادمین</td>
+                <td>حافظه محلی (LocalStorage)</td>
+                <td><span class="badge badge-info">صرفاً ظاهر (ماک)</span></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- PAGE BREAK -->
+<div class="page-break"></div>
+
+<!-- 11. API INVENTORY & 12. DATABASE AUDIT -->
+<div class="section-container" id="sec-api-inv">
+    <div class="section-header">
+        <span class="section-number">بخش ۱۱ و ۱۲</span>
+        <h2>سیاهه اندپوینت‌های API و ممیزی مدل‌های داده‌ای پایگاه داده</h2>
+    </div>
+
+    <div class="grid-2 mb-6">
+        <div>
+            <h3 class="card-title">اندپوینت‌های فعال بک‌اند (۲۵ اندپوینت REST)</h3>
+            <ul class="styled-list text-xs">
+                <li><code>POST /api/auth/login</code>: لاگین، تولید توکن JWT و کوکی رفرش.</li>
+                <li><code>POST /api/auth/refresh</code>: تمدید سشن و چرخش رفرش-توکن.</li>
+                <li><code>POST /api/auth/logout</code>: ابطال سشن و پاکسازی کوکی.</li>
+                <li><code>GET /api/auth/me</code>: واکشی پروفایل کاربر و نقش فعال.</li>
+                <li><code>GET /api/campaigns</code>: لیست کمپین‌ها با فیلترها و آمار بودجه.</li>
+                <li><code>GET /api/campaigns/stats</code>: خلاصه شاخص‌های کلی کمپین‌ها.</li>
+                <li><code>GET /api/campaigns/:id</code>: جزئیات کمپین مشخص.</li>
+                <li><code>POST /api/campaigns</code>: ساخت کمپین با اعتبارسنجی بودجه.</li>
+                <li><code>PATCH /api/campaigns/:id</code>: ویرایش فیلدها و وضعیت کمپین.</li>
+                <li><code>DELETE /api/campaigns/:id</code>: حذف کمپین.</li>
+                <li><code>GET /api/costs</code>: لیست هزینه‌ها با فیلتر پلتفرم و کمپین.</li>
+                <li><code>GET /api/costs/stats</code>: آمار تجمیعی مبالغ هزینه.</li>
+                <li><code>GET /api/costs/:id</code>: جزئیات فاکتور/هزینه.</li>
+                <li><code>POST /api/costs</code>: ثبت هزینه جدید و آپدیت خودکار spend.</li>
+                <li><code>POST /api/costs/batch</code>: ثبت دسته‌ای هزینه‌ها در تراکنش.</li>
+                <li><code>PATCH /api/costs/:id</code>: ویرایش هزینه و همگام‌سازی بودجه.</li>
+                <li><code>DELETE /api/costs/:id</code>: حذف هزینه و کسر خودکار از spend.</li>
+                <li><code>GET /api/dashboard/overview</code>: آمار داشبورد با ۶ شاخص، ۲ چارت، قیف ۵ مرحله‌ای و فیلتر جلالی.</li>
+                <li><code>GET /api/leads</code>: لیست صندوق لیدها با تفکیک مالکیت کارشناس.</li>
+                <li><code>GET /api/leads/assignees</code>: لیست کاربران مجاز جهت تخصیص.</li>
+                <li><code>GET /api/leads/:id</code>: پروفایل لید و اطلاعات تکمیلی.</li>
+                <li><code>POST /api/leads</code>: ایجاد لید دستی با بررسی عدم تکرار شماره.</li>
+                <li><code>PATCH /api/leads/:id/status</code>: تغییر وضعیت چرخه حیات لید در کانبان.</li>
+                <li><code>GET /api/leads/:id/activities</code>: لیست تاریخچه رویدادهای لید.</li>
+            </ul>
+        </div>
+
+        <div>
+            <h3 class="card-title">ممیزی پایگاه داده (Prisma Schema - 47 Models)</h3>
+            <p class="text-xs mb-3">پایگاه داده در بالاترین سطح استاندارد سازمانی طراحی شده است و شامل تفکیک خوشه‌های داده‌ای زیر است:</p>
+            <ul class="styled-list text-xs">
+                <li><strong>خوشه احراز هویت (۷ مدل):</strong> User, Organization, OrganizationMembership, Session, RefreshToken, OrganizationTaxonomy, NotificationPreference.</li>
+                <li><strong>خوشه کمپین و بازاریابی (۷ مدل):</strong> Campaign, Platform, CampaignPlatformAllocation, TargetAudience, CampaignAudience, LandingPage, UtmLink.</li>
+                <li><strong>خوشه مالی و هزینه‌ها (۲ مدل):</strong> CostCategory, Cost.</li>
+                <li><strong>خوشه مدیریت لید و CRM (۴ مدل):</strong> LeadStatusConfig, Lead, LeadActivity, LeadCall.</li>
+                <li><strong>خوشه پیام‌رسانی و رویدادها (۴ مدل):</strong> SmsCampaign, SmsRecipient, Webinar, WebinarAttendee.</li>
+                <li><strong>خوشه تسک‌ها و دانش (۱۰ مدل):</strong> Task, TaskSubtask, TaskComment, CalendarEvent, EquipmentItem, EquipmentTemplate, EquipmentTemplateItem, EventEquipment, Meeting, MeetingActionItem.</li>
+                <li><strong>خوشه فرآیندها و آموزش (۶ مدل):</strong> Sop, SopVersion, LearningResource, UserLearningProgress, Idea, IdeaVote.</li>
+                <li><strong>خوشه شاخص‌ها و یکپارچه‌سازی (۷ مدل):</strong> KpiMetric, KpiAlertRule, ImportJob, Notification, UserActivityLog, WordpressIntegration, WordpressWebhookLog.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+    <div class="page-break"></div>
+    
+<!-- 13. SECURITY & AUTHENTICATION REVIEW -->
+<div class="section-container" id="sec-sec-audit">
+    <div class="section-header">
+        <span class="section-number">بخش ۱۳</span>
+        <h2>بررسی عمیق معماری امنیت، احراز هویت و ایزولاسیون سازمانی</h2>
+    </div>
+
+    <p class="text-sm mb-4">معماری امنیتی سیستم بر پایه بهترین الگوهای استانداردهای امنیتی وب طراحی شده و طی فازهای B2.3 تا B2.4.6 به صورت عملیاتی تثبیت گردیده است:</p>
+
+    <div class="grid-2 mb-6">
+        <div class="card">
+            <h4 class="card-title text-sm">موتور چرخش رفرش-توکن و کشف Replay Attack</h4>
+            <p class="text-xs mb-2">در بسیاری از سیستم‌ها، سرقت رفرش-توکن منجر به دسترسی نامحدود مهاجم می‌شود. در گپجی استراتژی <strong>Refresh Token Family</strong> با مشخصات زیر اجرا شده است:</p>
+            <ul class="styled-list text-xs">
+                <li><strong>انقضای تک‌بارمصرف:</strong> به محض استفاده از رفرش-توکن، وضعیت آن به <code>CONSUMED</code> تغییر یافته و یک توکن فرزند ایجاد می‌شود.</li>
+                <li><strong>کشف فوری حمله Replay:</strong> اگر یک توکن مصرف‌شده مجدداً ارسال شود، سیستم بلافاصله هشدار امنیتی صادر کرده و <strong>تمام نشست‌ها و زنجیره توکن‌های آن کاربر را فوراً باطل (Revoke) می‌کند</strong> تا مهاجم خلع سلاح شود.</li>
+                <li><strong>قفل بدبینانه Concurrency:</strong> با استفاده از کوئری <code>SELECT ... FOR UPDATE</code> در PostgreSQL، ارسال همزمان درخواست‌های رفرش (Race Condition) مسدود شده و تنها یکی موفق می‌شود.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h4 class="card-title text-sm">ایزولاسیون چندمستأجری و کنترل سطوح دسترسی (RBAC)</h4>
+            <p class="text-xs mb-2">برای جلوگیری از نشت اطلاعات بین سازمان‌ها یا مشاهده داده‌های غیرمجاز توسط کارمندان:</p>
+            <ul class="styled-list text-xs">
+                <li><strong>مالکیت کارشناس فروش:</strong> کارشناس فروش (sales_agent) به صورت سخت‌گیرانه در سطح کوئری‌های SQL تنها به لیدهایی دسترسی دارد که فیلد <code>assignedToId</code> برابر با شناسه خودش باشد؛ درخواست لید سایر همکاران با خطای ۴۰۳ مسدود می‌شود.</li>
+                <li><strong>جداسازی سازمان‌ها:</strong> در تمام جداول اصلی، کلید ترکیبی با <code>organizationId</code> الزام شده است. کوئری‌های سرویس شرط سازمان را از کانتکست کاربر لاگین‌شده استخراج کرده و اعمال می‌کنند.</li>
+                <li><strong>عدم ذخیره توکن در دیسک کلاینت:</strong> توکن دسترسی JWT صرفاً در متغیرهای حافظه جاوااسکریپت قرار دارد و در صورت بستن پنجره یا حمله XSS روی دیسک ماندگار نیست.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- PAGE BREAK -->
+<div class="page-break"></div>
+
+<!-- 14. TESTING RESULTS & 15. TECHNICAL DEBT -->
+<div class="section-container" id="sec-test-results">
+    <div class="section-header">
+        <span class="section-number">بخش ۱۴ و ۱۵</span>
+        <h2>نتایج اجرای تست‌ها، اعتبارسنجی‌ها و بدهی‌های فنی شناسایی‌شده</h2>
+    </div>
+
+    <div class="card mb-6">
+        <h3 class="card-title">کارنامه اجرای تست‌های ممیزی (۳۴۵ تست یکپارچگی موفق)</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>مجموعه آزمون</th>
+                    <th>نوع آزمون</th>
+                    <th>تعداد تست</th>
+                    <th>نتیجه اجرای ممیزی</th>
+                    <th>دامنه اعتبارسنجی</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Auth PostgreSQL Integration</strong></td>
+                    <td>یکپارچگی دیتابیس واقعی</td>
+                    <td>۲۳ تست</td>
+                    <td><span class="badge badge-success">۲۳ پاس / ۰ خطا</span></td>
+                    <td>Argon2id، لاگین با ایمیل/موبایل، چرخش توکن، کشف حمله Replay، تست Race Condition همزمان</td>
+                </tr>
+                <tr>
+                    <td><strong>Campaigns Integration Suite</strong></td>
+                    <td>یکپارچگی دیتابیس واقعی</td>
+                    <td>۵۴ تست</td>
+                    <td><span class="badge badge-success">۵۴ پاس / ۰ خطا</span></td>
+                    <td>اعتبارسنجی بودجه صحیح ریالی، دسترسی ۶ نقش، ایجاد کمپین، محاسبه سلامت، آپدیت و حذف فیزیکی</td>
+                </tr>
+                <tr>
+                    <td><strong>Costs Integration Suite</strong></td>
+                    <td>یکپارچگی دیتابیس واقعی</td>
+                    <td>۵۳ تست</td>
+                    <td><span class="badge badge-success">۵۳ پاس / ۰ خطا</span></td>
+                    <td>ثبت هزینه، ثبت دسته‌ای، همگام‌سازی خودکار spend در کمپین، منع دسترسی کارشناس، حذف و کسر بودجه</td>
+                </tr>
+                <tr>
+                    <td><strong>Leads Integration Suite</strong></td>
+                    <td>یکپارچگی دیتابیس واقعی</td>
+                    <td>۷۰ تست</td>
+                    <td><span class="badge badge-success">۷۰ پاس / ۰ خطا</span></td>
+                    <td>ایجاد لید، منع شماره تکراری با ۴۰۹، محدودیت کارشناس فروش به لیدهای خود، لایف‌سایکل و لاگ فعالیت‌ها</td>
+                </tr>
+                <tr>
+                    <td><strong>Dashboard Integration Suite</strong></td>
+                    <td>یکپارچگی دیتابیس واقعی</td>
+                    <td>۶۶ تست</td>
+                    <td><span class="badge badge-success">۶۶ پاس / ۰ خطا</span></td>
+                    <td>۶ شاخص اصلی صفحه ۸، مرزهای ماه شمسی، عدم تقسیم بر صفر، قیف ۵ مرحله‌ای بدون هم‌پوشانی، شاخص سلامت</td>
+                </tr>
+                <tr>
+                    <td><strong>Frontend E2E Verifications</strong></td>
+                    <td>تست تعاملی فرانت‌اند/بک‌اند</td>
+                    <td>۷۹ تست</td>
+                    <td><span class="badge badge-success">۷۹ پاس / ۰ خطا</span></td>
+                    <td>اسکریپت‌های verify کمپین، هزینه‌ها و بورد کانبان لیدها متصل به سرورهای محلی فعال</td>
+                </tr>
+                <tr>
+                    <td><strong>Campaigns Service Unit Test</strong></td>
+                    <td>تست یونیت ماک‌شده</td>
+                    <td>۲ تست</td>
+                    <td><span class="badge badge-danger">۱ پاس / ۱ خطا</span></td>
+                    <td>خطای ماک در <code>campaigns.service.spec.ts</code>؛ شیء ماک فاقد تابع <code>findFirst</code> بود.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card mb-6" id="sec-tech-debt">
+        <h3 class="card-title">بدهی‌های فنی و ریسک‌های معماری شناسایی‌شده (Technical Debt & Risks)</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>شناسه</th>
+                    <th>شدت ریسک</th>
+                    <th>موضوع و ماژول آسیب‌پذیر</th>
+                    <th>شرح نقص فنی و اثر آن</th>
+                    <th>اقدام پیشنهادی جهت رفع</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>DEBT-01</strong></td>
+                    <td><span class="badge badge-danger">بحرانی (P0)</span></td>
+                    <td>ماژول تسک‌ها (Work Tasks)</td>
+                    <td>تسک‌های فرانت‌اند در <code>localStorage</code> ذخیره می‌شوند و بک‌اند کنترلی برای ذخیره در دیتابیس ندارد. تسک‌ها با بستن مرورگر یا تعویض کامپیوتر از دست می‌روند.</td>
+                    <td>پیاده‌سازی <code>TasksController</code> و <code>TasksService</code> متصل به جدول <code>tasks</code> در دیتابیس.</td>
+                </tr>
+                <tr>
+                    <td><strong>DEBT-02</strong></td>
+                    <td><span class="badge badge-danger">بحرانی (P0)</span></td>
+                    <td>کاربران و تنظیمات سازمان</td>
+                    <td>تنظیمات نرخ ارز، تاکسونومی سازمان و دعوت کاربران در فرانت‌اند روی ماک است و کنترلر مدیریت اعضا در بک‌اند فعال نیست.</td>
+                    <td>ایجاد اندپوینت‌های CRUD اعضا و تاکسونومی سازمان در بک‌اند NestJS.</td>
+                </tr>
+                <tr>
+                    <td><strong>DEBT-03</strong></td>
+                    <td><span class="badge badge-warning">متوسط (P1)</span></td>
+                    <td>پکیج اشتراکی <code>@gapji/shared</code></td>
+                    <td>قراردادهای داده‌ای لید، هزینه و داشبورد بین فرانت‌اند و بک‌اند تکثیر شده‌اند و در پکیج مشترک یکپارچه نشده‌اند.</td>
+                    <td>انتقال اینترفیس‌های DTO لیدها، هزینه‌ها و داشبورد به <code>packages/shared</code>.</td>
+                </tr>
+                <tr>
+                    <td><strong>DEBT-04</strong></td>
+                    <td><span class="badge badge-warning">متوسط (P2)</span></td>
+                    <td>ماک ناقص در یونیت تست کمپین</td>
+                    <td>اسکریپت <code>campaigns.service.spec.ts</code> به دلیل عدم ماک‌کردن <code>findFirst</code> با خطا مواجه می‌شود.</td>
+                    <td>تکمیل ماک تابع <code>findFirst</code> در فایل آزمون واحد.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- PAGE BREAK -->
+<div class="page-break"></div>
+
+<!-- 16. PROGRESS CALCULATION & 17. ROADMAP -->
+<div class="section-container" id="sec-calc-progress">
+    <div class="section-header">
+        <span class="section-number">بخش ۱۶ و ۱۷</span>
+        <h2>محاسبات پیشرفت پیاده‌سازی و نقشه راه اولویت‌بندی شده (Roadmap)</h2>
+    </div>
+
+    <div class="card mb-6">
+        <h3 class="card-title">فرمول رسمی سنجش انطباق محصول و تفکیک لایه‌ای</h3>
+        <p class="text-xs mb-3">بر اساس ۴۰ نیازمندی استخراج‌شده از سند رسمی ۲۹ صفحه‌ای محصول و ضرایب تعیین‌شده:</p>
+        <div class="calc-box mb-4">
+            <div class="formula-line">
+                درصد تکمیل محصول = (مجموع ضرایب وزنی نیازمندی‌ها / تعداد کل نیازمندی‌های واجد شرایط) × ۱۰۰
+            </div>
+            <div class="formula-line text-sm mt-2">
+                امتیاز وزنی کل = (۱۶ × ۱٫۰۰) + (۰ × ۰٫۷۰) + (۹ × ۰٫۴۰) + (۴ × ۰٫۱۵) + (۱۱ × ۰٫۰۰) = <strong>۲۰٫۲۰ از ۴۰</strong>
+            </div>
+            <div class="formula-result text-primary font-bold mt-2">
+                درصد قطعی پیشرفت انطباق MVP: ۵۰٫۵۰٪
+            </div>
+        </div>
+
+        <div class="grid-3">
+            <div class="metric-progress-card">
+                <span class="text-xs text-muted">پایگاه داده (Prisma):</span>
+                <span class="font-bold text-success">۹۵٪ (۴۷ مدل)</span>
+            </div>
+            <div class="metric-progress-card">
+                <span class="text-xs text-muted">فرانت‌اند (صفحات UI):</span>
+                <span class="font-bold text-primary">۶۸٪ (۱۶ روت)</span>
+            </div>
+            <div class="metric-progress-card">
+                <span class="text-xs text-muted">بک‌اند و API واقعی:</span>
+                <span class="font-bold text-warning">۵۵٪ (۵ ماژول)</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-6" id="sec-gap-roadmap">
+        <h3 class="card-title">نقشه راه اولویت‌بندی شده جهت تکمیل MVP (Prioritized Roadmap)</h3>
+        <div class="roadmap-grid">
+            <div class="roadmap-phase border-red">
+                <h4 class="text-sm font-bold text-danger mb-2">فاز صفر (P0) — رفع مسدودکننده‌های حیاتی (۱ هفته)</h4>
+                <ul class="styled-list text-xs">
+                    <li><strong>اتصال ماژول تسک‌ها:</strong> ساخت <code>TasksController</code> در بک‌اند جهت پایدارسازی تسک‌ها در دیتابیس (پایان اتکا به localStorage).</li>
+                    <li><strong>اتصال مدیریت اعضا و کاربران:</strong> پیاده‌سازی CRUD اعضای سازمان در بک‌اند جهت امکان دعوت کاربر و تخصیص نقش در دیتابیس.</li>
+                    <li><strong>اتصال تنظیمات سازمان:</strong> ذخیره‌سازی تاکسونومی و وضعیت‌های لید در جدول <code>organization_taxonomies</code>.</li>
+                </ul>
+            </div>
+
+            <div class="roadmap-phase border-amber">
+                <h4 class="text-sm font-bold text-warning mb-2">فاز اول (P1) — تکمیل امکانات باقیمانده MVP (۲ هفته)</h4>
+                <ul class="styled-list text-xs">
+                    <li><strong>ویزارد ایمپورت همه‌منظوره:</strong> راه‌اندازی ویزارد ۴ مرحله‌ای در <code>/performance/imports</code> برای ورود گروهی لید و هزینه.</li>
+                    <li><strong>اتصال صفحه مستقل پلتفرم‌ها:</strong> ایجاد صفحه <code>/performance/platforms</code> جهت تعریف متد دریافت داده پلتفرم‌ها.</li>
+                    <li><strong>سرویس ارسال ایمیل/پیامک بازیابی رمز:</strong> فعال‌سازی فراموشی رمز عبور واقعی در بک‌اند.</li>
+                </ul>
+            </div>
+
+            <div class="roadmap-phase border-blue">
+                <h4 class="text-sm font-bold text-primary mb-2">فاز دوم (P2) — ماژول‌های اولویت ۲ محصول (۳ هفته)</h4>
+                <ul class="styled-list text-xs">
+                    <li><strong>سازنده UTM و لندینگ‌ها:</strong> صفحه <code>/performance/landing</code> و صدور لینک با اعتبارسنجی UTM.</li>
+                    <li><strong>یکپارچه‌سازی وب‌هوک وردپرس:</strong> پیاده‌سازی دریافت لید از سایت وردپرسی و نگاشت خودکار فیلدها.</li>
+                    <li><strong>ماژول تقویم شمسی و صورتجلسات:</strong> تقویم کمپین‌ها و رویدادها با ثبت مصوبات.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PAGE BREAK -->
+<div class="page-break"></div>
+
+<!-- 18. WHAT TO KNOW & 19. CURRENT POSITION -->
+<div class="section-container" id="sec-what-to-know">
+    <div class="section-header">
+        <span class="section-number">بخش ۱۸</span>
+        <h2>آن‌چه کارفرما باید درباره گپجی بداند (صادقانه و بدون روتوش)</h2>
+    </div>
+
+    <div class="card mb-6">
+        <h3 class="card-title text-success">آن‌چه هم‌اکنون واقعاً کار می‌کند و قابل استفاده است</h3>
+        <p class="text-xs">شما می‌توانید با ۶ نقش مختلف لاگین کنید، نشست‌های همزمان داشته باشید، کمپین بسازید، هزینه‌های تبلیغات را ثبت و به کمپین متصل کنید، لید جدید ثبت کنید و شماره تکراری را بلاک ببینید، لیدها را در بورد کانبان جابجا کنید و دلیل ردشدن یا مبلغ فروش ثبت کنید، تاریخچه تغییرات لید را ببینید و داشبورد مدیریتی را با شاخص‌های دقیق جلالی رصد نمایید.</p>
+    </div>
+
+    <div class="card mb-6">
+        <h3 class="card-title text-warning">آن‌چه ظاهر دارد اما پشت صحنه در سرور ذخیره نمی‌شود (Mock / LocalStorage)</h3>
+        <p class="text-xs">صفحات «مدیریت تسک‌ها»، «کاربران و نقش‌ها» و «تنظیمات سازمان» دارای UI بسیار زیبا و کامل هستند، اما کدهای آنها داده‌ها را در حافظه موقت مرورگر ذخیره می‌کنند. اگر همان صفحه را در کامپیوتر یا مرورگر دیگری باز کنید، داده‌های تسک یا کاربران جدید را نخواهید دید.</p>
+    </div>
+
+    <div class="card mb-6">
+        <h3 class="card-title text-danger">آن‌چه هنوز ساخته نشده است</h3>
+        <p class="text-xs">ماژول‌های وبینار، پیامک، تقویم شمسی، تجهیزات، آموزش، ایده‌ها، پلتفرم‌های مستقل و اتصال وردپرس هنوز ساخته نشده‌اند. البته جدول‌های دیتابیس همه آنها آماده و مایگریت شده است.</p>
+    </div>
+</div>
+
+<!-- 20. CODEBASE NAVIGATION & 21. GIT CONFIRMATION -->
+<div class="section-container" id="sec-nav-guide">
+    <div class="section-header">
+        <span class="section-number">بخش ۲۰ و ۲۱</span>
+        <h2>راهنمای عملی ناوبری در کدهای پروژه و ردیابی امکانات (Navigation Guide)</h2>
+    </div>
+
+    <div class="card mb-6">
+        <h3 class="card-title">چگونه یک ویژگی را از UI تا پایگاه داده ردیابی کنیم؟ (۳ مثال عملی)</h3>
+        <div class="trace-example mb-3">
+            <strong>مثال ۱: ردیابی فرآیند ثبت هزینه تبلیغاتی:</strong>
+            <p class="text-xs">صفحه <code>apps/web/src/app/(app)/performance/costs/page.tsx</code> &larr; کامپوننت فرم <code>quick-cost-drawer.tsx</code> &larr; کلاینت <code>costs.api.ts</code> با متد <code>createCost()</code> &larr; ارسال به کنترلر بک‌اند <code>apps/api/src/modules/costs/costs.controller.ts</code> &larr; اعتبارسنجی با <code>create-cost.dto.ts</code> &larr; متد <code>create()</code> در <code>costs.service.ts</code> &larr; ذخیره در جدول <code>costs</code> در PostgreSQL و آپدیت <code>Campaign.spend</code>.</p>
+        </div>
+
+        <div class="trace-example mb-3">
+            <strong>مثال ۲: ردیابی فرآیند تغییر وضعیت لید در بورد کانبان:</strong>
+            <p class="text-xs">صفحه <code>apps/web/src/app/(app)/leads/board/page.tsx</code> &larr; کامپوننت درگ <code>kanban-card.tsx</code> &larr; کلاینت <code>lead.api.ts</code> با متد <code>updateLeadStatus()</code> &larr; ارسال به <code>PATCH /api/leads/:id/status</code> در <code>leads.controller.ts</code> &larr; متد <code>updateStatus()</code> در <code>leads.service.ts</code> &larr; تغییر وضعیت در جدول <code>leads</code> و ثبت رویداد در جدول <code>lead_activities</code>.</p>
+        </div>
+
+        <div class="trace-example">
+            <strong>مثال ۳: ردیابی فرآیند لاگین و نشست امن:</strong>
+            <p class="text-xs">صفحه <code>apps/web/src/app/(auth)/login/page.tsx</code> &larr; ارسال به <code>POST /api/auth/login</code> در <code>auth.controller.ts</code> &larr; متد <code>login()</code> در <code>auth.service.ts</code> &larr; مقایسه هش با Argon2id &larr; ثبت سشن در جدول <code>sessions</code> و توکن رفرش در جدول <code>refresh_tokens</code> &larr; صدور اکسس توکن در حافظه و کوکی امن <code>gapji_refresh_token</code>.</p>
+        </div>
+    </div>
+
+    <div class="card mb-6" id="sec-git-safety">
+        <h3 class="card-title">وضعیت Git مخازن و تایید قطعی ایمنی ممیزی</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>مخزن</th>
+                    <th>مسیر محلی</th>
+                    <th>شاخه کاری</th>
+                    <th>هش کامیت HEAD</th>
+                    <th>وضعیت شاخه ریموت</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>فرانت‌اند</strong></td>
+                    <td class="dir-ltr text-xs">F:\marketing platform</td>
+                    <td><code>feature/frontend-foundation</code></td>
+                    <td class="code-font dir-ltr text-xs">fd780ea1ab2a4fd7304474a1e7e25707f126aaf8</td>
+                    <td><span class="badge badge-success">همگام با GitHub (پوش‌شده)</span></td>
+                </tr>
+                <tr>
+                    <td><strong>بک‌اند</strong></td>
+                    <td class="dir-ltr text-xs">F:\marketing-platform-backend</td>
+                    <td><code>feature/backend-foundation</code></td>
+                    <td class="code-font dir-ltr text-xs">4a5390658cd5ddfe8c00cb150ca93e56a4c38b4d</td>
+                    <td><span class="badge badge-success">همگام با GitHub (پوش‌شده)</span></td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="text-xs text-muted mt-2"><strong>تاییدیه ایمنی ممیزی:</strong> تایید می‌گردد که این ممیزی کاملاً به صورت Read-Only انجام گرفت، هیچ کدی تغییر نیافت، هیچ بسته جدیدی نصب نشد، هیچ کامیتی اضافه نگردید و شاخه <code>main</code> در هر دو مخزن بدون کوچکترین دستکاری در کامیت پایه <code>9f5b8d7</code> حفظ شده است.</p>
+    </div>
+</div>
+
+<!-- PAGE BREAK -->
+<div class="page-break"></div>
+
+<!-- 22. FINAL VERDICT & LEARNING SUMMARY -->
+<div class="section-container" id="sec-verdict">
+    <div class="section-header">
+        <span class="section-number">بخش ۲۲</span>
+        <h2>حکم نهایی ممیزی و خلاصه یادگیری کارفرما (Executive Learning Summary)</h2>
+    </div>
+
+    <div class="card mb-6">
+        <h3 class="card-title">پاسخ‌های ده‌گانه شفاف به سوالات راهبردی کارفرما</h3>
+        
+        <div class="faq-item">
+            <strong>۱. گپجی دقیقاً چیست و چه مساله‌ای را حل می‌کند؟</strong>
+            <p class="text-xs">گپجی پلتفرم کنترل و مانیتورینگ متمرکز بازاریابی دیجیتال و فروش است که حلقه ارتباطی گسسته میان «بودجه‌های تبلیغاتی مصرف‌شده در پلتفرم‌ها»، «لیدهای جذب‌شده»، «پیگیری‌های تیم فروش» و «نرخ تبدیل واقعی به درآمد» را در یک پایگاه داده متمرکز تجمیع می‌کند.</p>
+        </div>
+
+        <div class="faq-item">
+            <strong>۲. تاکنون دقیقاً چه چیزهایی ساخته شده است؟</strong>
+            <p class="text-xs">پایگاه داده کامل با ۴۷ جدول؛ موتور امنیتی لاگین و نشست‌ها؛ مدیریت کامل کمپین‌ها؛ ثبت و تجمیع هزینه‌های تبلیغات؛ مدیریت صندوق لیدها و برد کانبان ۶ ستونه با ثبت فعالیت‌ها؛ و داشبورد مدیریتی تحلیلی با ۶ شاخص استاندارد جلالی.</p>
+        </div>
+
+        <div class="faq-item">
+            <strong>۳. سیستم چگونه کار می‌کند؟</strong>
+            <p class="text-xs">فرانت‌اند Next.js با احراز هویت بدون ذخیره توکن روی دیسک، درخواست‌ها را به NestJS می‌فرستد. بک‌اند پس از اعمال سطح دسترسی ۶ نقش و ایزولاسیون سازمان، داده‌ها را در PostgreSQL ذخیره و همگام‌سازی می‌نماید.</p>
+        </div>
+
+        <div class="faq-item">
+            <strong>۴. قوی‌ترین بخش‌های تکمیل‌شده کدامند؟</strong>
+            <p class="text-xs">پایگاه‌داده پریزما (۹۵٪)، معماری احراز هویت و چرخش رفرش-توکن مقاوم در برابر Replay (۱۰۰٪)، و همگام‌سازی خودکار هزینه‌های تبلیغات با کمپین‌ها و داشبورد (۱۰۰٪).</p>
+        </div>
+
+        <div class="faq-item">
+            <strong>۵. ضعیف‌ترین یا ناقص‌ترین بخش‌ها کدامند؟</strong>
+            <p class="text-xs">ماژول تسک‌ها و تنظیمات اعضای سازمان؛ زیرا این ماژول‌ها در فرانت‌اند ظاهر دارند اما در بک‌اند کنترلر و ذخیره سروری ندارند و متکی به localStorage مرورگر هستند.</p>
+        </div>
+
+        <div class="faq-item">
+            <strong>۶. درصد قطعی پیشرفت MVP چقدر است؟</strong>
+            <p class="text-xs"><strong>۵۰٫۵۰٪ بر اساس فرمول وزن‌دار نیازمندی‌های رسمی محصول</strong> (و ۶۸٪ در ظاهر فرانت‌اند و ۵۵٪ در APIهای واقعی بک‌اند).</p>
+        </div>
+
+        <div class="faq-item">
+            <strong>۷. مهم‌ترین ریسک‌های فنی پروژه چیست؟</strong>
+            <p class="text-xs">ریسک اتکا به LocalStorage در تسک‌ها و عدم اتصال پکیج <code>@gapji/shared</code> برای تایپ‌های مشترک میان فرانت‌اند و بک‌اند.</p>
+        </div>
+
+        <div class="faq-item">
+            <strong>۸. کدام تصمیمات محصولی نیازمند تایید شماست؟</strong>
+            <p class="text-xs">قاعده تغییر واحد پول سازمان در صورت وجود سوابق مالی قبلی (DEC-PDR-01)؛ و نحوه رفتار با شماره‌های تکراری در ایمپورت دسته‌ای (نادیده گرفتن یا به‌روزرسانی).</p>
+        </div>
+
+        <div class="faq-item">
+            <strong>۹. دقیقاً گام بعدی توسعه چه باید باشد؟</strong>
+            <p class="text-xs"><strong>اجرای فاز P0 (اتصال تسک‌ها و کاربران سازمان به دیتابیس)</strong>. نباید پیش از اتصال تسک‌ها و کاربران به بک‌اند، سراغ ساخت ماژول‌های جدید فاز ۲ رفت.</p>
+        </div>
+
+        <div class="faq-item">
+            <strong>۱۰. حکم نهایی ممیزی چیست؟</strong>
+            <p class="text-xs"><strong>سیستم بر روی ریل مهندسی فوق‌العاده مستحکم و باکیفیتی قرار دارد.</strong> ۵ ماژول اصلی با ۳۴۵ تست یکپارچگی موفق عمل می‌کنند. با یک اسپرینت رفع مسدودکننده‌های P0 (تسک‌ها و اعضای سازمان)، پلتفرم به آمادگی کامل برای بهره‌برداری آزمایشی واقعی (Pilot Phase) خواهد رسید.</p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

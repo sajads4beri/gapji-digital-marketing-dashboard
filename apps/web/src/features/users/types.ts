@@ -119,14 +119,14 @@ export interface ResendInvitationResult {
 
 // ۵. مدل‌های ماتریس دسترسی (Role & Permission Matrix)
 export type PermissionCategory =
-  | 'performance_campaigns' // فضای کاری ۱: عملکرد و کمپین‌ها
-  | 'sales_leads'           // فضای کاری ۲: فروش و لید
-  | 'tasks_settings';       // فضای کاری ۳: تسک‌ها، دانش و تنظیمات
+  | 'performance_campaigns' // عملکرد و کمپین‌ها
+  | 'sales_leads'           // فروش و سرنخ‌ها
+  | 'tasks_settings';       // فرآیندها، تسک‌ها و تنظیمات
 
 export const PERMISSION_CATEGORY_LABELS: Record<PermissionCategory, string> = {
-  performance_campaigns: 'عملکرد و کمپین‌ها (فضای کاری ۱)',
-  sales_leads: 'فروش و سرنخ‌ها (فضای کاری ۲)',
-  tasks_settings: 'تسک‌ها، دانش و تنظیمات (فضای کاری ۳ و تنظیمات)',
+  performance_campaigns: 'عملکرد و کمپین‌ها',
+  sales_leads: 'فروش و سرنخ‌ها',
+  tasks_settings: 'فرآیندها، تسک‌ها و تنظیمات',
 };
 
 export interface PermissionOperation {

@@ -1,10 +1,9 @@
 /**
  * ماژول مدیریت تنظیمات سازمان (Organization Settings Feature)
- * صادرات تمامی انواع، قرارداد سرویس، توابع ذخیره‌سازی و سرویس Mock
+ * اتصال کامل به سرویس واقعی بک‌اند NestJS و پایگاه داده PostgreSQL
  */
 
 export * from './types';
 export * from './organization.contract';
-export * from './organization.storage';
-export * from './organization.mock';
+export { realOrganizationService as organizationService } from './organization.api';
 export * from './components';

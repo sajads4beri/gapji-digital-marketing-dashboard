@@ -10,7 +10,7 @@ import { CampaignManagerHomeView } from './campaign-manager-home-view';
 import { SalesAgentHomeView } from './sales-agent-home-view';
 import { ContentCreatorHomeView } from './content-creator-home-view';
 import { Breadcrumb } from '@/components/layout/breadcrumb';
-import { ShieldCheck, RotateCcw, Sparkles } from 'lucide-react';
+import { ShieldCheck, RotateCcw } from 'lucide-react';
 
 export function RoleBasedHome() {
   const { activeRole, user, activeOrgName } = useAuth();
@@ -25,32 +25,37 @@ export function RoleBasedHome() {
   return (
     <div className="space-y-6 pb-12" dir="rtl">
       {/* مسیر راهنما (Breadcrumb) صفحه خانه */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#1F2E45]/60">
         <Breadcrumb
           items={[{ label: 'صفحه خانه (به‌ازای نقش)' }]}
           showHomeIcon={false}
         />
 
-        <div className="flex items-center gap-2 text-xs text-slate-500">
-          <span className="font-bold text-slate-700">{activeOrgName || 'سازمان فعال'}</span>
-          <span>•</span>
-          <span>نقش شما: <strong className="text-blue-700">{USER_ROLE_LABELS[effectiveRole] || effectiveRole}</strong></span>
+        <div className="flex items-center gap-2 text-xs text-slate-400">
+          <span className="font-bold text-slate-200">{activeOrgName || 'سازمان فعال'}</span>
+          <span className="text-slate-600">•</span>
+          <span>
+            نقش شما:{' '}
+            <strong className="text-[#719BDF] font-semibold">
+              {USER_ROLE_LABELS[effectiveRole] || effectiveRole}
+            </strong>
+          </span>
         </div>
       </div>
 
       {/* بنر حالت شبیه‌سازی پیش‌نمایش نقش برای ادمین */}
       {isSimulating && (
-        <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between gap-3 text-xs text-amber-900 animate-in fade-in">
-          <div className="flex items-center gap-2">
-            <ShieldCheck size={16} className="text-amber-600 shrink-0" />
+        <div className="p-3.5 bg-amber-500/10 border border-amber-500/25 rounded-2xl flex items-center justify-between gap-3 text-xs text-amber-200 animate-in fade-in shadow-lg">
+          <div className="flex items-center gap-2.5">
+            <ShieldCheck size={16} className="text-amber-400 shrink-0" />
             <span>
-              <strong>حالت شبیه‌سازی ادمین:</strong> در حال مشاهده صفحه خانه از دیدگاه نقش «{USER_ROLE_LABELS[effectiveRole]}» هستید.
+              <strong className="text-amber-300">حالت شبیه‌سازی ادمین:</strong> در حال مشاهده صفحه خانه از دیدگاه نقش «{USER_ROLE_LABELS[effectiveRole]}» هستید.
             </span>
           </div>
           <button
             type="button"
             onClick={() => setPreviewRole(null)}
-            className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold text-amber-900 bg-white border border-amber-300 rounded-xl hover:bg-amber-100 transition-colors shrink-0"
+            className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold text-amber-300 bg-[#0B1423] border border-amber-500/30 rounded-xl hover:bg-amber-500/20 transition-colors shrink-0"
           >
             <RotateCcw size={12} />
             <span>بازگشت به نمای ادمین</span>

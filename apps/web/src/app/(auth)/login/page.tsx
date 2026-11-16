@@ -96,18 +96,24 @@ export default function LoginPage() {
 
   return (
     <div className="w-full space-y-6">
-      {/* کارت مرکزی ورود مطابق صفحه ۶ سند محصول */}
-      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-sm backdrop-blur-xs">
+      {/* کارت مرکزی ورود مطابق استایل Midnight Quiet Luxury */}
+      <div className="bg-[#0B1423]/95 border border-[#1F2E45] rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative overflow-hidden">
+        {/* هاله ظریف نوری بالای کارت */}
+        <div
+          className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-[#719BDF] to-transparent opacity-80"
+          aria-hidden="true"
+        />
+
         {/* لوگو و عنوان پلتفرم */}
-        <div className="text-center space-y-3 pb-6 border-b border-slate-100">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black text-2xl shadow-md shadow-blue-500/20">
+        <div className="text-center space-y-3 pb-6 border-b border-[#1F2E45]/80">
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-[#719BDF] via-[#3B82F6] to-[#1D4ED8] text-white flex items-center justify-center font-black text-2xl shadow-[0_0_24px_rgba(113,155,223,0.35)] border border-[#719BDF]/30">
             گ
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight font-display">
               پلتفرم مارکتینگ گپ‌جی
             </h1>
-            <p className="text-xs text-slate-500 mt-1 font-medium">
+            <p className="text-xs text-slate-400 mt-1 font-medium">
               سامانه کنترل فرآیندهای دیجیتال مارکتینگ و کمپین‌ها
             </p>
           </div>
@@ -119,11 +125,11 @@ export default function LoginPage() {
           <div className="space-y-1.5 text-right">
             <label
               htmlFor="identifier"
-              className="block text-xs font-bold text-slate-700"
+              className="block text-xs font-bold text-slate-300"
             >
-              ایمیل یا شماره موبایل <span className="text-rose-500">*</span>
+              ایمیل یا شماره موبایل <span className="text-rose-400">*</span>
             </label>
-            <div className="relative">
+            <div className="relative flex items-center">
               <input
                 id="identifier"
                 name="identifier"
@@ -137,9 +143,9 @@ export default function LoginPage() {
                 disabled={isSubmitting}
                 placeholder="مثال: ali.mohammadi@gapji.ir یا ۰۹۱۲۱۱۱۱۱۱۱"
                 dir="ltr"
-                className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl px-4 py-2.5 pl-10 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all placeholder:text-slate-400 placeholder:text-right"
+                className="w-full bg-[#111D2E] border border-[#1F2E45] text-white text-sm rounded-xl py-2.5 pl-11 pr-4 focus:bg-[#18263A]/80 focus:ring-2 focus:ring-[#719BDF]/30 focus:border-[#719BDF] focus:outline-none transition-all placeholder:text-slate-500 placeholder:text-right"
               />
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none text-slate-400">
                 {identifier.includes('@') ? <Mail size={16} /> : <Phone size={16} />}
               </div>
             </div>
@@ -150,21 +156,21 @@ export default function LoginPage() {
             <div className="flex items-center justify-between">
               <label
                 htmlFor="password"
-                className="block text-xs font-bold text-slate-700"
+                className="block text-xs font-bold text-slate-300"
               >
-                رمز عبور <span className="text-rose-500">*</span>
+                رمز عبور <span className="text-rose-400">*</span>
               </label>
               {/* پیوند «رمز را فراموش کرده‌ام» مطابق سند */}
               <Link
                 href="/forgot-password"
-                className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                className="text-xs font-semibold text-[#719BDF] hover:text-[#96B9F2] transition-colors"
                 tabIndex={3}
               >
                 رمز را فراموش کرده‌ام
               </Link>
             </div>
 
-            <div className="relative">
+            <div className="relative flex items-center">
               <input
                 id="password"
                 name="password"
@@ -178,13 +184,13 @@ export default function LoginPage() {
                 disabled={isSubmitting}
                 placeholder="رمز عبور حساب کاربری"
                 dir="ltr"
-                className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl px-4 py-2.5 pl-10 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all placeholder:text-slate-400 placeholder:text-right"
+                className="w-full bg-[#111D2E] border border-[#1F2E45] text-white text-sm rounded-xl py-2.5 pl-11 pr-4 focus:bg-[#18263A]/80 focus:ring-2 focus:ring-[#719BDF]/30 focus:border-[#719BDF] focus:outline-none transition-all placeholder:text-slate-500 placeholder:text-right"
               />
               {/* دکمه نمایش و مخفی کردن رمز مطابق سند */}
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 hover:text-slate-700 transition-colors"
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 p-1.5 flex items-center text-slate-400 hover:text-slate-200 transition-colors rounded-lg hover:bg-[#18263A] focus:outline-none"
                 title={showPassword ? 'مخفی کردن رمز عبور' : 'نمایش رمز عبور'}
                 aria-label={showPassword ? 'مخفی کردن رمز عبور' : 'نمایش رمز عبور'}
                 tabIndex={-1}
@@ -197,11 +203,10 @@ export default function LoginPage() {
           {/* دکمه ورود هنگام ارسال غیرفعال با اسپینر مطابق سند */}
           <Button
             type="submit"
-            variant="primary"
             size="lg"
             isLoading={isSubmitting}
             disabled={isSubmitting}
-            className="w-full text-sm font-bold shadow-sm shadow-blue-500/20"
+            className="w-full text-sm font-bold bg-gradient-to-r from-[#719BDF] to-[#3B82F6] hover:from-[#5A85C9] hover:to-[#2563EB] text-white shadow-lg shadow-[#719BDF]/25 rounded-xl h-11 transition-all"
           >
             <span>ورود به سامانه</span>
           </Button>
@@ -210,9 +215,9 @@ export default function LoginPage() {
           {errorMessage && (
             <div
               role="alert"
-              className="p-3.5 bg-rose-50 border border-rose-200/90 rounded-2xl flex items-start gap-2.5 text-rose-800 text-xs animate-in fade-in slide-in-from-top-1"
+              className="p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-start gap-2.5 text-rose-300 text-xs animate-in fade-in slide-in-from-top-1"
             >
-              <AlertCircle size={17} className="text-rose-600 shrink-0 mt-0.5" />
+              <AlertCircle size={17} className="text-rose-400 shrink-0 mt-0.5" />
               <div className="leading-relaxed font-semibold">{errorMessage}</div>
             </div>
           )}
@@ -220,13 +225,13 @@ export default function LoginPage() {
       </div>
 
       {/* راهنمای حساب‌های آزمایشی توسعه جهت تست سریع */}
-      <div className="bg-white/80 border border-slate-200/80 rounded-2xl p-4 shadow-2xs">
+      <div className="bg-[#0B1423]/80 border border-[#1F2E45] rounded-2xl p-4 shadow-lg backdrop-blur-md">
         <button
           type="button"
           onClick={() => setShowDemoAccounts((prev) => !prev)}
-          className="w-full flex items-center justify-between text-xs font-bold text-slate-700 hover:text-slate-900 transition-colors"
+          className="w-full flex items-center justify-between text-xs font-bold text-slate-300 hover:text-white transition-colors"
         >
-          <div className="flex items-center gap-2 text-blue-700">
+          <div className="flex items-center gap-2 text-[#719BDF]">
             <Sparkles size={15} />
             <span>حساب‌های آزمایشی تستی فرانت‌اند (جهت ارزیابی)</span>
           </div>
@@ -239,9 +244,9 @@ export default function LoginPage() {
         </button>
 
         {showDemoAccounts && (
-          <div className="mt-3 pt-3 border-t border-slate-100 space-y-2 text-xs">
-            <p className="text-[11px] text-slate-500 leading-relaxed mb-2">
-              جهت ورود، روی هر حساب کلیک نمایید (رمز عبور تمامی حساب‌ها در دیتابیس محلی: <code className="bg-slate-100 px-1 py-0.5 rounded font-mono font-bold text-slate-800">Password123!</code>):
+          <div className="mt-3 pt-3 border-t border-[#1F2E45] space-y-2 text-xs">
+            <p className="text-[11px] text-slate-400 leading-relaxed mb-2">
+              جهت ورود، روی هر حساب کلیک نمایید (رمز عبور تمامی حساب‌ها در دیتابیس محلی: <code className="bg-[#18263A] text-[#719BDF] border border-[#1F2E45] px-1.5 py-0.5 rounded font-mono font-bold text-[11px]">Password123!</code>):
             </p>
             {REAL_DEV_CREDENTIALS.map((u) => {
               return (
@@ -249,12 +254,12 @@ export default function LoginPage() {
                   key={u.email}
                   type="button"
                   onClick={() => handleSelectDemoAccount(u.email)}
-                  className="w-full text-right p-2 rounded-xl border border-slate-200/80 hover:border-blue-300 hover:bg-blue-50/50 transition-all flex items-center justify-between"
+                  className="w-full text-right p-2.5 rounded-xl border border-[#1F2E45] bg-[#111D2E]/60 hover:border-[#719BDF]/40 hover:bg-[#18263A] transition-all flex items-center justify-between"
                 >
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-bold text-slate-900">{u.fullName}</span>
-                      <span className="text-[10px] text-slate-500 font-medium">
+                      <span className="font-bold text-white">{u.fullName}</span>
+                      <span className="text-[10px] text-slate-400 font-medium">
                         ({u.roleLabel})
                       </span>
                     </div>
@@ -262,7 +267,7 @@ export default function LoginPage() {
                       {u.email} | {u.mobile}
                     </span>
                   </div>
-                  <span className="text-[10px] font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md shrink-0">
+                  <span className="text-[10px] font-medium bg-[#18263A] text-[#719BDF] border border-[#1F2E45] px-2 py-0.5 rounded-md shrink-0">
                     ورود خودکار
                   </span>
                 </button>

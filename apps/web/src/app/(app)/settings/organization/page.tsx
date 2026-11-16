@@ -15,10 +15,13 @@ import {
   LayoutGrid,
   List,
   LucideIcon,
+  ShieldAlert,
+  Sparkles,
 } from 'lucide-react';
 import { Breadcrumb } from '@/components/layout/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/common/toast-provider';
+import { useAuth } from '@/features/auth/auth-context';
 import {
   organizationService,
   OrgListType,
@@ -97,6 +100,8 @@ function OrganizationSettingsContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const { activeRole, user } = useAuth();
+  const isAdmin = activeRole === 'admin' || user?.role === 'admin';
 
   // خواندن تب فعال از پارامترهای آدرس با مقدار پیش‌فرض 'campaign_types'
   const tabParam = searchParams.get('tab') as OrgTabKey | null;
@@ -181,17 +186,14 @@ function OrganizationSettingsContent() {
     }
   }, [activeTab, toast]);
 
-  // بارگذاری داده‌ها با تغییر تب فعال
   React.useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  // بارگذاری اولیه شمارنده‌ها
   React.useEffect(() => {
     refreshCounts();
   }, [refreshCounts]);
 
-  // اصلاح امن پارامتر نامعتبر URL بدون افزودن به تاریخچه (با استفاده از router.replace)
   React.useEffect(() => {
     if (tabParam && !VALID_TAB_KEYS.includes(tabParam)) {
       const current = new URLSearchParams(searchParams.toString());
@@ -201,9 +203,8 @@ function OrganizationSettingsContent() {
     }
   }, [tabParam, pathname, router, searchParams]);
 
-  // تغییر تب توسط کاربر و ثبت در تاریخچه مرورگر (router.push) جهت پشتیبانی از دکمه‌های Back و Forward
   const handleTabChange = (tab: OrgTabKey) => {
-    if (tab === activeTab) return; // جلوگیری از ثبت تاریخچه تکراری برای تب در حال نمایش
+    if (tab === activeTab) return;
 
     const current = new URLSearchParams(searchParams.toString());
     if (tab === 'campaign_types') {
@@ -215,21 +216,18 @@ function OrganizationSettingsContent() {
     router.push(`${pathname}${qs ? `?${qs}` : ''}`, { scroll: false });
   };
 
-  // باز کردن مودال ایجاد گزینه جدید
   const handleOpenCreateModal = () => {
     setItemModalMode('create');
     setSelectedItem(null);
     setIsItemModalOpen(true);
   };
 
-  // باز کردن مودال ویرایش گزینه
   const handleOpenEditModal = (item: OrgListItem) => {
     setItemModalMode('edit');
     setSelectedItem(item);
     setIsItemModalOpen(true);
   };
 
-  // ارسال فرم ایجاد یا ویرایش گزینه
   const handleItemSubmit = async (data: {
     label: string;
     key?: string;
@@ -258,13 +256,11 @@ function OrganizationSettingsContent() {
     }
   };
 
-  // باز کردن مودال فعال / غیرفعال‌سازی
   const handleOpenToggleModal = (item: OrgListItem) => {
     setItemToToggle(item);
     setIsToggleModalOpen(true);
   };
 
-  // تأیید فعال / غیرفعال‌سازی
   const handleConfirmToggleStatus = async (item: OrgListItem) => {
     if (activeTab === 'general') return;
 
@@ -283,7 +279,6 @@ function OrganizationSettingsContent() {
     }
   };
 
-  // تغییر ترتیب گزینه‌ها (Drag & Drop)
   const handleReorder = async (orderedIds: string[]) => {
     if (activeTab === 'general') return;
 
@@ -297,7 +292,6 @@ function OrganizationSettingsContent() {
     }
   };
 
-  // ذخیره تنظیمات عمومی سازمان
   const handleSaveGeneralSettings = async (data: UpdateGeneralSettingsInput) => {
     try {
       setIsSavingGeneral(true);
@@ -315,7 +309,7 @@ function OrganizationSettingsContent() {
   const isListTab = currentTabDef.isList;
 
   return (
-    <div className="space-y-6 pb-12" dir="rtl">
+    <div className="space-y-6 pb-12 text-slate-100" dir="rtl">
       {/* ۱. مسیر راهنما (Breadcrumb) */}
       <Breadcrumb
         items={[
@@ -324,47 +318,57 @@ function OrganizationSettingsContent() {
         ]}
       />
 
-      {/* ۲. سربرگ اصلی صفحه */}
+      {/* ۲. سربرگ اصلی صفحه با استایل لوکس Midnight Executive */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <span className="w-2.5 h-6 bg-purple-600 rounded-full inline-block" />
-            تنظیمات سازمان
+          <h1 className="text-xl sm:text-2xl font-black text-slate-100 tracking-tight flex items-center gap-2.5 font-display">
+            <span className="w-2.5 h-6 bg-[#719BDF] rounded-full inline-block shadow-[0_0_12px_rgba(113,155,223,0.4)]" />
+            <span>تنظیمات سازمان</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1 leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-400 mt-1 leading-relaxed">
             مدیریت فهرست‌های پایه (انواع کمپین، منابع لید، وضعیت‌ها، دلایل رد شدن، دسته‌بندی هزینه‌ها) و تنظیمات عمومی سازمان
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2.5 flex-wrap">
           <Button
             variant="outline"
             size="sm"
             onClick={fetchData}
             disabled={loading}
-            className="text-xs"
+            className="text-xs border-[#1F2E45] bg-[#111D2E] text-slate-200 hover:bg-[#18263A] hover:border-[#719BDF]/40 transition-all"
             title="به‌روزرسانی داده‌ها"
           >
-            <RefreshCw size={14} className={`ml-1.5 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw size={14} className={`me-1.5 ${loading ? 'animate-spin' : ''}`} />
             به‌روزرسانی
           </Button>
 
-          {isListTab && (
+          {isListTab && isAdmin && (
             <Button
               variant="primary"
               size="sm"
               onClick={handleOpenCreateModal}
-              className="text-xs bg-purple-600 hover:bg-purple-700 text-white shadow-2xs hover:shadow-xs"
+              className="text-xs bg-gradient-to-r from-[#719BDF] to-[#3B82F6] hover:from-[#5e8bd8] hover:to-[#2563eb] text-white shadow-[0_0_15px_rgba(113,155,223,0.25)] border-0 transition-all"
             >
-              <Plus size={14} className="ml-1.5" />
+              <Plus size={14} className="me-1.5" />
               افزودن گزینه جدید
             </Button>
           )}
         </div>
       </div>
 
+      {/* بنر اطلاع‌رسانی دسترسی فقط‌خواندنی برای کاربران غیر ادمین */}
+      {!isAdmin && (
+        <div className="bg-amber-500/10 border border-amber-500/20 p-3.5 rounded-2xl flex items-center gap-2.5 text-xs text-amber-200 animate-in fade-in">
+          <ShieldAlert size={16} className="text-amber-400 shrink-0" />
+          <span>
+            <strong>حالت فقط‌خواندنی:</strong> شما با نقش «{activeRole || 'کاربر'}» وارد شده‌اید. مشاهده تنظیمات سازمان مجاز بوده، اما افزودن، ویرایش و فعال/غیرفعال‌سازی گزینه‌ها منحصراً در اختیارات ادمین (Admin) سازمان می‌باشد.
+          </span>
+        </div>
+      )}
+
       {/* ۳. نوار ۶ تب اصلی صفحه */}
-      <div className="flex border-b border-slate-200 overflow-x-auto scrollbar-none">
+      <div className="flex border-b border-[#1F2E45] overflow-x-auto scrollbar-none">
         {ORG_TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
@@ -377,18 +381,18 @@ function OrganizationSettingsContent() {
               onClick={() => handleTabChange(tab.key)}
               className={`flex items-center gap-2 py-3 px-4 sm:px-5 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-all cursor-pointer ${
                 isActive
-                  ? 'border-purple-600 text-purple-700 bg-purple-50/40 rounded-t-xl'
-                  : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'
+                  ? 'border-[#719BDF] text-[#719BDF] bg-[#111D2E] rounded-t-xl shadow-xs'
+                  : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-[#1F2E45]'
               }`}
             >
               <Icon size={16} />
               <span>{tab.label}</span>
               {count !== null && (
                 <span
-                  className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                  className={`px-2 py-0.5 rounded-full text-[11px] font-mono font-bold tabular-nums ${
                     isActive
-                      ? 'bg-purple-100 text-purple-800'
-                      : 'bg-slate-100 text-slate-600'
+                      ? 'bg-[#719BDF]/15 text-[#719BDF] border border-[#719BDF]/30'
+                      : 'bg-[#18263A] text-slate-400 border border-[#1F2E45]'
                   }`}
                 >
                   {count.toLocaleString('fa-IR')}
@@ -401,12 +405,17 @@ function OrganizationSettingsContent() {
 
       {/* ۴. خطای بارگذاری */}
       {error && (
-        <div className="bg-rose-50 p-4 rounded-2xl border border-rose-200 text-xs text-rose-800 flex items-center justify-between">
+        <div className="bg-[#D66B73]/15 p-4 rounded-2xl border border-[#D66B73]/30 text-xs text-[#D66B73] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <AlertTriangle size={16} className="text-rose-600 shrink-0" />
+            <AlertTriangle size={16} className="text-[#D66B73] shrink-0" />
             <span>{error}</span>
           </div>
-          <Button variant="outline" size="sm" onClick={fetchData} className="text-xs">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchData}
+            className="border-[#D66B73]/30 text-[#D66B73] hover:bg-[#D66B73]/10 text-xs"
+          >
             تلاش دوباره
           </Button>
         </div>
@@ -417,19 +426,19 @@ function OrganizationSettingsContent() {
         <div className="space-y-4 animate-in fade-in duration-200">
           {/* برای تب وضعیت‌های لید: سوئیچ بین نمای جدول و نمای تفکیک گروه‌ها */}
           {activeTab === 'lead_statuses' && (
-            <div className="flex items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200/90 shadow-2xs">
-              <span className="text-xs font-bold text-slate-700">
+            <div className="flex items-center justify-between gap-3 bg-[#111D2E] p-3 rounded-2xl border border-[#1F2E45] shadow-lg">
+              <span className="text-xs font-bold text-slate-300">
                 شیوه نمایش وضعیت‌های لید:
               </span>
 
-              <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+              <div className="flex items-center gap-1 bg-[#0B1423] p-1 rounded-xl border border-[#1F2E45]">
                 <button
                   type="button"
                   onClick={() => setLeadStatusViewMode('table')}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     leadStatusViewMode === 'table'
-                      ? 'bg-white text-purple-700 shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-[#18263A] text-[#719BDF] shadow-xs'
+                      : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
                   <List size={13} />
@@ -441,8 +450,8 @@ function OrganizationSettingsContent() {
                   onClick={() => setLeadStatusViewMode('groups')}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     leadStatusViewMode === 'groups'
-                      ? 'bg-white text-purple-700 shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-[#18263A] text-[#719BDF] shadow-xs'
+                      : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
                   <LayoutGrid size={13} />
@@ -456,8 +465,8 @@ function OrganizationSettingsContent() {
           {activeTab === 'lead_statuses' && leadStatusViewMode === 'groups' ? (
             <LeadStatusGroupsView
               statuses={listItems as OrgLeadStatusItem[]}
-              onEditStatus={(st) => handleOpenEditModal(st)}
-              onToggleStatus={(st) => handleOpenToggleModal(st)}
+              onEditStatus={isAdmin ? (st) => handleOpenEditModal(st) : undefined}
+              onToggleStatus={isAdmin ? (st) => handleOpenToggleModal(st) : undefined}
             />
           ) : (
             <OrgListTable
@@ -466,10 +475,10 @@ function OrganizationSettingsContent() {
               isLoading={loading}
               error={error}
               onRetry={fetchData}
-              onAddNew={handleOpenCreateModal}
-              onEdit={handleOpenEditModal}
-              onToggleStatus={handleOpenToggleModal}
-              onReorder={handleReorder}
+              onAddNew={isAdmin ? handleOpenCreateModal : undefined}
+              onEdit={isAdmin ? handleOpenEditModal : undefined}
+              onToggleStatus={isAdmin ? handleOpenToggleModal : undefined}
+              onReorder={isAdmin ? handleReorder : undefined}
             />
           )}
         </div>
@@ -480,6 +489,7 @@ function OrganizationSettingsContent() {
             initialData={generalSettings || undefined}
             isLoading={loading}
             isSaving={isSavingGeneral}
+            readOnly={!isAdmin}
             onSave={handleSaveGeneralSettings}
           />
         </div>
@@ -524,9 +534,9 @@ export default function OrganizationSettingsPage() {
     <React.Suspense
       fallback={
         <div className="space-y-6 p-6" dir="rtl">
-          <div className="h-6 w-48 bg-slate-100 rounded-md animate-pulse" />
-          <div className="h-10 w-full bg-slate-100 rounded-xl animate-pulse" />
-          <div className="h-64 w-full bg-slate-100 rounded-2xl animate-pulse" />
+          <div className="h-6 w-48 bg-[#18263A] rounded-md animate-pulse" />
+          <div className="h-10 w-full bg-[#18263A] rounded-xl animate-pulse" />
+          <div className="h-64 w-full bg-[#18263A] rounded-2xl animate-pulse" />
         </div>
       }
     >

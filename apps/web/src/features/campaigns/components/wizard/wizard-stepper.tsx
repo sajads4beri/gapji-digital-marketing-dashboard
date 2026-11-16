@@ -61,8 +61,8 @@ export function WizardStepper({
   completedSteps,
 }: WizardStepperProps) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200/80 p-4 shadow-sm mb-6">
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
+    <div className="bg-[#111D2E]/80 backdrop-blur-md rounded-2xl border border-[#1F2E45] p-3 sm:p-4 shadow-xl mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
         {WIZARD_STEPS.map((step) => {
           const isCurrent = step.id === currentStep;
           const isCompleted = completedSteps.includes(step.id);
@@ -75,44 +75,44 @@ export function WizardStepper({
               type="button"
               onClick={() => isClickable && onStepClick(step.id)}
               disabled={!isClickable}
-              className={`flex items-center gap-3 p-2.5 rounded-xl text-right transition-all duration-200 ${
+              className={`flex items-center gap-2.5 p-2.5 rounded-xl text-right transition-all duration-200 border ${
                 isCurrent
-                  ? 'bg-blue-50/80 border border-blue-200 shadow-sm'
+                  ? 'bg-[#18263A] border-[#719BDF]/50 shadow-md shadow-[#719BDF]/5'
                   : isCompleted
-                  ? 'hover:bg-gray-50 border border-transparent'
-                  : 'opacity-50 cursor-not-allowed border border-transparent'
+                  ? 'bg-[#111D2E]/40 border-emerald-500/30 hover:bg-[#18263A]/80'
+                  : 'bg-[#0B1423]/40 border-transparent opacity-40 cursor-not-allowed'
               }`}
             >
               {/* نشانگر شماره یا آیکون وضعیت */}
               <div
-                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold transition-colors ${
+                className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold transition-colors ${
                   isCompleted
-                    ? 'bg-emerald-600 text-white'
+                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
                     : isCurrent
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-500'
+                    ? 'bg-gradient-to-r from-blue-600 to-[#719BDF] text-white shadow-sm'
+                    : 'bg-[#18263A] text-slate-500 border border-[#1F2E45]'
                 }`}
               >
-                {isCompleted ? <Check size={16} /> : <Icon size={16} />}
+                {isCompleted ? <Check size={15} /> : <Icon size={15} />}
               </div>
 
               {/* متن عنوان و شماره مرحله */}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-gray-400 font-medium">
+                  <span className="text-[10px] text-slate-400 font-medium font-mono">
                     مرحله {step.id}
                   </span>
                   {isCurrent && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#719BDF] animate-pulse" />
                   )}
                 </div>
                 <h4
                   className={`text-xs font-bold truncate ${
                     isCurrent
-                      ? 'text-blue-900'
+                      ? 'text-[#719BDF]'
                       : isCompleted
-                      ? 'text-gray-800'
-                      : 'text-gray-500'
+                      ? 'text-slate-200'
+                      : 'text-slate-500'
                   }`}
                 >
                   {step.title}

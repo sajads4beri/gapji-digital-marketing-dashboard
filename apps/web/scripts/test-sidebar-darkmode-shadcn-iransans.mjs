@@ -33,9 +33,9 @@ test('NAV-01: Navigation config defines 4 groups according to PDF', async () => 
   const navPath = path.join(webDir, 'src/config/navigation.ts');
   const content = fs.readFileSync(navPath, 'utf8');
 
-  assert.ok(content.includes("title: 'فضای کاری ۱: عملکرد'"), 'Group 1 must match PDF');
-  assert.ok(content.includes("title: 'فضای کاری ۲: فروش و لید'"), 'Group 2 must match PDF');
-  assert.ok(content.includes("title: 'فضای کاری ۳: اجرا و دانش'"), 'Group 3 must match PDF');
+  assert.ok(content.includes("title: 'عملکرد و کمپین‌ها'"), 'Group 1 must match');
+  assert.ok(content.includes("title: 'فروش و سرنخ‌ها'"), 'Group 2 must match');
+  assert.ok(content.includes("title: 'فرآیندها و ابزارها'"), 'Group 3 must match');
   assert.ok(content.includes("title: 'تنظیمات'"), 'Group 4 must be titled تنظیمات');
 });
 

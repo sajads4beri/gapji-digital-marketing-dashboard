@@ -99,4 +99,9 @@ export interface ITaskService {
    * دریافت تاریخچه رویدادهای یک تسک مرتب‌شده از جدید به قدیم
    */
   getHistory(taskId: string): Promise<TaskHistoryEvent[]>;
+
+  /**
+   * دریافت لیست کاربران فعال سازمان جهت گزینه‌های تخصیص تسک
+   */
+  getAssignees?(): Promise<Array<{ id: string; name: string; email?: string; role?: string }>>;
 }

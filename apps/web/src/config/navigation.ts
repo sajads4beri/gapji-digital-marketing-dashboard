@@ -48,7 +48,7 @@ export interface NavGroup {
 export const navigationConfig: NavGroup[] = [
   {
     id: 'performance',
-    title: 'فضای کاری ۱: عملکرد',
+    title: 'عملکرد و کمپین‌ها',
     defaultOpen: true,
     items: [
       {
@@ -83,10 +83,10 @@ export const navigationConfig: NavGroup[] = [
       {
         id: 'platforms',
         title: 'پلتفرم‌ها',
-        href: '#',
+        href: '/performance/platforms',
         icon: Share2,
-        comingSoon: true,
         permissionRoute: '/performance/platforms',
+        matchPattern: (pathname) => pathname.startsWith('/performance/platforms'),
       },
       {
         id: 'costs',
@@ -98,41 +98,41 @@ export const navigationConfig: NavGroup[] = [
       },
       {
         id: 'data-import',
-        title: 'Import داده',
-        href: '#',
+        title: 'ورود اطلاعات (Import)',
+        href: '/performance/imports',
         icon: UploadCloud,
-        comingSoon: true,
         permissionRoute: '/performance/imports',
+        matchPattern: (pathname) => pathname.startsWith('/performance/imports'),
       },
       {
         id: 'kpis',
         title: 'KPI و شاخص‌ها',
-        href: '#',
+        href: '/performance/kpis',
         icon: Target,
-        comingSoon: true,
         permissionRoute: '/performance/kpis',
+        matchPattern: (pathname) => pathname.startsWith('/performance/kpis'),
       },
       {
         id: 'audiences',
         title: 'مخاطبان',
-        href: '#',
+        href: '/performance/audiences',
         icon: Users,
-        comingSoon: true,
         permissionRoute: '/performance/audiences',
+        matchPattern: (pathname) => pathname.startsWith('/performance/audiences'),
       },
       {
         id: 'landing-utm',
         title: 'لندینگ و UTM',
-        href: '#',
+        href: '/performance/landing',
         icon: Link2,
-        comingSoon: true,
         permissionRoute: '/performance/landing',
+        matchPattern: (pathname) => pathname.startsWith('/performance/landing'),
       },
     ],
   },
   {
     id: 'sales-leads',
-    title: 'فضای کاری ۲: فروش و لید',
+    title: 'فروش و سرنخ‌ها',
     defaultOpen: false,
     items: [
       {
@@ -161,24 +161,24 @@ export const navigationConfig: NavGroup[] = [
       {
         id: 'sms',
         title: 'پیامک',
-        href: '#',
+        href: '/leads/sms',
         icon: MessageSquare,
-        comingSoon: true,
         permissionRoute: '/leads/sms',
+        matchPattern: (pathname) => pathname.startsWith('/leads/sms'),
       },
       {
         id: 'webinars',
         title: 'وبینار',
-        href: '#',
+        href: '/leads/webinars',
         icon: Video,
-        comingSoon: true,
         permissionRoute: '/leads/webinars',
+        matchPattern: (pathname) => pathname.startsWith('/leads/webinars'),
       },
     ],
   },
   {
     id: 'execution-knowledge',
-    title: 'فضای کاری ۳: اجرا و دانش',
+    title: 'فرآیندها و ابزارها',
     defaultOpen: false,
     items: [
       {

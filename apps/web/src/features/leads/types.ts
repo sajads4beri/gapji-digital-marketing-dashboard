@@ -9,7 +9,8 @@ export type LeadStatus =
   | 'qualified'
   | 'proposal'
   | 'won'
-  | 'lost';
+  | 'lost'
+  | (string & {});
 
 export type LeadEventType =
   | 'ad_click'
@@ -62,6 +63,17 @@ export interface LeadDetail {
   email?: string;
   company?: string;
   status: LeadStatus;
+  statusKey?: string;
+  statusConfigId?: string;
+  statusConfig?: {
+    id: string;
+    key: string;
+    label: string;
+    color?: string;
+    group?: 'open' | 'won' | 'lost';
+    isActive?: boolean;
+    sortOrder?: number;
+  };
   campaignId?: string;
   campaignName?: string;
   source: string;
