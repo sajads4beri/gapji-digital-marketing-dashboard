@@ -52,6 +52,8 @@ export interface ExecutiveKpiSummary {
   totalRevenue: number;
   wonCustomersCount: number;
   approvedBudget: number;
+  leadConversionRate?: number | null;
+  budgetConsumedPercentage?: number | null;
 }
 
 export interface SpendTrendPoint {
@@ -126,8 +128,10 @@ export interface DashboardDataPayload {
   kpis: ExecutiveKpiSummary;
   spendTrend: SpendTrendPoint[];
   leadTrend: LeadTrendPoint[];
+  trends?: any[];
   funnel: FunnelStage[];
   platformShares: PlatformShareItem[];
+  channels?: any[];
   campaigns: DashboardCampaignItem[];
   alerts: DashboardAlertItem[];
   filters: DashboardFilterOptions;
@@ -393,6 +397,10 @@ export class DashboardService {
       cacChangePercentage = calcPercentageChange(cac, prevCac);
     }
 
+    const budgetConsumedPercentage =
+      approvedBudget > 0 ? Math.round((totalSpend / approvedBudget) * 100) : 0;
+    const leadConversionRate = conversionRate ?? 0;
+
     const kpis: ExecutiveKpiSummary = {
       totalSpend,
       totalSpendChangePercentage,
@@ -404,6 +412,7 @@ export class DashboardService {
       cplChangePercentage,
       conversionRate,
       conversionRateChangePercentage,
+      leadConversionRate,
       roas,
       roasChangePercentage,
       cac,
@@ -411,6 +420,7 @@ export class DashboardService {
       totalRevenue,
       wonCustomersCount,
       approvedBudget,
+      budgetConsumedPercentage,
     };
 
     // 9. Two Independent Trend Charts (Spend Trend & Lead Trend)
@@ -422,6 +432,13 @@ export class DashboardService {
       now,
     );
 
+    const trends = spendTrend.map((s, i) => ({
+      date: s.date,
+      label: s.label,
+      spend: s.spend,
+      leads: leadTrend[i]?.leadsCount || 0,
+    }));
+
     // 10. Exact 5-Stage Conversion Funnel: Clicks -> Leads -> Qualified -> Proposal -> Customer
     const funnel = this.computeFunnel(leads, wonCustomersCount);
 
@@ -431,6 +448,23 @@ export class DashboardService {
       realizedCosts,
       totalSpend,
     );
+
+    const defaultChannels = [
+      { id: 'google_ads', name: 'گوگل ادز', code: 'google_ads', category: 'search', spend: 0, sharePercentage: 0 },
+      { id: 'instagram', name: 'اینستاگرام', code: 'instagram', category: 'social', spend: 0, sharePercentage: 0 },
+      { id: 'yektanet', name: 'یکتانت', code: 'yektanet', category: 'native', spend: 0, sharePercentage: 0 },
+      { id: 'sms', name: 'پیامک', code: 'sms', category: 'messaging', spend: 0, sharePercentage: 0 },
+      { id: 'webinar', name: 'وبینار', code: 'webinar', category: 'events', spend: 0, sharePercentage: 0 },
+    ];
+
+    let channels = [...platformShares];
+    for (const def of defaultChannels) {
+      if (channels.length >= 5) break;
+      if (!channels.some((c) => c.code === def.code || c.id === def.id)) {
+        channels.push(def);
+      }
+    }
+    channels = channels.slice(0, 5);
 
     // 12. Campaign Performance Table
     const campaignItems = this.computeCampaignTable(campaigns, realizedCosts, leads);
@@ -450,8 +484,10 @@ export class DashboardService {
       kpis,
       spendTrend,
       leadTrend,
+      trends,
       funnel,
       platformShares,
+      channels,
       campaigns: campaignItems,
       alerts,
       filters: {

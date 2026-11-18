@@ -2,35 +2,20 @@ import {
   IsString,
   IsNotEmpty,
   IsOptional,
-  IsIn,
   IsNumber,
   Min,
   MaxLength,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export const VALID_LEAD_STATUSES = [
-  'new',
-  'in_progress',
-  'qualified',
-  'proposal',
-  'won',
-  'lost',
-] as const;
-
-export type ValidLeadStatus = (typeof VALID_LEAD_STATUSES)[number];
-
 export class UpdateLeadStatusDto {
   @ApiProperty({
     example: 'in_progress',
-    enum: VALID_LEAD_STATUSES,
-    description: 'وضعیت جدید لید در قیف فروش',
+    description: 'شناسه یکتا (UUID) یا کلید وضعیت جدید لید در پایپ‌لاین فروش',
   })
   @IsString({ message: 'وضعیت لید باید رشته متنی باشد' })
   @IsNotEmpty({ message: 'وضعیت لید الزامی است' })
-  @IsIn(VALID_LEAD_STATUSES, {
-    message: 'وضعیت لید نامعتبر است. وضعیت‌های مجاز: new, in_progress, qualified, proposal, won, lost',
-  })
+  @MaxLength(100, { message: 'شناسه یا کلید وضعیت حداکثر می‌تواند ۱۰۰ کاراکتر باشد' })
   status: string;
 
   @ApiPropertyOptional({

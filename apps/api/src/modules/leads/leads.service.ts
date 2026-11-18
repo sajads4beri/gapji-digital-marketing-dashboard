@@ -20,6 +20,8 @@ export interface CurrentUserPayload {
   role: string;
 }
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 @Injectable()
 export class LeadsService {
   private readonly logger = new Logger(LeadsService.name);
@@ -91,6 +93,7 @@ export class LeadsService {
    * تبدیل رکورد دیتابیس لید به مدل استاندارد پاسخ API
    */
   public serializeLead(lead: any): any {
+    const canonicalKey = lead.statusConfig ? lead.statusConfig.key : (lead.statusKey || 'new');
     return {
       id: lead.id,
       fullName: lead.fullName,
@@ -99,8 +102,20 @@ export class LeadsService {
       email: lead.email || undefined,
       city: lead.city || undefined,
       source: lead.source || 'manual',
-      status: lead.statusKey || 'new',
-      statusKey: lead.statusKey || 'new',
+      status: canonicalKey,
+      statusKey: canonicalKey,
+      statusConfigId: lead.statusConfigId || lead.statusConfig?.id || undefined,
+      statusConfig: lead.statusConfig
+        ? {
+            id: lead.statusConfig.id,
+            key: lead.statusConfig.key,
+            label: lead.statusConfig.label,
+            group: lead.statusConfig.group,
+            color: lead.statusConfig.color || undefined,
+            isActive: lead.statusConfig.isActive,
+            sortOrder: lead.statusConfig.sortOrder,
+          }
+        : undefined,
       campaignId: lead.campaignId || undefined,
       campaignName: lead.campaign?.name || undefined,
       adName: lead.utmCampaign || undefined,
@@ -213,7 +228,48 @@ export class LeadsService {
         });
       }
 
-      // درج لید جدید
+      // اعتبارسنجی و نگاشت وضعیت اولیه لید با جدول LeadStatusConfig (B2.5.4)
+      let initialStatusConfig: any = null;
+      if (dto.statusKey && dto.statusKey.trim()) {
+        const inputKey = dto.statusKey.trim();
+        const isUuid = UUID_REGEX.test(inputKey);
+        initialStatusConfig = await tx.leadStatusConfig.findFirst({
+          where: {
+            organizationId,
+            isActive: true,
+            OR: isUuid ? [{ id: inputKey }, { key: inputKey }] : [{ key: inputKey }],
+          },
+        });
+        if (!initialStatusConfig) {
+          throw new BadRequestException('وضعیت اولیه لید نامعتبر یا غیرفعال است');
+        }
+      } else {
+        // یافتن وضعیت پیش‌فرض فعال سازمان (ابتدا کلید new، سپس اولین وضعیت در گروه open)
+        initialStatusConfig = await tx.leadStatusConfig.findFirst({
+          where: {
+            organizationId,
+            key: 'new',
+            isActive: true,
+          },
+        });
+        if (!initialStatusConfig) {
+          initialStatusConfig = await tx.leadStatusConfig.findFirst({
+            where: {
+              organizationId,
+              group: 'open',
+              isActive: true,
+            },
+            orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+          });
+        }
+        if (!initialStatusConfig) {
+          throw new BadRequestException(
+            'هیچ وضعیت اولیه فعالی در گروه باز (open) برای ایجاد لید در این سازمان یافت نشد',
+          );
+        }
+      }
+
+      // درج لید جدید با تضمین انطباق statusKey و statusConfigId
       const lead = await tx.lead.create({
         data: {
           organizationId,
@@ -226,11 +282,13 @@ export class LeadsService {
           assignedToId,
           nextFollowUpAt: dto.nextFollowUpAt ? new Date(dto.nextFollowUpAt) : null,
           nextFollowUpNote: dto.nextFollowUpNote ? dto.nextFollowUpNote.trim() : null,
-          statusKey: dto.statusKey?.trim() || 'new',
+          statusKey: initialStatusConfig.key,
+          statusConfigId: initialStatusConfig.id,
         },
         include: {
           campaign: { select: { id: true, name: true } },
           assignedTo: { select: { id: true, fullName: true, email: true } },
+          statusConfig: true,
         },
       });
 
@@ -277,7 +335,11 @@ export class LeadsService {
     if (filter.status) {
       const statuses = filter.status.split(',').map((s) => s.trim()).filter(Boolean);
       if (statuses.length > 0) {
-        where.statusKey = { in: statuses };
+        const uuids = statuses.filter((s) => UUID_REGEX.test(s));
+        where.OR = [
+          { statusKey: { in: statuses } },
+          ...(uuids.length > 0 ? [{ statusConfigId: { in: uuids } }] : []),
+        ];
       }
     }
 
@@ -313,6 +375,7 @@ export class LeadsService {
       include: {
         campaign: { select: { id: true, name: true } },
         assignedTo: { select: { id: true, fullName: true, email: true } },
+        statusConfig: true,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -335,6 +398,7 @@ export class LeadsService {
       include: {
         campaign: { select: { id: true, name: true } },
         assignedTo: { select: { id: true, fullName: true, email: true } },
+        statusConfig: true,
       },
     });
 
@@ -434,18 +498,38 @@ export class LeadsService {
     }
 
     const fromStatus = lead.statusKey || 'new';
-    const toStatus = dto.status.trim();
+    const toStatusInput = dto.status.trim();
+    const isUuid = UUID_REGEX.test(toStatusInput);
+
+    // اعتبارسنجی داینامیک وضعیت مقصد از جدول LeadStatusConfig متعلق به سازمان کاربر (B2.5.4)
+    const targetStatus = await this.prisma.leadStatusConfig.findFirst({
+      where: {
+        organizationId,
+        OR: isUuid ? [{ id: toStatusInput }, { key: toStatusInput }] : [{ key: toStatusInput }],
+      },
+    });
+
+    if (!targetStatus) {
+      throw new BadRequestException('وضعیت انتخاب‌شده در این سازمان یافت نشد');
+    }
+
+    if (!targetStatus.isActive) {
+      throw new BadRequestException('وضعیت انتخاب‌شده غیرفعال است و امکان تخصیص به لید را ندارد');
+    }
+
+    const toStatus = targetStatus.key;
 
     return await this.prisma.$transaction(async (tx) => {
       const updateData: any = {
-        statusKey: toStatus,
+        statusKey: targetStatus.key,
+        statusConfigId: targetStatus.id,
       };
 
-      if (toStatus === 'won') {
+      if (targetStatus.group === 'won' || targetStatus.key === 'won') {
         if (dto.dealValue !== undefined) {
           updateData.salesValue = dto.dealValue;
         }
-      } else if (toStatus === 'lost') {
+      } else if (targetStatus.group === 'lost' || targetStatus.key === 'lost') {
         if (dto.lostReason) {
           updateData.lostReason = dto.lostReason.trim();
         }
@@ -457,18 +541,11 @@ export class LeadsService {
         include: {
           campaign: { select: { id: true, name: true } },
           assignedTo: { select: { id: true, fullName: true, email: true } },
+          statusConfig: true,
         },
       });
 
-      const statusLabels: Record<string, string> = {
-        new: 'جدید',
-        in_progress: 'تماس گرفته شد',
-        qualified: 'واجد شرایط',
-        proposal: 'پیشنهاد',
-        won: 'مشتری',
-        lost: 'ردشده',
-      };
-      const toStatusLabel = statusLabels[toStatus] || toStatus;
+      const toStatusLabel = targetStatus.label || toStatus;
 
       const activity = await tx.leadActivity.create({
         data: {
@@ -478,7 +555,10 @@ export class LeadsService {
           title: `تغییر وضعیت به ${toStatusLabel}`,
           details: JSON.stringify({
             fromStatus,
-            toStatus,
+            toStatus: targetStatus.key,
+            statusConfigId: targetStatus.id,
+            toStatusLabel,
+            group: targetStatus.group,
             dealValue: dto.dealValue,
             lostReason: dto.lostReason,
             note: dto.note,
@@ -495,7 +575,7 @@ export class LeadsService {
       const serializedActivity = this.serializeActivity(activity);
 
       this.logger.log(
-        `Lead ${lead.id} status changed from ${fromStatus} to ${toStatus} by user ${user.id} in org ${organizationId}`,
+        `Lead ${lead.id} status changed from ${fromStatus} to ${toStatus} (${targetStatus.id}) by user ${user.id} in org ${organizationId}`,
       );
 
       return {

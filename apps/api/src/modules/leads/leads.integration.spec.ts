@@ -532,6 +532,287 @@ async function runLeadIntegrationTests() {
     });
     assert(managerActs.statusCode === 200, 'Marketing manager can view activities of any lead (200 OK)');
 
+    // --- 15. B2.5.4 Dynamic Lead Status Lifecycle & Relationship Integrity ---
+    console.log('\n--- 15. Dynamic Lead Status Lifecycle & Relationship Integrity (B2.5.4) ---');
+
+    // Create an active custom status in organization
+    const customStatus = await prisma.leadStatusConfig.create({
+      data: {
+        organizationId: '00000000-0000-0000-0000-000000000001',
+        key: 'custom_review_test',
+        label: 'در حال بررسی تخصصی',
+        group: 'open',
+        color: 'purple',
+        sortOrder: 15,
+        isActive: true,
+      },
+    });
+
+    // Create an inactive status in the organization
+    const inactiveStatus = await prisma.leadStatusConfig.create({
+      data: {
+        organizationId: '00000000-0000-0000-0000-000000000001',
+        key: 'custom_inactive_test',
+        label: 'وضعیت غیرفعال تستی',
+        group: 'open',
+        color: 'slate',
+        sortOrder: 16,
+        isActive: false,
+      },
+    });
+
+    // Create another organization with its own status for cross-tenant testing
+    const otherOrgId = '00000000-0000-0000-0000-000000000099';
+    await prisma.organization.upsert({
+      where: { id: otherOrgId },
+      update: {},
+      create: {
+        id: otherOrgId,
+        name: 'سازمان متفرقه تستی',
+        slug: 'other-test-org-99',
+      },
+    });
+    const foreignStatus = await prisma.leadStatusConfig.create({
+      data: {
+        organizationId: otherOrgId,
+        key: 'foreign_status_test',
+        label: 'وضعیت سازمان دیگر',
+        group: 'open',
+        color: 'cyan',
+        sortOrder: 1,
+        isActive: true,
+      },
+    });
+
+    try {
+      // 15.1: Assign active custom status by key
+      const updateCustomKey = await request({
+        url: `${API_BASE}/leads/${statusLeadId}/status`,
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${adminToken}` },
+      }, { status: 'custom_review_test' });
+      assert(updateCustomKey.statusCode === 200, 'Assigning an active custom configured status by key succeeds with 200 OK');
+      assert(updateCustomKey.data.status === 'custom_review_test', 'Lead statusKey reflects custom status key');
+      assert(updateCustomKey.data.statusConfigId === customStatus.id, 'Lead statusConfigId accurately references LeadStatusConfig.id');
+      assert(updateCustomKey.data.statusConfig?.label === 'در حال بررسی تخصصی', 'Lead statusConfig payload contains display label');
+
+      // 15.2: Assign active status by UUID
+      const updateByUuid = await request({
+        url: `${API_BASE}/leads/${statusLeadId}/status`,
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${adminToken}` },
+      }, { status: customStatus.id });
+      assert(updateByUuid.statusCode === 200, 'Assigning an active status by UUID succeeds with 200 OK');
+      assert(updateByUuid.data.statusConfigId === customStatus.id, 'statusConfigId matches UUID');
+
+      // Direct DB check for consistency
+      const dbLeadCheck = await prisma.lead.findUnique({ where: { id: statusLeadId } });
+      assert(dbLeadCheck?.statusKey === 'custom_review_test' && dbLeadCheck?.statusConfigId === customStatus.id, 'statusKey and statusConfigId remain synchronized in PostgreSQL');
+
+      // 15.3: Assigning an inactive status fails with 400
+      const updateInactive = await request({
+        url: `${API_BASE}/leads/${statusLeadId}/status`,
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${adminToken}` },
+      }, { status: 'custom_inactive_test' });
+      assert(updateInactive.statusCode === 400, 'Assigning an inactive status fails with 400 Bad Request');
+      assert(updateInactive.data.message?.includes('غیرفعال'), 'Error message specifies inactive status rejection');
+
+      // 15.4: Assigning another organization status fails with 400
+      const updateForeign = await request({
+        url: `${API_BASE}/leads/${statusLeadId}/status`,
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${adminToken}` },
+      }, { status: foreignStatus.id });
+      assert(updateForeign.statusCode === 400, 'Assigning another organization status fails with 400 Bad Request');
+
+      // 15.5: Creating lead with configured default status
+      const defaultLeadRes = await request({
+        url: `${API_BASE}/leads`,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${adminToken}` },
+      }, { fullName: 'لید تست وضعیت پیش‌فرض', mobile: '09129990099' });
+      assert(defaultLeadRes.statusCode === 201, 'Creating lead without statusKey succeeds with 201');
+      assert(defaultLeadRes.data.status === 'new', 'Created lead status is "new"');
+      assert(!!defaultLeadRes.data.statusConfigId, 'Created lead statusConfigId is automatically linked to default LeadStatusConfig');
+
+      // 15.6: Existing lead with deactivated status remains readable
+      await prisma.leadStatusConfig.update({
+        where: { id: customStatus.id },
+        data: { isActive: false },
+      });
+      const readHistoricalLead = await request({
+        url: `${API_BASE}/leads/${statusLeadId}`,
+        method: 'GET',
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      assert(readHistoricalLead.statusCode === 200, 'Lead with deactivated status remains fully readable (200 OK)');
+      assert(readHistoricalLead.data.status === 'custom_review_test', 'Historical status is preserved');
+      assert(readHistoricalLead.data.statusConfig?.label === 'در حال بررسی تخصصی', 'Historical status label is preserved');
+    } finally {
+      // Clean up custom and foreign statuses
+      await prisma.leadActivity.deleteMany({ where: { lead: { mobile: '09129990099' } } });
+      await prisma.lead.deleteMany({ where: { mobile: '09129990099' } });
+      await prisma.leadStatusConfig.deleteMany({
+        where: { id: { in: [customStatus.id, inactiveStatus.id, foreignStatus.id] } },
+      });
+      await prisma.organization.deleteMany({ where: { id: otherOrgId } });
+    }
+
+    // --- 16. B2.5.4.1 Pipeline Hardening, Default Status & Historical Integrity ---
+    console.log('\n--- 16. Pipeline Hardening, Default Status & Historical Integrity (B2.5.4.1) ---');
+
+    // 16.1: Reject lead creation when no active open status exists in organization
+    const orgNoOpenId = '00000000-0000-0000-0000-000000000088';
+    await prisma.organization.upsert({
+      where: { id: orgNoOpenId },
+      update: {},
+      create: {
+        id: orgNoOpenId,
+        name: 'سازمان بدون وضعیت باز',
+        slug: 'org-no-open-88',
+      },
+    });
+
+    // Create won and lost status only (no open status)
+    const wonStatus88 = await prisma.leadStatusConfig.create({
+      data: {
+        organizationId: orgNoOpenId,
+        key: 'deal_closed_88',
+        label: 'مشتری قطعی ۸۸',
+        group: 'won',
+        sortOrder: 1,
+        isActive: true,
+      },
+    });
+
+    const user88Email = 'admin88@test.local';
+    const user88 = await prisma.user.upsert({
+      where: { email: user88Email },
+      update: {},
+      create: {
+        email: user88Email,
+        passwordHash: '$argon2id$v=19$m=65536,t=3,p=4$Q40Lem6D3AYsikHLP+QLwg$b26aY1TShQm45x10YaRRQq0217keSPGWnPmSJyVTmAI', // Password123!
+        fullName: 'ادمین سازمان بدون باز',
+      },
+    });
+    await prisma.organizationMembership.upsert({
+      where: { organizationId_userId: { userId: user88.id, organizationId: orgNoOpenId } },
+      update: { status: 'active', role: 'admin' },
+      create: {
+        userId: user88.id,
+        organizationId: orgNoOpenId,
+        role: 'admin',
+        status: 'active',
+      },
+    });
+
+    try {
+      const token88 = await loginUser(user88Email);
+
+      // Attempt creating lead without statusKey in organization with no active open status
+      const noOpenCreateRes = await request({
+        url: `${API_BASE}/leads`,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token88}` },
+      }, { fullName: 'لید تست بدون وضعیت باز', mobile: '09128880088' });
+
+      assert(noOpenCreateRes.statusCode === 400, 'Lead creation in organization without active open status fails with 400 Bad Request');
+      assert(
+        noOpenCreateRes.data.message?.includes('گروه باز') || noOpenCreateRes.data.message?.includes('open'),
+        'Error message clearly explains absence of active open status',
+      );
+
+      // 16.2: Inactive 'new' status gracefully falls back to lowest sortOrder in active 'open' group
+      const intakeStatus88 = await prisma.leadStatusConfig.create({
+        data: {
+          organizationId: orgNoOpenId,
+          key: 'intake_custom_88',
+          label: 'ورودی اختصاصی ۸۸',
+          group: 'open',
+          sortOrder: 5,
+          isActive: true,
+        },
+      });
+      // Inactive new status
+      const inactiveNew88 = await prisma.leadStatusConfig.create({
+        data: {
+          organizationId: orgNoOpenId,
+          key: 'new',
+          label: 'جدید غیرفعال ۸۸',
+          group: 'open',
+          sortOrder: 1,
+          isActive: false,
+        },
+      });
+
+      const fallbackOpenRes = await request({
+        url: `${API_BASE}/leads`,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token88}` },
+      }, { fullName: 'لید تست فال‌بک باز', mobile: '09128880089' });
+
+      assert(fallbackOpenRes.statusCode === 201, 'Lead creation with inactive new falls back to active open status with 201 Created');
+      assert(fallbackOpenRes.data.status === 'intake_custom_88', 'Lead status correctly falls back to intake_custom_88');
+      assert(fallbackOpenRes.data.statusConfigId === intakeStatus88.id, 'Lead statusConfigId links to intakeStatus88');
+
+      // 16.3: Historical lead with statusConfigId = null is read and serialized safely
+      const historicalLeadNullConfig = await prisma.lead.create({
+        data: {
+          organizationId: '00000000-0000-0000-0000-000000000001',
+          fullName: 'لید تاریخی با کانفیگ تهی',
+          mobile: '09127770077',
+          statusKey: 'lost',
+          statusConfigId: null,
+        },
+      });
+
+      const readNullRes = await request({
+        url: `${API_BASE}/leads/${historicalLeadNullConfig.id}`,
+        method: 'GET',
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      assert(readNullRes.statusCode === 200, 'Historical lead with statusConfigId=null returns 200 OK');
+      assert(readNullRes.data.status === 'lost', 'Historical lead status is lost');
+      assert(readNullRes.data.statusConfigId === undefined || readNullRes.data.statusConfigId === null, 'statusConfigId is not assigned a bogus config');
+
+      // 16.4: Mismatched statusKey and statusConfigId canonical resolution
+      const defaultWonStatus = await prisma.leadStatusConfig.findFirst({
+        where: { organizationId: '00000000-0000-0000-0000-000000000001', key: 'won' },
+      });
+      if (defaultWonStatus) {
+        const mismatchLead = await prisma.lead.create({
+          data: {
+            organizationId: '00000000-0000-0000-0000-000000000001',
+            fullName: 'لید تست عدم انطباق کلیدها',
+            mobile: '09127770078',
+            statusKey: 'qualified',
+            statusConfigId: defaultWonStatus.id,
+          },
+        });
+
+        const readMismatchRes = await request({
+          url: `${API_BASE}/leads/${mismatchLead.id}`,
+          method: 'GET',
+          headers: { Authorization: `Bearer ${adminToken}` },
+        });
+        assert(readMismatchRes.statusCode === 200, 'Mismatched lead returns 200 OK');
+        assert(readMismatchRes.data.status === 'won', 'Canonical status resolves to statusConfig.key (won)');
+        assert(readMismatchRes.data.statusKey === 'won', 'Canonical statusKey resolves to statusConfig.key (won)');
+
+        await prisma.lead.delete({ where: { id: mismatchLead.id } });
+      }
+
+      await prisma.lead.delete({ where: { id: historicalLeadNullConfig.id } });
+    } finally {
+      await prisma.leadActivity.deleteMany({ where: { lead: { mobile: { in: ['09128880088', '09128880089', '09127770077', '09127770078'] } } } });
+      await prisma.lead.deleteMany({ where: { mobile: { in: ['09128880088', '09128880089', '09127770077', '09127770078'] } } });
+      await prisma.leadStatusConfig.deleteMany({ where: { organizationId: orgNoOpenId } });
+      await prisma.organizationMembership.deleteMany({ where: { organizationId: orgNoOpenId } });
+      await prisma.user.deleteMany({ where: { email: user88Email } });
+      await prisma.organization.deleteMany({ where: { id: orgNoOpenId } });
+    }
+
     // Clean up test records
     await prisma.leadActivity.deleteMany({
       where: { lead: { mobile: { in: allTestPhones } } },

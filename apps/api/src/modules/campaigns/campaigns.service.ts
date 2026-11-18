@@ -10,6 +10,7 @@ import { Campaign, CampaignStatus, CampaignHealth } from './campaign.entity';
 import { CreateCampaignDto } from './create-campaign.dto';
 import { UpdateCampaignDto } from './update-campaign.dto';
 
+export const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const DEFAULT_ORGANIZATION_ID = '00000000-0000-0000-0000-000000000001';
 
 export interface CurrentUserPayload {
@@ -100,6 +101,21 @@ export class CampaignsService {
         id: campaign.owner?.id || campaign.ownerId || 'unassigned',
         name: campaign.owner?.fullName || campaign.owner?.email || 'نامشخص',
       },
+      targetAudiences: campaign.campaignAudiences
+        ? campaign.campaignAudiences.map((ca: any) => ({
+            id: ca.targetAudience?.id || ca.targetAudienceId,
+            name: ca.targetAudience?.name,
+            gender: ca.targetAudience?.gender,
+            ageMin: ca.targetAudience?.ageMin,
+            ageMax: ca.targetAudience?.ageMax,
+            location: ca.targetAudience?.location,
+            interests: ca.targetAudience?.interests,
+            channel: ca.targetAudience?.channel,
+          }))
+        : [],
+      targetAudienceIds: campaign.campaignAudiences
+        ? campaign.campaignAudiences.map((ca: any) => ca.targetAudienceId)
+        : [],
       createdAt: campaign.createdAt instanceof Date ? campaign.createdAt.toISOString() : campaign.createdAt,
       updatedAt: campaign.updatedAt instanceof Date ? campaign.updatedAt.toISOString() : campaign.updatedAt,
     };
@@ -120,6 +136,11 @@ export class CampaignsService {
       include: {
         owner: { select: { id: true, fullName: true, email: true } },
         _count: { select: { leads: true } },
+        campaignAudiences: {
+          include: {
+            targetAudience: true,
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -129,6 +150,9 @@ export class CampaignsService {
 
   async findOne(id: string, user?: CurrentUserPayload): Promise<any> {
     this.assertCampaignAccess(user, 'read');
+    if (!UUID_REGEX.test(id)) {
+      throw new NotFoundException(`Campaign with ID ${id} not found`);
+    }
     const organizationId = user?.organizationId ?? DEFAULT_ORGANIZATION_ID;
 
     const campaign = await this.prisma.campaign.findFirst({
@@ -139,6 +163,11 @@ export class CampaignsService {
       include: {
         owner: { select: { id: true, fullName: true, email: true } },
         _count: { select: { leads: true } },
+        campaignAudiences: {
+          include: {
+            targetAudience: true,
+          },
+        },
       },
     });
 
@@ -213,6 +242,11 @@ export class CampaignsService {
       include: {
         owner: { select: { id: true, fullName: true, email: true } },
         _count: { select: { leads: true } },
+        campaignAudiences: {
+          include: {
+            targetAudience: true,
+          },
+        },
       },
     });
 
@@ -220,11 +254,48 @@ export class CampaignsService {
       `Campaign created: ${campaign.id} ("${campaign.name}") for org ${organizationId} by user ${user?.id || 'system'}`,
     );
 
+    // پیوند مخاطبان هدف انتخاب‌شده در ویزارد به کمپین در جدول campaign_audiences
+    const audienceIds: string[] = [];
+    if (Array.isArray(targetAudience?.selectedAudienceIds)) {
+      audienceIds.push(...targetAudience.selectedAudienceIds);
+    } else if (Array.isArray(targetAudience)) {
+      audienceIds.push(...targetAudience);
+    } else if (Array.isArray((dto as any).targetAudienceIds)) {
+      audienceIds.push(...(dto as any).targetAudienceIds);
+    }
+
+    const uniqueAudienceIds = [...new Set(audienceIds.filter((id) => typeof id === 'string' && UUID_REGEX.test(id.trim())))];
+    if (uniqueAudienceIds.length > 0) {
+      const validAudiences = await this.prisma.targetAudience.findMany({
+        where: {
+          organizationId,
+          id: { in: uniqueAudienceIds },
+        },
+        select: { id: true },
+      });
+
+      if (validAudiences.length > 0) {
+        await this.prisma.campaignAudience.createMany({
+          data: validAudiences.map((aud) => ({
+            organizationId,
+            campaignId: campaign.id,
+            targetAudienceId: aud.id,
+          })),
+          skipDuplicates: true,
+        });
+
+        return this.findOne(campaign.id, user);
+      }
+    }
+
     return this.serializeCampaign(campaign);
   }
 
   async update(id: string, dto: UpdateCampaignDto, user?: CurrentUserPayload): Promise<any> {
     this.assertCampaignAccess(user, 'write');
+    if (!UUID_REGEX.test(id)) {
+      throw new NotFoundException(`Campaign with ID ${id} not found`);
+    }
     const existing = await this.findOne(id, user);
 
     const {
@@ -270,15 +341,65 @@ export class CampaignsService {
       include: {
         owner: { select: { id: true, fullName: true, email: true } },
         _count: { select: { leads: true } },
+        campaignAudiences: {
+          include: {
+            targetAudience: true,
+          },
+        },
       },
     });
 
     this.logger.log(`Campaign updated: ${updated.id} ("${updated.name}")`);
+
+    // همگام‌سازی مخاطبان متصل در صورت ارسال targetAudience یا targetAudienceIds
+    if (targetAudience !== undefined || (dto as any).targetAudienceIds !== undefined) {
+      const audienceIds: string[] = [];
+      if (Array.isArray(targetAudience?.selectedAudienceIds)) {
+        audienceIds.push(...targetAudience.selectedAudienceIds);
+      } else if (Array.isArray(targetAudience)) {
+        audienceIds.push(...targetAudience);
+      } else if (Array.isArray((dto as any).targetAudienceIds)) {
+        audienceIds.push(...(dto as any).targetAudienceIds);
+      }
+
+      const uniqueAudienceIds = [...new Set(audienceIds.filter((id) => typeof id === 'string' && UUID_REGEX.test(id.trim())))];
+
+      await this.prisma.campaignAudience.deleteMany({
+        where: { campaignId: existing.id },
+      });
+
+      if (uniqueAudienceIds.length > 0) {
+        const validAudiences = await this.prisma.targetAudience.findMany({
+          where: {
+            organizationId: existing.organizationId,
+            id: { in: uniqueAudienceIds },
+          },
+          select: { id: true },
+        });
+
+        if (validAudiences.length > 0) {
+          await this.prisma.campaignAudience.createMany({
+            data: validAudiences.map((aud) => ({
+              organizationId: existing.organizationId,
+              campaignId: existing.id,
+              targetAudienceId: aud.id,
+            })),
+            skipDuplicates: true,
+          });
+        }
+      }
+
+      return this.findOne(existing.id, user);
+    }
+
     return this.serializeCampaign(updated);
   }
 
   async remove(id: string, user?: CurrentUserPayload): Promise<void> {
     this.assertCampaignAccess(user, 'write');
+    if (!UUID_REGEX.test(id)) {
+      throw new NotFoundException(`Campaign with ID ${id} not found`);
+    }
     const existing = await this.findOne(id, user);
     await this.prisma.campaign.delete({
       where: { id: existing.id },
