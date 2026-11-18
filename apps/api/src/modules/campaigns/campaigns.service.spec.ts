@@ -65,6 +65,34 @@ async function runCampaignsServiceTests() {
       }
       return null;
     },
+    findFirst: async ({ where }: { where: { id: string; organizationId?: string } }) => {
+      if (where.id === '11111111-1111-1111-1111-111111111111') {
+        return {
+          id: '11111111-1111-1111-1111-111111111111',
+          organizationId: DEFAULT_ORGANIZATION_ID,
+          name: 'Summer Campaign',
+          description: 'Test description',
+          channel: 'instagram',
+          type: 'digital',
+          objective: 'lead',
+          status: CampaignStatus.ACTIVE,
+          health: CampaignHealth.HEALTHY,
+          budget: '50000000',
+          spend: '12500000',
+          startDate: new Date('2026-06-01'),
+          endDate: new Date('2026-08-31'),
+          ownerId: null,
+          targetLeads: 500,
+          targetSales: null,
+          impressions: 1000,
+          clicks: 100,
+          conversions: 10,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+      }
+      return null;
+    },
     create: async ({ data }: { data: any }) => ({
       id: '22222222-2222-2222-2222-222222222222',
       ...data,
@@ -225,6 +253,7 @@ async function runCampaignsServiceTests() {
     const restrictedMockPrisma = {
       campaign: {
         findUnique: mockPrismaCampaign.findUnique,
+        findFirst: mockPrismaCampaign.findFirst,
         delete: async () => {
           throw new Prisma.PrismaClientKnownRequestError(
             'Foreign key constraint failed on the field: `campaignId`',
