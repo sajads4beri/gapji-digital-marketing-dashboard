@@ -5,6 +5,14 @@ import {
   CampaignFilters,
   CampaignStats,
   CampaignStatusType,
+  CampaignFunnelResponse,
+  CampaignStageLead,
+  CampaignAllOkrResponse,
+  CampaignStageOkrResponse,
+  FunnelKeyResult,
+  CreateKeyResultInput,
+  UpdateKeyResultInput,
+  CreateOkrTaskInput,
 } from '../types';
 import { ICampaignService } from './campaign.contract';
 import {
@@ -491,6 +499,148 @@ export class MockCampaignService implements ICampaignService {
       totalImpressions: list.reduce((sum, c) => sum + (c.impressions || 0), 0),
       totalClicks: list.reduce((sum, c) => sum + (c.clicks || 0), 0),
       totalConversions: list.reduce((sum, c) => sum + (c.conversions || 0), 0),
+    };
+  }
+
+  public async getFunnel(id: string): Promise<CampaignFunnelResponse> {
+    await delay(this.delayMs);
+    this.checkSimulatedError();
+
+    const campaign = await this.getById(id);
+    if (!campaign) {
+      throw new MockServiceError(`کمپینی با شناسه "${id}" یافت نشد.`, 404);
+    }
+
+    return {
+      campaignId: campaign.id,
+      campaignName: campaign.name,
+      totalLeads: 25,
+      stages: [
+        { id: '1', key: 'new', label: 'سرنخ جدید', group: 'open', color: '#3B82F6', sortOrder: 1, count: 12, percentageOfTotal: 48, conversionRate: 100 },
+        { id: '2', key: 'contacted', label: 'تماس اولیه', group: 'open', color: '#F59E0B', sortOrder: 2, count: 7, percentageOfTotal: 28, conversionRate: 58.3 },
+        { id: '3', key: 'qualified', label: 'واجد شرایط', group: 'open', color: '#10B981', sortOrder: 3, count: 4, percentageOfTotal: 16, conversionRate: 57.1 },
+        { id: '4', key: 'customer', label: 'مشتری نهایی', group: 'won', color: '#059669', sortOrder: 4, count: 2, percentageOfTotal: 8, conversionRate: 50 },
+      ],
+    };
+  }
+
+  public async getLeadsByStage(
+    _id: string,
+    params?: { statusKey?: string; statusConfigId?: string; search?: string },
+  ): Promise<CampaignStageLead[]> {
+    await delay(this.delayMs);
+    this.checkSimulatedError();
+
+    const mockLeads: CampaignStageLead[] = [
+      {
+        id: 'lead-1',
+        fullName: 'علی محمدی',
+        mobile: '09121112233',
+        email: 'ali@example.com',
+        statusKey: params?.statusKey || 'new',
+        statusLabel: 'سرنخ جدید',
+        statusColor: '#3B82F6',
+        assignedTo: { id: 'u-1', fullName: 'نیما باقری', email: 'sales@gapji.dev' },
+        createdAt: new Date().toISOString(),
+      },
+    ];
+
+    if (params?.search?.trim()) {
+      const q = params.search.trim().toLowerCase();
+      return mockLeads.filter(
+        (l) => l.fullName.toLowerCase().includes(q) || l.mobile.includes(q),
+      );
+    }
+
+    return mockLeads;
+  }
+
+  public async getFunnelAllOkr(campaignId: string): Promise<CampaignAllOkrResponse> {
+    await delay(this.delayMs);
+    return {
+      campaignId,
+      campaignName: 'کمپین نمونه',
+      totalObjectives: 0,
+      totalKeyResults: 0,
+      averageProgress: 0,
+      totalTasks: 0,
+      completedTasks: 0,
+      objectives: [],
+    };
+  }
+
+  public async getStageOkr(campaignId: string, stageKey: string): Promise<CampaignStageOkrResponse> {
+    await delay(this.delayMs);
+    return {
+      campaignId,
+      campaignName: 'کمپین نمونه',
+      stageKey,
+      objective: null,
+      keyResults: [],
+    };
+  }
+
+  public async upsertStageObjective(
+    _campaignId: string,
+    _stageKey: string,
+    data: { title: string; description?: string },
+  ): Promise<any> {
+    await delay(this.delayMs);
+    return { id: generateId(), title: data.title, description: data.description };
+  }
+
+  public async createKeyResult(
+    _campaignId: string,
+    stageKey: string,
+    data: CreateKeyResultInput,
+  ): Promise<FunnelKeyResult> {
+    await delay(this.delayMs);
+    return {
+      id: generateId(),
+      stageKey,
+      title: data.title,
+      targetValue: data.targetValue,
+      currentValue: data.currentValue ?? 0,
+      unit: data.unit ?? 'عدد',
+      progressPercent: 0,
+      tasks: [],
+    };
+  }
+
+  public async updateKeyResult(
+    _campaignId: string,
+    krId: string,
+    data: UpdateKeyResultInput,
+  ): Promise<FunnelKeyResult> {
+    await delay(this.delayMs);
+    return {
+      id: krId,
+      title: data.title ?? 'نتیجه کلیدی',
+      targetValue: data.targetValue ?? 100,
+      currentValue: data.currentValue ?? 0,
+      unit: data.unit ?? 'عدد',
+      progressPercent: 0,
+      tasks: [],
+    };
+  }
+
+  public async deleteKeyResult(_campaignId: string, _krId: string): Promise<{ success: boolean }> {
+    await delay(this.delayMs);
+    return { success: true };
+  }
+
+  public async createTaskUnderKeyResult(
+    _campaignId: string,
+    _krId: string,
+    data: CreateOkrTaskInput,
+  ): Promise<any> {
+    await delay(this.delayMs);
+    return {
+      id: generateId(),
+      title: data.title,
+      description: data.description,
+      priority: data.priority ?? 'medium',
+      status: 'todo',
     };
   }
 }

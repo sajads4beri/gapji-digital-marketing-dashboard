@@ -1,8 +1,14 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { Campaign, CampaignStats, CreateCampaignDto } from '@gapji/shared';
 
-// API base URL configured via environment variable
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+// API base URL: In the browser, always use relative '/api' unless an explicit absolute URL is provided.
+// This allows seamless access via localhost, LAN IP, or internet tunnels (Cloudflare, ngrok, localtunnel).
+const API_BASE_URL =
+  typeof window !== 'undefined'
+    ? (process.env.NEXT_PUBLIC_API_URL && process.env.NEXT_PUBLIC_API_URL.startsWith('http')
+        ? process.env.NEXT_PUBLIC_API_URL
+        : '/api')
+    : (process.env.INTERNAL_API_URL || 'http://localhost:3001/api');
 
 // Memory-only access token storage (Never stored in localStorage or sessionStorage)
 let memoryAccessToken: string | null = null;

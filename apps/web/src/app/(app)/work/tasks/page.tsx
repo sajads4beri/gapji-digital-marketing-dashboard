@@ -53,7 +53,14 @@ const RELATED_TYPE_OPTIONS = [
   { label: 'رویدادها و وبینارها', value: 'webinar' },
 ];
 
-
+const FUNNEL_STAGE_FILTER_OPTIONS = [
+  { label: 'مرحله ۱: آگاهی (Awareness)', value: 'awareness' },
+  { label: 'مرحله ۲: علاقه‌مندی (Interest)', value: 'interest' },
+  { label: 'مرحله ۳: بررسی و تعامل (Consideration)', value: 'consideration' },
+  { label: 'مرحله ۴: قصد خرید (Intent)', value: 'intent' },
+  { label: 'مرحله ۵: ارزیابی نهایی (Evaluation)', value: 'evaluation' },
+  { label: 'مرحله ۶: خرید موفق (Purchase)', value: 'purchase' },
+];
 
 function TasksContent() {
   const router = useRouter();
@@ -69,6 +76,7 @@ function TasksContent() {
   const statusParam = searchParams.get('status') || '';
   const assigneeFilter = searchParams.get('assigneeId') || '';
   const relatedTypeFilter = (searchParams.get('relatedType') as TaskRelatedType) || '';
+  const funnelStageFilter = searchParams.get('funnelStageKey') || '';
 
   const selectedStatuses = React.useMemo(() => {
     return statusParam ? statusParam.split(',').filter(Boolean) : [];
@@ -130,6 +138,13 @@ function TasksContent() {
         placeholder: 'همه بخش‌ها...',
         options: RELATED_TYPE_OPTIONS,
       },
+      {
+        id: 'funnelStageKey',
+        label: 'مرحله قیف فروش (OKR)',
+        type: 'select',
+        placeholder: 'همه مراحل قیف...',
+        options: FUNNEL_STAGE_FILTER_OPTIONS,
+      },
     ],
     [assigneeOptions]
   );
@@ -162,6 +177,7 @@ function TasksContent() {
 
       if (assigneeFilter) filters.assigneeId = assigneeFilter;
       if (relatedTypeFilter) filters.relatedType = relatedTypeFilter;
+      if (funnelStageFilter) filters.funnelStageKey = funnelStageFilter;
 
       const data = await taskService.getAll(filters);
       setTasks(data);
@@ -172,7 +188,7 @@ function TasksContent() {
     } finally {
       setLoading(false);
     }
-  }, [scopeParam, searchQuery, selectedStatuses, assigneeFilter, relatedTypeFilter]);
+  }, [scopeParam, searchQuery, selectedStatuses, assigneeFilter, relatedTypeFilter, funnelStageFilter]);
 
   React.useEffect(() => {
     fetchTasks();
@@ -306,6 +322,8 @@ function TasksContent() {
       updateUrlParams({ assigneeId: value || null });
     } else if (filterId === 'relatedType') {
       updateUrlParams({ relatedType: value || null });
+    } else if (filterId === 'funnelStageKey') {
+      updateUrlParams({ funnelStageKey: value || null });
     }
   };
 
@@ -321,11 +339,12 @@ function TasksContent() {
       status: null,
       assigneeId: null,
       relatedType: null,
+      funnelStageKey: null,
     });
   };
 
   const hasActiveFilters = Boolean(
-    searchQuery || selectedStatuses.length > 0 || assigneeFilter || relatedTypeFilter
+    searchQuery || selectedStatuses.length > 0 || assigneeFilter || relatedTypeFilter || funnelStageFilter
   );
 
   // ۵. ایجاد سریع تسک جدید
@@ -500,6 +519,7 @@ function TasksContent() {
           status: selectedStatuses,
           assigneeId: assigneeFilter,
           relatedType: relatedTypeFilter,
+          funnelStageKey: funnelStageFilter,
         }}
         onFilterChange={handleFilterChange}
         onClearAll={handleClearFilters}

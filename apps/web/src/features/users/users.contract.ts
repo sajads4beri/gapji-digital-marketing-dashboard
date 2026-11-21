@@ -29,6 +29,11 @@ export interface IUserService {
   getAccessMatrix(): Promise<RoleAccessMatrix>;
 
   /**
+   * بروزرسانی و ذخیره ماتریس دسترسی نقش‌ها (ویژه ادمین)
+   */
+  updateAccessMatrix(matrix: Record<string, Record<string, boolean>>): Promise<RoleAccessMatrix>;
+
+  /**
    * دعوت کاربر جدید به سازمان با نقش مشخص
    */
   inviteUser(input: InviteUserInput): Promise<UserItem>;

@@ -18,6 +18,16 @@ import { LandingModule } from './modules/landing/landing.module';
 import { SmsModule } from './modules/sms/sms.module';
 import { WebinarsModule } from './modules/webinars/webinars.module';
 import { CalendarModule } from './modules/calendar/calendar.module';
+import { SearchModule } from './modules/search/search.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { EquipmentModule } from './modules/equipment/equipment.module';
+import { MeetingsModule } from './modules/meetings/meetings.module';
+import { SopsModule } from './modules/sops/sops.module';
+import { LearningModule } from './modules/learning/learning.module';
+import { IdeasModule } from './modules/ideas/ideas.module';
+import { ActivityModule } from './modules/activity/activity.module';
+import { WordpressModule } from './modules/wordpress/wordpress.module';
+import { HealthModule } from './modules/health/health.module';
 import { DatabaseModule } from './database/database.module';
 
 @Module({
@@ -45,6 +55,16 @@ import { DatabaseModule } from './database/database.module';
     SmsModule,
     WebinarsModule,
     CalendarModule,
+    SearchModule,
+    NotificationsModule,
+    EquipmentModule,
+    MeetingsModule,
+    SopsModule,
+    LearningModule,
+    IdeasModule,
+    ActivityModule,
+    WordpressModule,
+    HealthModule,
   ],
   controllers: [],
   providers: [],

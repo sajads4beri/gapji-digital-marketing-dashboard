@@ -1,84 +1,94 @@
-# 07 — TECHNICAL DEBT & GAP ANALYSIS REGISTER
-## Exhaustive Registry of Architectural Flaws, Technical Debt, and Missing Capabilities
+# 07 — Technical Debt and Gap Analysis
+## Gapji Digital Marketing Platform Deep Audit
 
 ---
 
-## 1. TECHNICAL DEBT SEVERITY MATRIX
+## 1. Technical Debt Register
 
-| Debt ID | Category | Title & Summary | Severity | Blast Radius | Est. Remediation | Phase |
-| :--- | :--- | :--- | :---: | :---: | :---: | :---: |
-| **DEBT-001** | Architecture | **Unmerged Git Branches (Frontend vs Backend Monorepo Split)** | `P0 - Blocker` | Repository-wide | 2-3 Days | PHASE-001 |
-| **DEBT-002** | Security | **Sales Agent Lead Scoping Bug (Test Failure ITEM-08)** | `P0 - Critical` | Data Privacy | 1 Day | PHASE-003/009 |
-| **DEBT-003** | Product Gap | **9 Completely Missing Frontend Pages from PDF Specification** | `P1 - High` | 31% of Product | 8 Days | PHASE-011/013 |
-| **DEBT-004** | Architecture | **Missing Mandated Tech Stack Packages in `apps/web`** | `P1 - High` | Frontend-wide | 3 Days | PHASE-002 |
-| **DEBT-005** | Reliability | **Dual-Layer LocalStorage Mock Fallback Anti-Pattern** | `P1 - High` | Data Integrity | 4 Days | PHASE-002–010 |
-| **DEBT-006** | Type Safety | **`packages/shared` Missing 85% of Domain Entity Types** | `P1 - High` | Full Monorepo | 2 Days | PHASE-001 |
-| **DEBT-007** | DevOps | **Absence of Standard Automated CI/CD Test Runner** | `P2 - Medium` | Deployment | 2 Days | PHASE-014 |
-| **DEBT-008** | UX / Access | **Lack of Accessible Keyboard Drag-and-Drop in Kanban** | `P2 - Medium` | Accessibility | 2 Days | PHASE-009/010 |
-| **DEBT-009** | Architecture | **Absence of Server-Side Background Task Processing (BullMQ)** | `P2 - Medium` | Performance | 3 Days | PHASE-008 |
+| Debt ID | Classification | Severity | Area / Module | Description & Root Cause | Impact | Recommended Remediation |
+| :--- | :--- | :---: | :--- | :--- | :--- | :--- |
+| **DEBT-01** | Missing Domain Modules | `P0 / Critical` | Backend API & Web | 8 documented product modules have Prisma models but zero controllers, services, or web views. | 27% of product specification is unexecutable. | Implement dedicated modules in NestJS and routes in Next.js (`PHASE-002` to `009`). |
+| **DEBT-02** | Header Search Disconnected | `P1 / High` | Application Shell | Visual search input exists in `Header` but lacks a backend cross-entity search endpoint. | Users cannot execute documented search for leads/campaigns. | Build `/api/search/global` indexing leads and campaigns (`PHASE-001`). |
+| **DEBT-03** | Route Alias Inconsistency | `P1 / High` | Routing Structure | PDF defines `/performance/campaigns`, while Next.js routes to `/campaigns`. | Potential navigation breakage or external bookmark mismatches. | Add Next.js rewrite or alias redirecting `/performance/campaigns` to `/campaigns` (`PHASE-001`). |
+| **DEBT-04** | Mock Notification Fallback | `P1 / High` | Notifications | Header contains hardcoded static notifications array in React state. | In-app alerts do not reflect real system events. | Implement `NotificationModule` with SSE/WebSocket push (`PHASE-002`). |
+| **DEBT-05** | Permissions Matrix Persistence | `P1 / High` | Settings / Users | Permissions Matrix UI table in `/settings/users` renders toggles without a save mutation endpoint. | Custom role overrides cannot be persisted to PostgreSQL. | Add `PATCH /api/users/permissions/matrix` endpoint (`PHASE-001`). |
+| **DEBT-06** | Mock Fallback in Feature APIs | `P2 / Medium` | Frontend Services | Feature APIs (`platforms.api.ts`, `task.api.ts`) contain fallback mocks on HTTP error. | Can mask backend outages or API contract mismatches. | Remove silent mock fallbacks in favor of standardized `ErrorState` retry UI (`PHASE-001`). |
+| **DEBT-07** | Client-Side Campaign Filtering | `P2 / Medium` | Performance / Campaigns | `campaignApi.getAll()` fetches all records and applies text/status filters in client memory. | Will degrade frontend performance as campaign records scale past thousands. | Move filtering to SQL queries via Prisma in `campaigns.service.ts` (`PHASE-001`). |
+| **DEBT-08** | Incomplete PDF Export Pipeline | `P2 / Medium` | Performance / Dashboard | Dashboard features Excel export via client, but PDF export is missing or uses print stylesheet. | Executive stakeholders cannot download formatted reports. | Add server-side PDF generator (e.g. Puppeteer / PDFKit) (`PHASE-001`). |
+| **DEBT-09** | Missing Production Dockerfile | `P3 / Medium` | DevOps / Infrastructure | Workspace contains only `docker-compose.yml` for local Postgres; lacks multi-stage production Dockerfiles. | Cannot be deployed to Kubernetes or production container hosts. | Create production multi-stage Dockerfiles for API and Web (`PHASE-010`). |
+| **DEBT-10** | Missing CI/CD Automated Pipelines| `P3 / Medium` | DevOps / QA | No GitHub Actions or CI pipeline configurations in repository root. | Regressions can be introduced without automated pull-request validation. | Add `.github/workflows/ci.yml` running lint, typecheck, and tests (`PHASE-010`). |
 
 ---
 
-## 2. DEEP DIVE INTO CRITICAL DEBTS & AUDIT EVIDENCE
+## 2. Deep Gap Analysis: Documented vs Actual Implementation
 
-### 2.1 DEBT-001: The Unmerged Git Branches
-- **Forensic Evidence**:
-  - `git branch -a` shows `feature/frontend-foundation` (commit `094df4b`) and `feature/backend-foundation` (commit `4a53906`) both branched from scaffold commit `9f5b8d7`.
-  - In `zero_vapor_blasts_11h11` (frontend branch), `apps/api` contains only 1 TypeORM module (`campaigns`).
-  - In `marketing-platform-backend` (backend branch), `apps/api` contains 16 NestJS modules with Prisma ORM and 48 relational models.
-- **Root Cause**: Two teams or parallel tasks worked independently without continuous integration into `main`.
-- **Remediation Plan**: Merge `feature/backend-foundation` into the active worktree, standardize database tooling on Prisma 5.22, and remove the obsolete TypeORM files.
+```mermaid
+graph LR
+    subgraph PDFSpecs["Documented Capabilities (29 Pages)"]
+        DonePages["18 Connected Pages<br/>(Auth, Dash, Campaigns, Leads, Costs, Import, etc.)"]
+        PartialPages["3 Partial Pages<br/>(Global Search, Notifications Header, User Matrix)"]
+        MissingPages["8 Missing Pages<br/>(Equipment, Meetings, SOPs, Learning, Ideas, Activity, WordPress, Notifications Page)"]
+    end
 
-### 2.2 DEBT-002: Sales Agent Lead Data Leakage (Test ITEM-08)
-- **Forensic Evidence**: Execution of `node apps/web/scripts/test-permissions-matrix.mjs` resulted in:
-  ```
-  ✖ [FAIL] [ITEM-08] Sales agent cannot fetch or view leads of other users;
-                     data ownership is strictly enforced at service layer
-  ```
-- **Code Inspection**: In `apps/web/src/features/leads/utils/lead-storage.ts`, `getAll(filters)` only filters by `assignedToId` if explicitly passed in `filters`. If a sales agent navigates to `/leads` without query params, the mock service returns ALL organizational leads, violating Section 3.2 (Page 14) of the PDF:
-  > "نقش‌ها: کارشناس فروش (فقط لیدهای خود)، مدیر"
-- **Remediation Plan**: Enforce user ID scoping directly within the backend NestJS service layer (`where: { assignedToId: user.id }` for `sales_agent`) and replicate this constraint in the frontend service adapter.
+    subgraph ActualCode["Physical Codebase Implementation"]
+        FullStack["Backend Modules & Frontend Views Active"]
+        FrontendOnly["Prisma Models Exist in DB Schema ONLY"]
+    end
 
-### 2.3 DEBT-003: 9 Completely Missing Frontend Pages
-- **Forensic Evidence**: Recursive inspection of `apps/web/src/app` confirmed that the following routes do not exist:
-  1. `/notifications` (PDF Page 3)
-  2. `/work/calendar` (PDF Page 20)
-  3. `/work/equipment` (PDF Page 21)
-  4. `/work/meetings` (PDF Page 22)
-  5. `/work/sops` (PDF Page 23)
-  6. `/work/learning` (PDF Page 24)
-  7. `/work/ideas` (PDF Page 25)
-  8. `/work/activity` (PDF Page 26)
-  9. `/settings/wordpress` (PDF Page 29)
-- **Remediation Plan**: Construct the dedicated pages, layouts, and feature folders in `PHASE-011` and `PHASE-013`.
+    DonePages --> FullStack
+    PartialPages --> FullStack
+    MissingPages --> FrontendOnly
+```
 
-### 2.4 DEBT-004: Missing Mandated Tech Stack Packages
-- **Forensic Evidence**: `apps/web/package.json` contains:
-  ```json
-  "dependencies": {
-    "next": "14.2.3",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "@gapji/shared": "file:../../packages/shared",
-    "clsx": "^2.1.0",
-    "tailwind-merge": "^2.2.2",
-    "lucide-react": "^0.365.0",
-    "axios": "^1.6.8",
-    "date-fns": "^3.6.0"
-  }
-  ```
-  The following mandated libraries (PDF Pages 26-29) are completely absent:
-  - `@tanstack/react-query` (Server state management & invalidation)
-  - `@tanstack/react-form` (Dynamic array form handling)
-  - `zod` (Validation schemas & input normalization)
-  - `zustand` (Client session & UI state management)
-  - `@dnd-kit/core` & `@dnd-kit/sortable` (Kanban drag-and-drop)
-  - `framer-motion` (Accessible transitions)
-  - `recharts` (Accessible charts)
-- **Remediation Plan**: Install and configure these libraries in `PHASE-002`.
+### 2.1 Detailed Review of the 8 Missing Product Domains
 
-### 2.5 DEBT-005: Dual-Layer Mock Storage Anti-Pattern
-- **Forensic Evidence**:
-  - `lead-storage.ts`, `costs.storage.ts`, `task-storage.ts`, and `users.storage.ts` utilize browser `localStorage` and global memory arrays.
-  - Multi-user scenarios, concurrent updates, and cross-browser synchronization are impossible.
-- **Remediation Plan**: Replace mock storage calls with `useQuery` and `useMutation` hooks calling real NestJS endpoints backed by PostgreSQL.
+#### 1. Page 3: Notifications Hub (`/notifications`)
+- **Documented Requirements:** Header drawer with 10 recent notifications; full page with notifications list and Settings tab (Event Type × Channel matrix with toggles); mark all as read; click to navigate to entity; counter capped at `+99`.
+- **Current State:** Header has mock counter and 3 static items. Backend models `Notification` and `NotificationPreference` exist in Prisma, but no API module exists.
+- **Remediation:** Build `apps/api/src/modules/notifications` and `apps/web/src/app/(app)/notifications/page.tsx` (`PHASE-002`).
+
+#### 2. Page 21: Equipment Management (`/work/equipment`)
+- **Documented Requirements:** Two views: "Shortages" (default) and "All Equipment"; Shortages grouped by event date with `< 3 days` warning; All Equipment table with status/assignee filters; equipment templates; apply template to campaign/webinar.
+- **Current State:** Tagged `comingSoon: true` in navigation. Prisma models `EquipmentItem`, `EquipmentTemplate`, `EquipmentTemplateItem`, `EventEquipment` exist. No backend module or frontend page exists.
+- **Remediation:** Build `apps/api/src/modules/equipment` and `apps/web/src/app/(app)/work/equipment/page.tsx` (`PHASE-003`).
+
+#### 3. Page 22: Meeting Minutes (`/work/meetings`)
+- **Documented Requirements:** Meetings list; reading view (max 800px); meeting form (Attendees, Agenda, Decisions, Action Items table); distribution status; "Send to all" with email preview; "Convert action items to tasks"; version history.
+- **Current State:** Tagged `comingSoon: true` in navigation. Prisma models `Meeting`, `MeetingActionItem` exist. No backend module or frontend page exists.
+- **Remediation:** Build `apps/api/src/modules/meetings` and `apps/web/src/app/(app)/work/meetings/page.tsx` (`PHASE-004`).
+
+#### 4. Page 23: SOP Knowledge Base (`/work/sops`)
+- **Documented Requirements:** Categorized card list; reading view (800px) with edit mode; numbered procedure steps, checklist, attachments; version selector & history; "Create task from SOP" prominent button; draft vs published badges; print stylesheet.
+- **Current State:** Tagged `comingSoon: true` in navigation. Prisma models `Sop`, `SopVersion` exist. No backend module or frontend page exists.
+- **Remediation:** Build `apps/api/src/modules/sops` and `apps/web/src/app/(app)/work/sops/page.tsx` (`PHASE-005`).
+
+#### 5. Page 24: Learning & LMS Hub (`/work/learning`)
+- **Documented Requirements:** "Library" and "My Courses" tabs for users; "Team Progress" tab for managers; library cards (software, duration); inline video/article player with speed control and resume playback timestamp; course assignment; completion tracking.
+- **Current State:** Tagged `comingSoon: true` in navigation. Prisma models `LearningResource`, `UserLearningProgress` exist. No backend module or frontend page exists.
+- **Remediation:** Build `apps/api/src/modules/learning` and `apps/web/src/app/(app)/work/learning/page.tsx` (`PHASE-006`).
+
+#### 6. Page 25: Ideas Incubator (`/work/ideas`)
+- **Documented Requirements:** Quick submit input at top; status filter; card list with 1-click reversible upvotes; details drawer; manager change status; "Convert to task" button; "Log execution result" for implemented ideas; executed ideas highlighted.
+- **Current State:** Tagged `comingSoon: true` in navigation. Prisma models `Idea`, `IdeaVote` exist. No backend module or frontend page exists.
+- **Remediation:** Build `apps/api/src/modules/ideas` and `apps/web/src/app/(app)/work/ideas/page.tsx` (`PHASE-007`).
+
+#### 7. Page 26: Activity Report & Audit Feed (`/work/activity`)
+- **Documented Requirements:** Role-filtered activity report (managers see all, users see own); date range filter; summary KPI cards; team comparison table; live activity feed ("User X changed lead Y to Qualified" + timestamp + link); Excel export.
+- **Current State:** Tagged `comingSoon: true` in navigation. Prisma model `UserActivityLog` exists. No backend module or frontend page exists.
+- **Remediation:** Build `apps/api/src/modules/activity` and `apps/web/src/app/(app)/work/activity/page.tsx` (`PHASE-008`).
+
+#### 8. Page 29: WordPress Connection & Inbound Leads (`/settings/wordpress`)
+- **Documented Requirements:** Connection status card; single-view API key generation with rotation confirmation; setup guide; "Test Connection" button; field mapping table (WordPress form field -> Lead system field); rejected webhooks log table.
+- **Current State:** Tagged `comingSoon: true` in navigation. Prisma models `WordpressIntegration`, `WordpressWebhookLog` exist. Partial status endpoint in landing; no dedicated settings page or webhook receiver.
+- **Remediation:** Build `apps/api/src/modules/wordpress` and `apps/web/src/app/(app)/settings/wordpress/page.tsx` (`PHASE-009`).
+
+---
+
+## 3. Risk Assessment Matrix
+
+| Risk Factor | Probability | Impact | Exposure | Mitigation Strategy |
+| :--- | :---: | :---: | :---: | :--- |
+| **Scope Creep during Module Completion** | Medium | High | **High** | Strictly constrain new modules to documented fields in PDF (`REQ-084` to `REQ-092`). |
+| **API/Database Data Desynchronization** | Low | High | **Medium** | Rely strictly on existing Prisma models; do not alter schema unless verified non-destructive. |
+| **UI Route Breakage on Refactor** | Low | Medium | **Low** | Maintain route aliases (`/performance/campaigns` -> `/campaigns`) to prevent dead links. |
+| **Memory Pressure on Heavy Aggregations** | Medium | Medium | **Medium** | Introduce index optimization and server-side pagination for costs and leads before prod launch. |

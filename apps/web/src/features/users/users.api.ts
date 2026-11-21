@@ -81,6 +81,18 @@ export class RealUserService implements IUserService {
   }
 
   /**
+   * بروزرسانی و ذخیره ماتریس دسترسی نقش‌ها با اندپوینت PATCH /api/users/access-matrix
+   */
+  async updateAccessMatrix(matrix: Record<string, Record<string, boolean>>): Promise<RoleAccessMatrix> {
+    try {
+      const { data } = await api.patch<RoleAccessMatrix>('/users/access-matrix', { matrix });
+      return data;
+    } catch (err: any) {
+      throw new Error(extractErrorMessage(err, 'خطا در ذخیره ماتریس دسترسی‌ها'));
+    }
+  }
+
+  /**
    * دعوت کاربر جدید با اندپوینت POST /api/users/invite
    */
   async inviteUser(input: InviteUserInput): Promise<UserItem> {
@@ -101,13 +113,11 @@ export class RealUserService implements IUserService {
   }
 
   /**
-   * تغییر نقش سازمانی کاربر با اندپوینت PATCH /api/users/:id/role
+   * تغییر نقش کاربری با اندپوینت PATCH /api/users/:id/role
    */
   async changeUserRole(userId: string, newRole: UserRole): Promise<UserItem> {
     try {
-      const { data } = await api.patch<UserItem>(`/users/${userId}/role`, {
-        newRole,
-      });
+      const { data } = await api.patch<UserItem>(`/users/${userId}/role`, { role: newRole });
       return data;
     } catch (err: any) {
       throw new Error(extractErrorMessage(err, 'خطا در تغییر نقش کاربر'));
@@ -122,7 +132,7 @@ export class RealUserService implements IUserService {
       const { data } = await api.patch<UserItem>(`/users/${userId}/deactivate`);
       return data;
     } catch (err: any) {
-      throw new Error(extractErrorMessage(err, 'خطا در غیرفعال‌سازی حساب کاربر'));
+      throw new Error(extractErrorMessage(err, 'خطا در غیرفعال‌سازی کاربر'));
     }
   }
 

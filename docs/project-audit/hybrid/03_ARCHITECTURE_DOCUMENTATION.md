@@ -1,98 +1,135 @@
-# 03 — SYSTEM ARCHITECTURE & DATA FLOW (معماری سامانه و جریان داده‌ها)
-## مستندات جامع معماری، توپولوژی روتینگ، پایگاه داده و تعاملات کلاینت-سرور
+# 03 — Architecture Documentation (مستندات معماری و لایه‌های فنی پلتفرم)
+## Gapji Digital Marketing Platform Deep Audit
 
 ---
 
-## 1. HIGH-LEVEL TOPOLOGY & MONOREPO ARCHITECTURE (معماری کلان مونورپو)
+## 1. High-Level Architecture (معماری کلان سیستم)
 
-معماری سامانه Gapji بر مبنای ساختار **pnpm Monorepo** طراحی شده است:
+سامانه Gapji Digital Marketing Platform به صورت یک **Full-Stack Monorepo** بر پایه تفکیک لایه‌های ارائه (Presentation)، پردازش بیزنس (Business Logic) و ذخیره‌سازی داده‌ها (Data Layer) توسعه یافته است:
 
 ```mermaid
-flowchart TD
-    subgraph FrontendApp ["apps/web (Next.js 14 App Router)"]
-        AuthGroup["(auth) Route Group: /login, /select-org, /forgot-password"]
-        AppGroup["(app) Route Group: 26 Pages, AppShell, Header, Sidebar"]
-        StoreLayer["Client State: Zustand (authStore, uiStore) + React Context"]
-        DataFetchLayer["Data Layer: Axios apiClient + Fallback Mock Storage Layer"]
+graph TB
+    subgraph ClientLayer["Frontend Client Layer (Next.js 14 App Router)"]
+        UI["shadcn/ui & Tailwind CSS (Pure RTL, Light Mode, Tokens)"]
+        AppRouter["App Router: Route Groups (auth) & (app)"]
+        State["State Management: TanStack Query v5 + Zustand v5"]
+        AxiosClient["Axios HTTP Client (Memory-Only Access Token)"]
+        Jalali["Standalone Jalali Date Engine (persian-date.ts)"]
     end
 
-    subgraph BackendApp ["apps/api (NestJS 10)"]
-        NestBootstrap["main.ts: CORS, Global ValidationPipe, Swagger (/docs)"]
-        AuthModule["modules/auth: JWT Access Tokens, Argon2, HttpOnly Cookie"]
-        DomainModules["16 Domain Modules: campaigns, leads, costs, tasks, etc."]
-        PrismaService["database/prisma.service.ts: Prisma Client Lifecycle"]
+    subgraph TransportBoundary["Transport & Network Security"]
+        HTTPS["TLS / HTTPS Transport Encryption"]
+        HttpOnlyCookie["HttpOnly, SameSite=Lax Refresh Cookie"]
+        QueueInterceptor["Axios 401 Interceptor with Refresh Queueing"]
     end
 
-    subgraph DataStorage ["Database Layer (PostgreSQL 15)"]
-        PostgresDB[("PostgreSQL 15 Container (Port 5432)")]
-        PrismaSchema["schema.prisma: 48 Relational Models & Indexes"]
+    subgraph BackendCore["Backend Layer (NestJS 10 Modular Core)"]
+        Guards["JwtAuthGuard, RolesGuard & System Policies"]
+        Controllers["16 Domain Controllers (REST Endpoints)"]
+        Services["16 Domain Services (Business Logic)"]
+        PrismaService["PrismaService (ORM mapping 43 Models)"]
     end
 
-    AppGroup --> StoreLayer
-    StoreLayer --> DataFetchLayer
-    DataFetchLayer -->|HTTP REST with Bearer Token & HttpOnly Cookies| NestBootstrap
-    NestBootstrap --> AuthModule
-    NestBootstrap --> DomainModules
-    DomainModules --> PrismaService
-    PrismaService --> PrismaSchema
-    PrismaSchema --> PostgresDB
+    subgraph DataLayer["Persistence Layer"]
+        Postgres["PostgreSQL 16 Database"]
+        Migrations["6 Prisma Sequential Migrations"]
+    end
+
+    UI --> AppRouter
+    AppRouter --> State
+    State --> AxiosClient
+    AxiosClient --> HTTPS
+    HTTPS --> TransportBoundary
+    TransportBoundary --> QueueInterceptor
+    QueueInterceptor --> Guards
+    Guards --> Controllers
+    Controllers --> Services
+    Services --> PrismaService
+    PrismaService --> Postgres
+    Migrations --> Postgres
 ```
 
 ---
 
-## 2. THE DUAL-LAYER STORAGE FALLBACK MECHANISM (مکانیزم دولایه‌ای ذخیره‌سازی داده)
+## 2. Monorepo Package Boundaries (مرزهای بسته‌ها و استقلال لایه‌ها)
 
-به دلیل تفکیک دو شاخه در گیت، در حال حاضر فایل‌های `api.ts` در فرانت‌اند الگوی زیر را اجرا می‌کنند:
+1. **`packages/shared`:** مخزن قراردادهای مشترک (Shared Contracts). تعاریف DTO، اینام‌ها (`UserRole`, `LeadStatus`, `CampaignStatus`) و اینترفیس‌ها را بین کلاینت و سرور همگام نگه می‌دارد.
+2. **`apps/api`:** بک‌اند کاملاً مستقل با فریم‌ورک NestJS. بدون کوچک‌ترین وابستگی به کدهای مرورگر یا Next.js.
+3. **`apps/web`:** فرانت‌اند ترکیبی SSR/Client با فریم‌ورک Next.js 14 App Router که صرفاً از طریق فراخوانی متدهای Axios کلاینت با API ارتباط می‌گیرد.
+
+---
+
+## 3. Backend Architecture (معماری بک‌اند NestJS)
+
+- **Configuration:** با استفاده از `@nestjs/config` متغیرهای محیطی لود شده و صحت مقادیر توسط Joi schema (`apps/api/src/config/env.validation.ts`) بررسی می‌شود.
+- **Data Access & Prisma:** پایگاه داده PostgreSQL توسط `PrismaService` مدیریت می‌شود. خطاهای پایگاه داده از طریق `PrismaClientExceptionFilter` هندل شده و کدهای خطای دیتابیس (نظیر خطای `P2003` برای حذف رکوردهای وابسته) به پیام‌های خطای استاندارد HTTP تبدیل می‌شوند.
+- **Domain Modules:** ۱۶ ماژول کاربردی فعال: `auth`, `campaigns`, `costs`, `dashboard`, `leads`, `tasks`, `calendar`, `webinars`, `sms`, `audiences`, `landing`, `platforms`, `imports`, `kpis`, `users`, `organization`.
+
+---
+
+## 4. Frontend Architecture (معماری فرانت‌اند Next.js)
+
+### 4.1 Routing & Layout (ساختار مسیرها و چیدمان)
+- **`(auth)` Route Group:** مسیرهای عمومی لاگین (`/login`)، فراموشی رمز (`/forgot-password`) و انتخاب سازمان (`/select-org`).
+- **`(app)` Route Group:** کلیه مسیرهای حفاظت‌شده نرم‌افزار. توسط `middleware.ts` بررسی نشست و نقش انجام می‌شود.
+- **Universal 3 States:** تمام صفحات ملزم به پیاده‌سازی ۳ وضعیت هستند: Skeleton Loading، Empty State همراه با Action Button، و Error State همراه با Retry Button.
+
+### 4.2 State Management Strategy (استراتژی مدیریت وضعیت)
+- **Server State:** مدیریت کوئری‌ها، کش و همگام‌سازی داده‌های سرور توسط `TanStack Query v5` با کلیدهای کوئری یکتا (`['campaigns', 'list', filters]`).
+- **Client State:** وضعیت‌های صرفاً کلاینتی (منوی باز/بسته، حالت فشرده جدول، تب انتخابی) توسط `Zustand` ذخیره شده و با localStorage هماهنگ است.
+
+---
+
+## 5. Security & Session Management (امنیت نشست‌ها و احراز هویت)
 
 ```mermaid
 sequenceDiagram
-    participant UI as Page Component (e.g. leads/page.tsx)
-    participant API as leadApi (leads/api/lead.api.ts)
-    participant Backend as NestJS API (:3001)
-    participant MockStorage as leadService (utils/lead-storage.ts)
+    autonumber
+    actor User as User Browser (مرورگر)
+    participant Web as Next.js Web Client
+    participant API as NestJS API Server
+    participant DB as PostgreSQL Database
 
-    UI->>API: getLeads(filters)
-    API->>Backend: GET /api/leads
-    alt Backend Responds (200 OK)
-        Backend-->>API: Array of LeadDetail (Real Database)
-        API-->>UI: Render Real Leads
-    else Connection Fails or 404/403
-        Backend--xAPI: Error / Network Failure
-        API-->>UI: Catch Block Triggered
-        UI->>MockStorage: leadService.getAll(filters)
-        MockStorage-->>UI: Return LocalStorage 'gapji_leads_data_v2'
-    end
+    User->>Web: Enter Email & Password
+    Web->>API: POST /api/auth/login
+    API->>DB: Verify Argon2 Hash & User Status
+    API->>DB: Create Session & RefreshToken Record (Token Family)
+    API-->>Web: Set-Cookie: refreshToken (HttpOnly, SameSite=Lax)<br/>Body: { accessToken: "eyJ..." }
+    Note over Web: Access Token is stored in Memory ONLY.<br/>Never saved in localStorage.
+
+    Note over Web,API: Access Token expires (15 min)
+    Web->>API: GET /api/costs (Authorization: Bearer <expired>)
+    API-->>Web: 401 Unauthorized
+    Note over Web: Axios Interceptor traps 401.<br/>Queues concurrent requests.
+    Web->>API: POST /api/auth/refresh (Sends HttpOnly Cookie)
+    API->>DB: Rotate Refresh Token Family
+    API-->>Web: Body: { accessToken: "eyJ_new..." }
+    Note over Web: Drain queued requests with new token.
+    Web->>API: Re-execute GET /api/costs
+    API-->>Web: 200 OK + Costs Data
 ```
 
-> [!WARNING]
-> الگوی فوق صرفاً برای فاز توسعه رابط کاربری (Demo/Development) مناسب بوده و برای محیط پروداکشن به طور کامل منسوخ خواهد شد. در فاز ۲ و فازهای بعدی، تمامی فراخوانی‌ها از طریق `useQuery` و `useMutation` مستقیماً به سرور PostgreSQL متصل خواهند شد.
+---
+
+## 6. Granular RBAC & System Policies (کنترل دسترسی و سیاست‌های سیستم)
+
+پلتفرم ۶ نقش مصوب را در سطح سازمان اعمال می‌کند:
+1. `admin`: مدیر ارشد سازمان با اختیارات کامل راهبری.
+2. `marketing_manager`: مدیر مارکتینگ با دسترسی کامل به کمپین‌ها، هزینه‌ها و تیم.
+3. `campaign_manager`: کارشناس کمپین برای ساخت و اجرای کمپین‌ها.
+4. `sales_agent`: کارشناس فروش با دسترسی منحصراً به لیدهای محوله (`assignedToId === user.id`).
+5. `content_creator`: کارشناس محتوا و برگزارکننده رویدادهای وبینار.
+6. `client`: کارفرما با دسترسی صرفاً خواندنی به داشبورد و گزارش‌ها.
+
+### Mathematical System Baseline Policies:
+- **Lead Privacy:** دسترسی `sales_agent` به لیدهای سایر کاربران حتی در صورت جعل شناسه لید در API غیرممکن است (خطای ۴۰۳ یا آرایه خالی).
+- **Client Mutation Lock:** نقش `client` به هیچ‌یک از متدهای POST/PATCH/DELETE روی کمپین‌ها، هزینه‌ها یا لیدها دسترسی ندارد.
+- **Single Admin Rule:** سازمان همواره باید حداقل یک ادمین فعال داشته باشد و عزل آخرین ادمین بدون معرفی ادمین جدید توسط دیتابیس مسدود است.
 
 ---
 
-## 3. RBAC SECURITY & ROLE CAPABILITY MATRIX (ماتریس سطوح دسترسی ۶ نقش)
+## 7. Localization, RTL & Shamsi Calendar Engine
 
-مدیریت دسترسی‌ها بر اساس `apps/web/src/lib/permissions.ts` و نقش‌های سازمانی پیاده‌سازی شده است:
-
-| User Role (نقش کاربری) | Persian Title (عنوان فارسی) | Accessible Routes (مسیرهای مجاز) | Key Restrictions (محدودیت‌های کلیدی) |
-| :--- | :--- | :--- | :--- |
-| `admin` | مدیر ارشد سازمانی | تمامی ۲۹ صفحه و تنظیمات | الزام به حفظ حداقل ۱ ادمین فعال |
-| `marketing_manager` | مدیر مارکتینگ | تمام بخش‌ها به جز تغییر ساختار ادمین | دسترسی کامل به بودجه و تایید مصوبات |
-| `campaign_manager` | کمپین‌چی | کمپین‌ها، هزینه‌ها، ایمپورت، تسک‌ها | عدم دسترسی به تنظیمات کاربران و سازمان |
-| `sales_agent` | کارشناس فروش | صندوق لیدها، برد کانبان، جزئیات لید | دسترسی **فقط به لیدهای اختصاص‌یافته به خود** |
-| `content_creator` | مسئول محتوا و وبینار | وبینارها، تجهیزات، تسک‌ها، تقویم | عدم دسترسی به بخش‌های مالی و فروش |
-| `client` | کارفرما / مشتری | صفحه خانه، داشبورد، خلاصه کمپین‌ها | دسترسی **فقط-خواندنی (Read-Only)** |
-
----
-
-## 4. DATABASE ARCHITECTURE: 48 PRISMA RELATIONAL MODELS (مدل‌های ۴۸ گانه پایگاه داده)
-
-فایل `apps/api/prisma/schema.prisma` در شاخه بک‌اند شامل ۴۸ مدل پایگاه داده است:
-1. **سازمان و امنیت**: `User`, `Organization`, `OrganizationMembership`, `Session`, `RefreshToken`, `OrganizationTaxonomy`, `NotificationPreference`.
-2. **کمپین و کانال‌ها**: `Campaign`, `Platform`, `CampaignPlatformAllocation`, `TargetAudience`, `CampaignAudience`, `LandingPage`, `UtmLink`.
-3. **هزینه‌ها**: `CostCategory`, `Cost`.
-4. **لید و پایپ‌لاین**: `LeadStatusConfig`, `Lead`, `LeadActivity`, `LeadCall`.
-5. **رویداد و پیامک**: `SmsCampaign`, `SmsRecipient`, `Webinar`, `WebinarAttendee`.
-6. **وظایف و هماهنگی**: `Task`, `TaskSubtask`, `TaskComment`, `CalendarEvent`, `EquipmentItem`, `EquipmentTemplate`, `EquipmentTemplateItem`, `EventEquipment`.
-7. **دانش و آموزش**: `Meeting`, `MeetingActionItem`, `Sop`, `SopVersion`, `LearningResource`, `UserLearningProgress`, `Idea`, `IdeaVote`.
-8. **هوشمندی و مانیتورینگ**: `KpiMetric`, `CustomMetric`, `KpiAlertRule`, `ImportJob`, `Notification`, `UserActivityLog`.
-9. **یکپارچه‌سازی**: `WordpressIntegration`, `WordpressWebhookLog`.
+- **Pure RTL & Vazirmatn:** تگ `<html lang="fa" dir="rtl">` همراه با لود فونت‌های محلی وزیرمتن (بدون نیاز به اینترنت).
+- **Jalali Engine (`persian-date.ts`):** الگوریتم محاسباتی مستقل تاریخ شمسی بدون وابستگی خارجی با موفقیت ۱۰۰٪ در آزمون ۱۱٬۳۲۳ روز متوالی (۱۳۹۰ تا ۱۴۲۰).
+- **Currency Standard:** نمایش مبالغ با ارقام فارسی، جداکننده ۳ رقم و پسوند تومان یا ریال مصوب سازمان (`۱۲٬۵۰۰٬۰۰۰ تومان`).

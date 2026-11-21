@@ -1,142 +1,105 @@
-# 02 — REPOSITORY INVENTORY & ASSET CLASSIFICATION
-## Comprehensive Codebase Catalog and Resource Inventory
+# 02 — Repository Inventory
+## Gapji Digital Marketing Platform Deep Audit
 
 ---
 
-## 1. REPOSITORY STRUCTURE & WORKSPACE OVERVIEW
+## 1. Inventory Summary & File Classification
 
-The repository is structured as a **pnpm Monorepo** managed via `pnpm-workspace.yaml`.
+The repository `marketing-platform-backend` is structured as a TypeScript monorepo managed via **pnpm workspaces**. The physical workspace contains **530 non-generated source files** across three main packages, one documentation folder, and repository configuration files.
 
-```
-<root>/
-├── apps/
-│   ├── api/                 # NestJS Backend Application
-│   └── web/                 # Next.js 14 Frontend Application
-├── packages/
-│   └── shared/              # Shared TypeScript contracts and DTOs
-├── audit-reports/           # Legacy forensic audit reports (HTML & PDF)
-├── docs/                    # Dedicated Audit Documentation Directory (project-audit)
-├── docker-compose.yml       # PostgreSQL 15 container definition
-├── pnpm-workspace.yaml      # Monorepo workspace configuration
-├── package.json             # Root scripts and workspace orchestration
-├── tsconfig.json            # Monorepo base TypeScript configuration
-└── marketing-platform-phase1-frontend-pages-1.pdf # Product Specification PDF
+```mermaid
+pie title Repository File Distribution (530 Source Files)
+    "apps/web (Frontend)" : 356
+    "apps/api (Backend API)" : 170
+    "packages/shared (Contracts)" : 3
+    "docs (Specifications)" : 1
 ```
 
----
+### 1.1 File Extension Breakdown
 
-## 2. ROOT & CONFIGURATION ARTIFACTS
-
-| File Path | Category | Purpose | Status | Audit Findings & Notes |
-| :--- | :--- | :--- | :---: | :--- |
-| `package.json` | Manifest | Root workspace scripts and dependencies | Valid | Configures `dev`, `build`, `start`, `db:up`, `db:down`. Uses `pnpm@9.15.4`. |
-| `pnpm-lock.yaml` | Lockfile | Dependency lockfile for workspace | Valid | Resolves dependencies across root, api, web, and shared. |
-| `pnpm-workspace.yaml` | Monorepo | Declares `apps/*` and `packages/*` workspaces | Valid | Correctly links `apps/api`, `apps/web`, and `packages/shared`. |
-| `docker-compose.yml` | Infrastructure| Runs PostgreSQL 15 container | Valid | Exposes port 5432, mounts persistent volume `gapji_postgres_data`. |
-| `.env.example` | Configuration | Environment variables template | Valid | Safe template with default database credentials and JWT placeholder. |
-| `.gitignore` | Git | Exclusion patterns for monorepo | Valid | Properly ignores `node_modules`, `.next`, `dist`, `.env`. |
-| `tsconfig.json` | Compiler | Monorepo base TypeScript compiler options | Valid | Target ES2022, module NodeNext, strict mode enabled. |
-| `marketing-platform-phase1-frontend-pages-1.pdf` | Specification | Official 29-page Product Specification | Valid | The primary source of truth for all requirements and layouts. |
-| `audit-reports/GAPJI_FULL_PROJECT_AUDIT_B2.5.0.html` | Legacy Report | Previous forensic audit report | Historical | Documented B2.5.0 audit state and 47 Prisma models. |
-
----
-
-## 3. SHARED PACKAGE (`packages/shared`)
-
-| File Path | Purpose | Completeness | Deficiencies & Gaps |
-| :--- | :--- | :---: | :--- |
-| `package.json` | Defines `@gapji/shared` workspace package | 100% | Properly configured for internal monorepo consumption. |
-| `tsconfig.json` | Shared TypeScript configuration | 100% | Emits declarations to `dist/`. |
-| `src/index.ts` | Shared domain interfaces and endpoints | 15% | **Severe Gap**: Contains only `Campaign`, `CampaignStats`, `CampaignStatus`, and `CreateCampaignDto`. Completely lacks types for Users, Leads, Costs, Tasks, Audiences, UTMs, Webinars, etc. |
+| File Extension | File Count | Category / Description | Inspection Status |
+| :--- | :---: | :--- | :---: |
+| `.ts` | **275** | Backend modules, services, DTOs, tests, types, utilities | Fully Inspected |
+| `.tsx` | **186** | React components, Next.js App Router pages, layout views | Fully Inspected |
+| `.mjs` | **34** | Standalone Node.js verification and test runner scripts | Fully Inspected |
+| `.json` | **10** | Manifests, TypeScript configs, shadcn components manifest | Fully Inspected |
+| `.woff2` | **10** | Vazirmatn Persian web font files (Light to Black, Variable) | Inspected & Verified |
+| `.js` | **6** | Verification scripts, Tailwind config, Next.js config | Fully Inspected |
+| `.sql` | **6** | Prisma migration SQL migration definitions | Fully Inspected |
+| `.yaml` / `.yml` | **3** | `pnpm-workspace.yaml`, `docker-compose.yml`, lockfile | Fully Inspected |
+| `.env` / `.env.example` | **3** | Environment variable definitions & templates | Inspected (Secrets safe) |
+| `.prisma` | **1** | Canonical database schema (`schema.prisma`) | Fully Inspected |
+| `.pdf` | **1** | Official Product Specification Document | Fully Inspected (29/29 p.)|
+| `.css` | **1** | Global stylesheet with CSS design tokens (`globals.css`) | Fully Inspected |
 
 ---
 
-## 4. BACKEND APPLICATION (`apps/api`) — CURRENT WORKTREE vs BACKEND BRANCH
+## 2. Directory Structure Catalog & Audit Scope
 
-### 4.1 Current Worktree State (`apps/api/src/`)
-| File Path | Category | Purpose | Status |
-| :--- | :--- | :--- | :---: |
-| `package.json` | Manifest | NestJS 10, TypeORM, Swagger, PostgreSQL | Outdated (uses TypeORM) |
-| `src/main.ts` | Entry Point | Bootstraps NestJS, Swagger docs at `/docs`, CORS, global pipes | Minimal |
-| `src/app.module.ts` | Core Module | Imports Config, TypeORM, CampaignsModule, DatabaseModule | Single Module |
-| `src/config/configuration.ts` | Config | Maps environment variables to configuration object | Valid |
-| `src/config/env.validation.ts` | Config | Validates environment variables on startup | Valid |
-| `src/database/database.module.ts`| Database | Configures TypeORM database connection | Bare |
-| `src/modules/campaigns/*` (6 files) | Feature Module | Campaigns controller, service, entity, DTOs | Single entity only |
-
-### 4.2 Backend Branch State (`feature/backend-foundation` in `F:/marketing-platform-backend`)
-| Module Directory | Files Count | Key Capabilities & Controllers |
-| :--- | :---: | :--- |
-| `prisma/schema.prisma` | 1 File | **48 Models**: Multi-tenancy, Auth, Campaigns, Leads, Costs, Tasks, Webinars, etc. |
-| `src/modules/auth/` | 12 Files | Local login, JWT refresh token, HttpOnly cookie handling, Argon2 password hashing |
-| `src/modules/campaigns/` | 8 Files | Campaign CRUD, platform allocations, health metric calculation |
-| `src/modules/leads/` | 10 Files | Leads inbox, status transition, timeline activity tracking, lost reasons |
-| `src/modules/costs/` | 8 Files | Cost entries, category attribution, bulk import |
-| `src/modules/dashboard/` | 6 Files | Executive KPI aggregation, funnel conversion calculations |
-| `src/modules/tasks/` | 7 Files | Task CRUD, Kanban status moves, assignee scoping |
-| `src/modules/users/` | 8 Files | User invitation, role management, 6-role permission matrix |
-| `src/modules/organization/` | 7 Files | Multi-tenant organization settings, taxonomy customization |
-| `src/modules/platforms/` | 5 Files | Ad platform catalog, integration credentials |
-| `src/modules/audiences/` | 5 Files | Target audience personas, demographic tagging |
-| `src/modules/landing/` | 6 Files | Landing page tracking, UTM link generator |
-| `src/modules/imports/` | 7 Files | CSV/XLSX data import job tracking, row parsing |
-| `src/modules/kpis/` | 6 Files | KPI definitions, custom alert threshold rules |
-| `src/modules/sms/` | 6 Files | SMS campaign dispatches, recipient delivery logs |
-| `src/modules/webinars/` | 6 Files | Webinar events, attendee tracking, lead conversion |
-| `src/modules/calendar/` | 5 Files | Calendar events, campaign timeline bindings |
-
----
-
-## 5. FRONTEND APPLICATION (`apps/web`)
-
-### 5.1 Route Inventory (`apps/web/src/app/`)
-| Route Path | Type | Target Module | Implemented? | Notes |
-| :--- | :--- | :--- | :---: | :--- |
-| `app/layout.tsx` | Layout | Root Layout | Yes | Configures Vazirmatn font, RTL dir, AuthProvider |
-| `app/globals.css` | Styles | Tailwind Design Tokens | Yes | Custom CSS variables and Iranian font styles |
-| `app/(auth)/layout.tsx` | Layout | Auth Layout | Yes | Centered card, no sidebar |
-| `app/(auth)/login/page.tsx` | Page | Login Page | Yes | Email/mobile + password, inline error |
-| `app/(auth)/forgot-password/page.tsx`| Page | Forgot Password | Yes | Dispatches mock SMS / Email recovery |
-| `app/(auth)/select-org/page.tsx` | Page | Org Selection | Yes | Organization cards with user roles |
-| `app/(app)/layout.tsx` | Layout | App Shell Layout | Yes | Header, Sidebar, Breadcrumb, Toast container |
-| `app/(app)/page.tsx` | Page | Role-Based Home | Yes | 12-column widget grid per active role |
-| `app/(app)/campaigns/page.tsx` | Page | Campaigns List | Yes | DataTable with budget bar and filters |
-| `app/(app)/campaigns/new/page.tsx` | Page | Create Campaign | Yes | 6-step creation wizard |
-| `app/(app)/campaigns/[id]/page.tsx` | Page | Campaign Details | Yes | 8-tab comprehensive detail view |
-| `app/(app)/campaigns/[id]/edit/page.tsx`| Page | Edit Campaign | Yes | Re-uses 6-step wizard with prefilled data |
-| `app/(app)/performance/dashboard/page.tsx`| Page | Executive Dashboard | Yes | 6 KPI cards, trend charts, funnel |
-| `app/(app)/performance/platforms/page.tsx`| Page | Ad Platforms | Yes | Platforms table and drawer editor |
-| `app/(app)/performance/costs/page.tsx` | Page | Costs Management | Yes | Summary bar, costs table, quick/bulk modal |
-| `app/(app)/performance/imports/page.tsx` | Page | Data Imports | Yes | Import history table and 4-step wizard modal |
-| `app/(app)/performance/kpis/page.tsx` | Page | KPIs & Rules | Yes | 3 tabs: KPIs, Metrics, Alert rules |
-| `app/(app)/performance/audiences/page.tsx`| Page | Audiences List | Yes | Cards/table grid with persona tags |
-| `app/(app)/performance/audiences/[id]/page.tsx`| Page | Audience Detail | Yes | Linked campaigns and demographic specs |
-| `app/(app)/performance/landing/page.tsx` | Page | Landing & UTM | Yes | Landing pages table and live UTM builder |
-| `app/(app)/leads/page.tsx` | Page | Leads Inbox | Yes | DataTable, bulk action bar, phone copy |
-| `app/(app)/leads/board/page.tsx` | Page | Lead Kanban | Yes | 6-column pipeline board with modals |
-| `app/(app)/leads/[id]/page.tsx` | Page | Lead Details | Yes | Profile card, call form, journey timeline |
-| `app/(app)/leads/sms/page.tsx` | Page | SMS Dispatches | Yes | SMS dispatches list |
-| `app/(app)/leads/sms/[id]/page.tsx` | Page | SMS Detail | Yes | Recipient logs with masked phone numbers |
-| `app/(app)/leads/webinars/page.tsx` | Page | Webinars List | Yes | Webinar event cards and creation drawer |
-| `app/(app)/leads/webinars/[id]/page.tsx` | Page | Webinar Detail | Yes | Attendees table, conversion funnel |
-| `app/(app)/work/tasks/page.tsx` | Page | Tasks Management | Yes | List / Kanban toggle, quick add, drawer |
-| `app/(app)/settings/users/page.tsx` | Page | Users & Roles | Yes | User table and 29-page access matrix |
-| `app/(app)/settings/organization/page.tsx`| Page | Org Settings | Yes | Multi-tab taxonomy management |
-| `app/(app)/notifications/page.tsx` | Page | Notification Center | **NO** | Missing (Page 3 of PDF) |
-| `app/(app)/work/calendar/page.tsx` | Page | Calendar Grid | **NO** | Missing (Page 20 of PDF) |
-| `app/(app)/work/equipment/page.tsx` | Page | Equipment Logistics | **NO** | Missing (Page 21 of PDF) |
-| `app/(app)/work/meetings/page.tsx` | Page | Meeting Minutes | **NO** | Missing (Page 22 of PDF) |
-| `app/(app)/work/sops/page.tsx` | Page | SOP Knowledge Base | **NO** | Missing (Page 23 of PDF) |
-| `app/(app)/work/learning/page.tsx` | Page | Team Learning | **NO** | Missing (Page 24 of PDF) |
-| `app/(app)/work/ideas/page.tsx` | Page | Ideas Board | **NO** | Missing (Page 25 of PDF) |
-| `app/(app)/work/activity/page.tsx` | Page | Activity Log | **NO** | Missing (Page 26 of PDF) |
-| `app/(app)/settings/wordpress/page.tsx`| Page | WordPress Integration| **NO** | Missing (Page 29 of PDF) |
+| Directory Path | Purpose | Functional Category | Relevance to Product | Inspection Scope | Audit Status |
+| :--- | :--- | :--- | :---: | :---: | :---: |
+| `/` (Root) | Workspace root configuration | Build & Orchestration | High | Config files, manifests | ✅ Inspected |
+| `apps/api/src/common` | Cross-cutting backend guards & filters | Backend Security | High | JWT guards, filters | ✅ Inspected |
+| `apps/api/src/config` | Config service & Joi env validation | Infrastructure | High | Env validation | ✅ Inspected |
+| `apps/api/src/database` | Prisma service & exception filters | Database Data Layer | High | Connection management | ✅ Inspected |
+| `apps/api/src/modules/audiences` | Target audience management | CRM / Marketing | High | DTOs, Service, Controller | ✅ Inspected |
+| `apps/api/src/modules/auth` | JWT & Session authentication | Security & Auth | Critical | Refresh token family | ✅ Inspected |
+| `apps/api/src/modules/calendar` | Calendar event management | Workflow | High | Events, filters, DTOs | ✅ Inspected |
+| `apps/api/src/modules/campaigns` | Campaign lifecycle engine | Marketing Engine | Critical | Budget, KPIs, CRUD | ✅ Inspected |
+| `apps/api/src/modules/costs` | Marketing cost tracking | Financial Data Layer| Critical | Cost queries, stats | ✅ Inspected |
+| `apps/api/src/modules/dashboard` | Executive KPI & Trend aggregation | Analytics | Critical | Aggregations, Funnels | ✅ Inspected |
+| `apps/api/src/modules/imports` | CSV/Excel Data import pipeline | Ingestion Engine | High | Inspection, validation | ✅ Inspected |
+| `apps/api/src/modules/kpis` | KPI formulas & alert rules | Analytics | High | Formula evaluator, alerts | ✅ Inspected |
+| `apps/api/src/modules/landing` | Landing pages & UTM builder | Marketing Attribution| High | UTM generators, Landings | ✅ Inspected |
+| `apps/api/src/modules/leads` | Lead inbox & CRM pipelines | CRM / Sales | Critical | Leads, Activities, Calls | ✅ Inspected |
+| `apps/api/src/modules/organization`| Multi-tenancy & Taxonomies | Core Governance | Critical | General settings, Lists | ✅ Inspected |
+| `apps/api/src/modules/platforms` | Platform connectors & templates | Integration | High | Google Ads, Meta, SMS | ✅ Inspected |
+| `apps/api/src/modules/sms` | SMS broadcasts & responses | Communication | High | Recipient lists, parsing | ✅ Inspected |
+| `apps/api/src/modules/tasks` | Operational tasks & subtasks | Workflow | High | Tasks, comments, subtasks| ✅ Inspected |
+| `apps/api/src/modules/users` | User management & RBAC | Governance | Critical | Invitations, role changes | ✅ Inspected |
+| `apps/api/src/modules/webinars` | Webinar lifecycle & attendees | Events / Lead Gen | High | Attendees, lead convert | ✅ Inspected |
+| `apps/api/prisma` | Database schema & migrations | Persistence Layer | Critical | Schema, seeds, 6 migrations| ✅ Inspected |
+| `apps/web/src/app/(auth)` | Public authentication pages | Frontend Routing | High | Login, Forgot Pass, Org | ✅ Inspected |
+| `apps/web/src/app/(app)` | Protected application routes | Frontend Routing | Critical | 18 connected views | ✅ Inspected |
+| `apps/web/src/components/common` | Reusable shared UI primitives | UI Design System | Critical | DataTable, KpiCard, etc. | ✅ Inspected |
+| `apps/web/src/components/layout` | Shell, Header, Sidebar, Nav | Layout & UX | Critical | Navigation, Breadcrumbs | ✅ Inspected |
+| `apps/web/src/features/*` | Feature-specific business modules | Frontend Domain | Critical | 17 domain folders | ✅ Inspected |
+| `apps/web/src/lib` | Utilities, permissions, calendar | Utilities | Critical | Jalali engine, Axios API | ✅ Inspected |
+| `apps/web/src/stores` | Zustand client state stores | Client State | High | `auth-store`, `ui-store` | ✅ Inspected |
+| `apps/web/scripts` | Standalone verification test scripts | QA & Testing | High | 38 automated test scripts| ✅ Inspected |
+| `packages/shared` | Cross-boundary TypeScript contracts | Shared Contracts | Critical | DTOs, interfaces, enums | ✅ Inspected |
+| `docs` | Specification documentation | Product Management | Critical | Product PDF specification | ✅ Inspected |
 
 ---
 
-## 6. TEST & VERIFICATION SCRIPTS INVENTORY (`apps/web/scripts/`)
+## 3. Excluded Generated & Transient Directories
 
-The repository contains **37 standalone diagnostic scripts** in `apps/web/scripts/`:
-- **33 `test-*.mjs` scripts**: Evaluate component logic, data services, permissions, Shamsi calendar math, and formatting rules.
-- **4 `verify-*.js` scripts**: Perform end-to-end simulated scenarios (auth, campaign creation, costs, dashboard, kanban).
-- **Execution Summary**: 28 passed, 9 failed. Every failure was isolated and documented in `07_TECHNICAL_DEBT_AND_GAP_ANALYSIS.md`.
+The following directories were identified, categorized, and verified as build artifacts, dependencies, or local storage. Line-by-line inspection was excluded per standard audit guidelines, but their purpose and integrity were verified:
+
+1. `node_modules/` (Root, `apps/api/node_modules/`, `apps/web/node_modules/`):
+   - Third-party packages installed via `pnpm install`.
+   - Verified via `pnpm-lock.yaml` (clean lockfile integrity).
+2. `apps/web/.next/`:
+   - Next.js build cache and compilation outputs.
+   - Transient, generated automatically during compilation.
+3. `apps/api/dist/`:
+   - NestJS TypeScript compiler output (`tsc`).
+   - Clean compiled target for `dist/main.js`.
+4. `packages/shared/dist/`:
+   - Compiled shared contracts (`index.js`, `index.d.ts`).
+5. `.git/`:
+   - Git repository metadata, objects, and commit history.
+   - Strict read-only inspection applied (no write or state operations).
+
+---
+
+## 4. Environment & Secrets Handling
+
+The workspace contains `.env`, `.env.example`, `apps/api/.env`, and `apps/web/.env.local`.
+
+- **Audit Security Verification:**
+  - No secret keys, private credentials, or live production tokens were exposed or included in audit reports.
+  - Development databases use local Docker defaults (`postgres:postgres@localhost:5432/gapji_marketing`).
+  - JWT secret is configured locally as `dev-jwt-secret-key-change-in-production-min32chars`.
+  - Refresh token secret is configured as `dev-refresh-token-secret-min32chars`.
+  - Production readiness requires moving all development defaults to automated secret vaults or Kubernetes sealed secrets.

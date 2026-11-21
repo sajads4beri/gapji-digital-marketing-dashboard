@@ -2,9 +2,11 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Body,
   Patch,
   Param,
+  Query,
   Delete,
   UseGuards,
   Req,
@@ -22,6 +24,12 @@ import { CreateCampaignDto } from './create-campaign.dto';
 import { UpdateCampaignDto } from './update-campaign.dto';
 import { Campaign } from './campaign.entity';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import {
+  UpsertFunnelObjectiveDto,
+  CreateFunnelKeyResultDto,
+  UpdateFunnelKeyResultDto,
+  CreateOkrTaskDto,
+} from './funnel-okr.dto';
 
 @ApiTags('campaigns')
 @Controller('campaigns')
@@ -46,6 +54,137 @@ export class CampaignsController {
   getStats(@Req() req: any) {
     const user = req.user as CurrentUserPayload;
     return this.campaignsService.getStats(user);
+  }
+
+  @Get(':id/funnel')
+  @ApiOperation({ summary: 'Get campaign sales funnel stages and conversion metrics' })
+  @ApiParam({ name: 'id', description: 'Campaign UUID' })
+  @ApiResponse({ status: 200, description: 'Funnel stages with counts and conversion rates' })
+  getFunnel(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Req() req: any,
+  ) {
+    const user = req.user as CurrentUserPayload;
+    return this.campaignsService.getCampaignFunnel(id, user);
+  }
+
+  @Get(':id/leads')
+  @ApiOperation({ summary: 'Get leads belonging to a specific campaign and funnel stage' })
+  @ApiParam({ name: 'id', description: 'Campaign UUID' })
+  @ApiResponse({ status: 200, description: 'List of leads in stage' })
+  getLeadsByStage(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Query('statusKey') statusKey: string,
+    @Query('statusConfigId') statusConfigId: string,
+    @Query('search') search: string,
+    @Req() req: any,
+  ) {
+    const user = req.user as CurrentUserPayload;
+    return this.campaignsService.getCampaignLeadsByStage(
+      id,
+      { statusKey, statusConfigId, search },
+      user,
+    );
+  }
+
+  @Get(':id/funnel/okr')
+  @ApiOperation({ summary: 'Get all funnel stage objectives and key results for campaign' })
+  @ApiParam({ name: 'id', description: 'Campaign UUID' })
+  @ApiResponse({ status: 200, description: 'Campaign funnel OKR tree and summary' })
+  getFunnelAllOkr(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Req() req: any,
+  ) {
+    const user = req.user as CurrentUserPayload;
+    return this.campaignsService.getCampaignAllFunnelOkr(id, user);
+  }
+
+  @Get(':id/funnel/stages/:stageKey/okr')
+  @ApiOperation({ summary: 'Get OKR for a specific funnel stage' })
+  @ApiParam({ name: 'id', description: 'Campaign UUID' })
+  @ApiParam({ name: 'stageKey', description: 'Funnel stage identifier (e.g. awareness, interest)' })
+  @ApiResponse({ status: 200, description: 'Stage objective, key results, and linked tasks' })
+  getStageOkr(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('stageKey') stageKey: string,
+    @Req() req: any,
+  ) {
+    const user = req.user as CurrentUserPayload;
+    return this.campaignsService.getStageOkr(id, stageKey, user);
+  }
+
+  @Put(':id/funnel/stages/:stageKey/objective')
+  @ApiOperation({ summary: 'Upsert the Objective for a funnel stage' })
+  @ApiParam({ name: 'id', description: 'Campaign UUID' })
+  @ApiParam({ name: 'stageKey', description: 'Funnel stage identifier' })
+  @ApiResponse({ status: 200, description: 'Created or updated objective' })
+  upsertStageObjective(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('stageKey') stageKey: string,
+    @Body() dto: UpsertFunnelObjectiveDto,
+    @Req() req: any,
+  ) {
+    const user = req.user as CurrentUserPayload;
+    return this.campaignsService.upsertStageObjective(id, stageKey, dto, user);
+  }
+
+  @Post(':id/funnel/stages/:stageKey/key-results')
+  @ApiOperation({ summary: 'Create a Key Result under stage Objective' })
+  @ApiParam({ name: 'id', description: 'Campaign UUID' })
+  @ApiParam({ name: 'stageKey', description: 'Funnel stage identifier' })
+  @ApiResponse({ status: 201, description: 'Created key result' })
+  createKeyResult(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('stageKey') stageKey: string,
+    @Body() dto: CreateFunnelKeyResultDto,
+    @Req() req: any,
+  ) {
+    const user = req.user as CurrentUserPayload;
+    return this.campaignsService.createKeyResult(id, stageKey, dto, user);
+  }
+
+  @Put(':id/funnel/key-results/:krId')
+  @ApiOperation({ summary: 'Update a Key Result (title, progress values, unit)' })
+  @ApiParam({ name: 'id', description: 'Campaign UUID' })
+  @ApiParam({ name: 'krId', description: 'Key Result UUID' })
+  @ApiResponse({ status: 200, description: 'Updated key result' })
+  updateKeyResult(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('krId', new ParseUUIDPipe()) krId: string,
+    @Body() dto: UpdateFunnelKeyResultDto,
+    @Req() req: any,
+  ) {
+    const user = req.user as CurrentUserPayload;
+    return this.campaignsService.updateKeyResult(id, krId, dto, user);
+  }
+
+  @Delete(':id/funnel/key-results/:krId')
+  @ApiOperation({ summary: 'Delete a Key Result' })
+  @ApiParam({ name: 'id', description: 'Campaign UUID' })
+  @ApiParam({ name: 'krId', description: 'Key Result UUID' })
+  @ApiResponse({ status: 200, description: 'Key result deleted' })
+  deleteKeyResult(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('krId', new ParseUUIDPipe()) krId: string,
+    @Req() req: any,
+  ) {
+    const user = req.user as CurrentUserPayload;
+    return this.campaignsService.deleteKeyResult(id, krId, user);
+  }
+
+  @Post(':id/funnel/key-results/:krId/tasks')
+  @ApiOperation({ summary: 'Create an execution task under Key Result' })
+  @ApiParam({ name: 'id', description: 'Campaign UUID' })
+  @ApiParam({ name: 'krId', description: 'Key Result UUID' })
+  @ApiResponse({ status: 201, description: 'Created task linked to KR' })
+  createTaskUnderKeyResult(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('krId', new ParseUUIDPipe()) krId: string,
+    @Body() dto: CreateOkrTaskDto,
+    @Req() req: any,
+  ) {
+    const user = req.user as CurrentUserPayload;
+    return this.campaignsService.createTaskUnderKeyResult(id, krId, dto, user);
   }
 
   @Get(':id')

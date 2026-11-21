@@ -9,6 +9,12 @@ import { PrismaService } from '../../database/prisma.service';
 import { Campaign, CampaignStatus, CampaignHealth } from './campaign.entity';
 import { CreateCampaignDto } from './create-campaign.dto';
 import { UpdateCampaignDto } from './update-campaign.dto';
+import {
+  UpsertFunnelObjectiveDto,
+  CreateFunnelKeyResultDto,
+  UpdateFunnelKeyResultDto,
+  CreateOkrTaskDto,
+} from './funnel-okr.dto';
 
 export const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const DEFAULT_ORGANIZATION_ID = '00000000-0000-0000-0000-000000000001';
@@ -417,5 +423,657 @@ export class CampaignsService {
       totalClicks: campaigns.reduce((sum: number, c: any) => sum + Number(c.clicks || 0), 0),
       totalConversions: campaigns.reduce((sum: number, c: any) => sum + Number(c.conversions || 0), 0),
     };
+  }
+
+  async getCampaignFunnel(id: string, user?: CurrentUserPayload) {
+    this.assertCampaignAccess(user, 'read');
+    if (!UUID_REGEX.test(id)) {
+      throw new NotFoundException(`Campaign with ID ${id} not found`);
+    }
+    const organizationId = user?.organizationId ?? DEFAULT_ORGANIZATION_ID;
+
+    const campaign = await this.prisma.campaign.findFirst({
+      where: { id, organizationId },
+      select: { id: true, name: true, ownerId: true },
+    });
+
+    if (!campaign) {
+      throw new NotFoundException(`Campaign with ID ${id} not found`);
+    }
+
+    if (user && user.role === 'campaign_manager' && campaign.ownerId && campaign.ownerId !== user.id) {
+      throw new ForbiddenException('شما فقط مجاز به مشاهده کمپین‌های خود هستید');
+    }
+
+    let statusConfigs = await this.prisma.leadStatusConfig.findMany({
+      where: { organizationId, isActive: true },
+      orderBy: { sortOrder: 'asc' },
+    });
+
+    if (statusConfigs.length === 0) {
+      statusConfigs = [
+        { id: 'new', organizationId, key: 'new', label: 'سرنخ جدید', group: 'open' as any, color: '#3B82F6', sortOrder: 1, isSystem: true, isActive: true, createdAt: new Date(), updatedAt: new Date() },
+        { id: 'contacted', organizationId, key: 'contacted', label: 'تماس اولیه', group: 'open' as any, color: '#F59E0B', sortOrder: 2, isSystem: true, isActive: true, createdAt: new Date(), updatedAt: new Date() },
+        { id: 'qualified', organizationId, key: 'qualified', label: 'واجد شرایط', group: 'open' as any, color: '#10B981', sortOrder: 3, isSystem: true, isActive: true, createdAt: new Date(), updatedAt: new Date() },
+        { id: 'proposal', organizationId, key: 'proposal', label: 'ارسال پروپوزال', group: 'open' as any, color: '#8B5CF6', sortOrder: 4, isSystem: true, isActive: true, createdAt: new Date(), updatedAt: new Date() },
+        { id: 'customer', organizationId, key: 'customer', label: 'مشتری نهایی', group: 'won' as any, color: '#059669', sortOrder: 5, isSystem: true, isActive: true, createdAt: new Date(), updatedAt: new Date() },
+      ];
+    }
+
+    const leads = await this.prisma.lead.findMany({
+      where: { campaignId: id, organizationId },
+      select: { id: true, statusKey: true, statusConfigId: true },
+    });
+
+    const totalLeads = leads.length;
+
+    let previousStageCount = totalLeads;
+    const stages = statusConfigs.map((status, index) => {
+      const count = leads.filter(
+        (lead) =>
+          lead.statusConfigId === status.id ||
+          lead.statusKey === status.key ||
+          (status.key === 'new' && !lead.statusKey && !lead.statusConfigId)
+      ).length;
+
+      const percentageOfTotal = totalLeads > 0 ? Number(((count / totalLeads) * 100).toFixed(1)) : 0;
+      
+      let conversionRate = 100;
+      if (index === 0) {
+        conversionRate = 100;
+      } else if (previousStageCount > 0) {
+        conversionRate = Number(((count / previousStageCount) * 100).toFixed(1));
+      } else {
+        conversionRate = 0;
+      }
+      if (count > 0) {
+        previousStageCount = count;
+      }
+
+      return {
+        id: status.id,
+        key: status.key,
+        label: status.label,
+        group: status.group,
+        color: status.color || '#3B82F6',
+        sortOrder: status.sortOrder,
+        count,
+        percentageOfTotal,
+        conversionRate,
+      };
+    });
+
+    return {
+      campaignId: campaign.id,
+      campaignName: campaign.name,
+      totalLeads,
+      stages,
+    };
+  }
+
+  async getCampaignLeadsByStage(
+    id: string,
+    query: { statusKey?: string; statusConfigId?: string; search?: string },
+    user?: CurrentUserPayload
+  ) {
+    this.assertCampaignAccess(user, 'read');
+    if (!UUID_REGEX.test(id)) {
+      throw new NotFoundException(`Campaign with ID ${id} not found`);
+    }
+    const organizationId = user?.organizationId ?? DEFAULT_ORGANIZATION_ID;
+
+    const where: any = {
+      campaignId: id,
+      organizationId,
+    };
+
+    if (query.statusConfigId && UUID_REGEX.test(query.statusConfigId)) {
+      where.statusConfigId = query.statusConfigId;
+    } else if (query.statusKey) {
+      where.statusKey = query.statusKey;
+    }
+
+    if (query.search?.trim()) {
+      const term = query.search.trim();
+      where.OR = [
+        { fullName: { contains: term, mode: 'insensitive' } },
+        { mobile: { contains: term } },
+      ];
+    }
+
+    const leads = await this.prisma.lead.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        assignedTo: {
+          select: { id: true, fullName: true, email: true },
+        },
+        statusConfig: {
+          select: { id: true, key: true, label: true, color: true, group: true },
+        },
+      },
+    });
+
+    return leads.map((lead) => ({
+      id: lead.id,
+      fullName: lead.fullName,
+      mobile: lead.mobile,
+      email: lead.email,
+      statusKey: lead.statusKey,
+      statusLabel: lead.statusConfig?.label ?? lead.statusKey,
+      statusColor: lead.statusConfig?.color ?? '#3B82F6',
+      assignedTo: lead.assignedTo
+        ? {
+            id: lead.assignedTo.id,
+            fullName: lead.assignedTo.fullName,
+            email: lead.assignedTo.email,
+          }
+        : null,
+      createdAt: lead.createdAt,
+    }));
+  }
+
+  async getCampaignAllFunnelOkr(id: string, user?: CurrentUserPayload) {
+    this.assertCampaignAccess(user, 'read');
+    if (!UUID_REGEX.test(id)) {
+      throw new NotFoundException(`Campaign with ID ${id} not found`);
+    }
+    const organizationId = user?.organizationId ?? DEFAULT_ORGANIZATION_ID;
+
+    const campaign = await this.prisma.campaign.findFirst({
+      where: { id, organizationId },
+      select: { id: true, name: true, ownerId: true },
+    });
+    if (!campaign) {
+      throw new NotFoundException(`Campaign with ID ${id} not found`);
+    }
+
+    const objectives = await this.prisma.campaignFunnelObjective.findMany({
+      where: { campaignId: id, organizationId },
+      include: {
+        keyResults: {
+          orderBy: { createdAt: 'asc' },
+          include: {
+            tasks: {
+              orderBy: { createdAt: 'desc' },
+              select: {
+                id: true,
+                title: true,
+                status: true,
+                priority: true,
+                dueDate: true,
+                assignee: {
+                  select: { id: true, fullName: true, email: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    let totalKeyResults = 0;
+    let sumPercentages = 0;
+    let totalTasks = 0;
+    let completedTasks = 0;
+
+    const mappedObjectives = objectives.map((obj) => {
+      const mappedKrs = obj.keyResults.map((kr) => {
+        totalKeyResults++;
+        const current = Number(kr.currentValue);
+        const target = Number(kr.targetValue);
+        const krTasks = kr.tasks.map((t) => {
+          totalTasks++;
+          if (t.status === 'done') completedTasks++;
+          return {
+            id: t.id,
+            title: t.title,
+            status: t.status,
+            priority: t.priority,
+            dueDate: t.dueDate ? t.dueDate.toISOString().slice(0, 10) : null,
+            assignee: t.assignee,
+          };
+        });
+
+        const tasksCount = krTasks.length;
+        const doneCount = krTasks.filter((t) => t.status === 'done').length;
+        const progressPercent =
+          tasksCount > 0
+            ? Math.min(100, Math.round((doneCount / tasksCount) * 100))
+            : (target > 0 && current > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0);
+        sumPercentages += progressPercent;
+
+        return {
+          id: kr.id,
+          title: kr.title,
+          currentValue: current,
+          targetValue: target,
+          unit: kr.unit,
+          progressPercent,
+          tasksCount,
+          completedTasksCount: doneCount,
+          tasks: krTasks,
+          createdAt: kr.createdAt,
+          updatedAt: kr.updatedAt,
+        };
+      });
+
+      return {
+        id: obj.id,
+        stageKey: obj.stageKey,
+        title: obj.title,
+        description: obj.description,
+        keyResults: mappedKrs,
+        createdAt: obj.createdAt,
+        updatedAt: obj.updatedAt,
+      };
+    });
+
+    const averageProgress = totalKeyResults > 0 ? Math.round(sumPercentages / totalKeyResults) : 0;
+
+    return {
+      campaignId: campaign.id,
+      campaignName: campaign.name,
+      totalObjectives: objectives.length,
+      totalKeyResults,
+      averageProgress,
+      totalTasks,
+      completedTasks,
+      objectives: mappedObjectives,
+    };
+  }
+
+  async getStageOkr(id: string, stageKey: string, user?: CurrentUserPayload) {
+    this.assertCampaignAccess(user, 'read');
+    if (!UUID_REGEX.test(id)) {
+      throw new NotFoundException(`Campaign with ID ${id} not found`);
+    }
+    const organizationId = user?.organizationId ?? DEFAULT_ORGANIZATION_ID;
+
+    const campaign = await this.prisma.campaign.findFirst({
+      where: { id, organizationId },
+      select: { id: true, name: true },
+    });
+    if (!campaign) {
+      throw new NotFoundException(`Campaign with ID ${id} not found`);
+    }
+
+    const objective = await this.prisma.campaignFunnelObjective.findFirst({
+      where: { campaignId: id, stageKey, organizationId },
+      include: {
+        keyResults: {
+          orderBy: { createdAt: 'asc' },
+          include: {
+            tasks: {
+              orderBy: { createdAt: 'desc' },
+              select: {
+                id: true,
+                title: true,
+                status: true,
+                priority: true,
+                dueDate: true,
+                assignee: {
+                  select: { id: true, fullName: true, email: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!objective) {
+      return {
+        campaignId: campaign.id,
+        campaignName: campaign.name,
+        stageKey,
+        objective: null,
+        keyResults: [],
+      };
+    }
+
+    const mappedKrs = objective.keyResults.map((kr) => {
+      const current = Number(kr.currentValue);
+      const target = Number(kr.targetValue);
+      const tasksCount = kr.tasks.length;
+      const doneCount = kr.tasks.filter((t) => t.status === 'done').length;
+      const progressPercent =
+        tasksCount > 0
+          ? Math.min(100, Math.round((doneCount / tasksCount) * 100))
+          : (target > 0 && current > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0);
+      return {
+        id: kr.id,
+        title: kr.title,
+        currentValue: current,
+        targetValue: target,
+        unit: kr.unit,
+        progressPercent,
+        tasks: kr.tasks.map((t) => ({
+          id: t.id,
+          title: t.title,
+          status: t.status,
+          priority: t.priority,
+          dueDate: t.dueDate ? t.dueDate.toISOString().slice(0, 10) : null,
+          assignee: t.assignee,
+        })),
+        createdAt: kr.createdAt,
+        updatedAt: kr.updatedAt,
+      };
+    });
+
+    return {
+      campaignId: campaign.id,
+      campaignName: campaign.name,
+      stageKey,
+      objective: {
+        id: objective.id,
+        title: objective.title,
+        description: objective.description,
+        createdAt: objective.createdAt,
+        updatedAt: objective.updatedAt,
+      },
+      keyResults: mappedKrs,
+    };
+  }
+
+  async upsertStageObjective(
+    id: string,
+    stageKey: string,
+    dto: UpsertFunnelObjectiveDto,
+    user?: CurrentUserPayload,
+  ) {
+    this.assertCampaignAccess(user, 'write');
+    if (!UUID_REGEX.test(id)) {
+      throw new NotFoundException(`Campaign with ID ${id} not found`);
+    }
+    const organizationId = user?.organizationId ?? DEFAULT_ORGANIZATION_ID;
+
+    const campaign = await this.prisma.campaign.findFirst({
+      where: { id, organizationId },
+    });
+    if (!campaign) {
+      throw new NotFoundException(`Campaign with ID ${id} not found`);
+    }
+
+    const objective = await this.prisma.campaignFunnelObjective.upsert({
+      where: {
+        campaignId_stageKey_organizationId: {
+          campaignId: id,
+          stageKey,
+          organizationId,
+        },
+      },
+      update: {
+        title: dto.title.trim(),
+        description: dto.description?.trim() || null,
+      },
+      create: {
+        organizationId,
+        campaignId: id,
+        stageKey,
+        title: dto.title.trim(),
+        description: dto.description?.trim() || null,
+      },
+      include: {
+        keyResults: true,
+      },
+    });
+
+    return objective;
+  }
+
+  async createKeyResult(
+    id: string,
+    stageKey: string,
+    dto: CreateFunnelKeyResultDto,
+    user?: CurrentUserPayload,
+  ) {
+    this.assertCampaignAccess(user, 'write');
+    if (!UUID_REGEX.test(id)) {
+      throw new NotFoundException(`Campaign with ID ${id} not found`);
+    }
+    const organizationId = user?.organizationId ?? DEFAULT_ORGANIZATION_ID;
+
+    const campaign = await this.prisma.campaign.findFirst({
+      where: { id, organizationId },
+    });
+    if (!campaign) {
+      throw new NotFoundException(`Campaign with ID ${id} not found`);
+    }
+
+    // Auto-create objective if not yet created for this stage
+    let objective = await this.prisma.campaignFunnelObjective.findFirst({
+      where: { campaignId: id, stageKey, organizationId },
+    });
+
+    if (!objective) {
+      const stageLabels: Record<string, string> = {
+        awareness: 'آگاهی (Awareness)',
+        interest: 'علاقه‌مندی (Interest)',
+        consideration: 'بررسی و تعامل (Consideration)',
+        intent: 'قصد خرید (Intent)',
+        evaluation: 'ارزیابی نهایی (Evaluation)',
+        purchase: 'خرید موفق (Purchase)',
+      };
+      const defaultTitle = `هدف مرحله ${stageLabels[stageKey] || stageKey}`;
+      objective = await this.prisma.campaignFunnelObjective.create({
+        data: {
+          organizationId,
+          campaignId: id,
+          stageKey,
+          title: defaultTitle,
+        },
+      });
+    }
+
+    const keyResult = await this.prisma.campaignFunnelKeyResult.create({
+      data: {
+        organizationId,
+        objectiveId: objective.id,
+        title: dto.title.trim(),
+        currentValue: dto.currentValue ?? 0,
+        targetValue: dto.targetValue,
+        unit: dto.unit?.trim() || 'عدد',
+      },
+      include: {
+        tasks: true,
+      },
+    });
+
+    const current = Number(keyResult.currentValue);
+    const target = Number(keyResult.targetValue);
+    const progressPercent = 0;
+
+    return {
+      id: keyResult.id,
+      objectiveId: objective.id,
+      stageKey,
+      title: keyResult.title,
+      currentValue: current,
+      targetValue: target,
+      unit: keyResult.unit,
+      progressPercent,
+      tasks: [],
+      createdAt: keyResult.createdAt,
+      updatedAt: keyResult.updatedAt,
+    };
+  }
+
+  async updateKeyResult(
+    id: string,
+    krId: string,
+    dto: UpdateFunnelKeyResultDto,
+    user?: CurrentUserPayload,
+  ) {
+    this.assertCampaignAccess(user, 'write');
+    const organizationId = user?.organizationId ?? DEFAULT_ORGANIZATION_ID;
+
+    const keyResult = await this.prisma.campaignFunnelKeyResult.findFirst({
+      where: { id: krId, organizationId, objective: { campaignId: id } },
+      include: { objective: true },
+    });
+    if (!keyResult) {
+      throw new NotFoundException(`Key Result ${krId} not found in this campaign`);
+    }
+
+    const data: any = {};
+    if (dto.title !== undefined) data.title = dto.title.trim();
+    if (dto.currentValue !== undefined) data.currentValue = dto.currentValue;
+    if (dto.targetValue !== undefined) data.targetValue = dto.targetValue;
+    if (dto.unit !== undefined) data.unit = dto.unit.trim();
+
+    const updated = await this.prisma.campaignFunnelKeyResult.update({
+      where: { id: krId },
+      data,
+      include: {
+        tasks: {
+          select: {
+            id: true,
+            title: true,
+            status: true,
+            priority: true,
+            dueDate: true,
+            assignee: { select: { id: true, fullName: true, email: true } },
+          },
+        },
+      },
+    });
+
+    const current = Number(updated.currentValue);
+    const target = Number(updated.targetValue);
+    const tasksCount = updated.tasks.length;
+    const doneCount = updated.tasks.filter((t) => t.status === 'done').length;
+    const progressPercent =
+      tasksCount > 0
+        ? Math.min(100, Math.round((doneCount / tasksCount) * 100))
+        : (target > 0 && current > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0);
+
+    return {
+      id: updated.id,
+      objectiveId: updated.objectiveId,
+      stageKey: keyResult.objective.stageKey,
+      title: updated.title,
+      currentValue: current,
+      targetValue: target,
+      unit: updated.unit,
+      progressPercent,
+      tasks: updated.tasks.map((t) => ({
+        id: t.id,
+        title: t.title,
+        status: t.status,
+        priority: t.priority,
+        dueDate: t.dueDate ? t.dueDate.toISOString().slice(0, 10) : null,
+        assignee: t.assignee,
+      })),
+      createdAt: updated.createdAt,
+      updatedAt: updated.updatedAt,
+    };
+  }
+
+  async deleteKeyResult(id: string, krId: string, user?: CurrentUserPayload) {
+    this.assertCampaignAccess(user, 'write');
+    const organizationId = user?.organizationId ?? DEFAULT_ORGANIZATION_ID;
+
+    const keyResult = await this.prisma.campaignFunnelKeyResult.findFirst({
+      where: { id: krId, organizationId, objective: { campaignId: id } },
+    });
+    if (!keyResult) {
+      throw new NotFoundException(`Key Result ${krId} not found in this campaign`);
+    }
+
+    await this.prisma.task.updateMany({
+      where: { okrKeyResultId: krId },
+      data: { okrKeyResultId: null },
+    });
+
+    await this.prisma.campaignFunnelKeyResult.delete({
+      where: { id: krId },
+    });
+
+    return { success: true, deletedId: krId };
+  }
+
+  async createTaskUnderKeyResult(
+    id: string,
+    krId: string,
+    dto: CreateOkrTaskDto,
+    user?: CurrentUserPayload,
+  ) {
+    this.assertCampaignAccess(user, 'write');
+    const organizationId = user?.organizationId ?? DEFAULT_ORGANIZATION_ID;
+
+    const keyResult = await this.prisma.campaignFunnelKeyResult.findFirst({
+      where: { id: krId, organizationId, objective: { campaignId: id } },
+      include: {
+        objective: {
+          include: { campaign: { select: { id: true, name: true } } },
+        },
+      },
+    });
+    if (!keyResult) {
+      throw new NotFoundException(`Key Result ${krId} not found in this campaign`);
+    }
+
+    const createdById = user?.id || (await this.resolveDefaultUserId(organizationId));
+    let dueDate: Date | null = null;
+    if (dto.dueDate) {
+      dueDate = new Date(dto.dueDate);
+    } else {
+      const nextWeek = new Date();
+      nextWeek.setDate(nextWeek.getDate() + 7);
+      dueDate = nextWeek;
+    }
+
+    const task = await this.prisma.task.create({
+      data: {
+        organizationId,
+        createdById,
+        title: dto.title.trim(),
+        description: dto.description?.trim() || null,
+        status: 'todo',
+        priority: (dto.priority as any) || 'medium',
+        dueDate,
+        assigneeId: dto.assigneeId || null,
+        relatedType: 'campaign',
+        relatedId: id,
+        okrKeyResultId: krId,
+      },
+      include: {
+        assignee: {
+          select: { id: true, fullName: true, email: true },
+        },
+      },
+    });
+
+    return {
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      status: task.status,
+      priority: task.priority,
+      dueDate: task.dueDate ? task.dueDate.toISOString().slice(0, 10) : null,
+      assignee: task.assignee,
+      okr: {
+        keyResultId: keyResult.id,
+        keyResultTitle: keyResult.title,
+        objectiveId: keyResult.objective.id,
+        objectiveTitle: keyResult.objective.title,
+        stageKey: keyResult.objective.stageKey,
+        campaignId: id,
+        campaignName: keyResult.objective.campaign?.name,
+      },
+      createdAt: task.createdAt,
+    };
+  }
+
+  private async resolveDefaultUserId(organizationId: string): Promise<string> {
+    const user = await this.prisma.user.findFirst({
+      where: { memberships: { some: { organizationId } } },
+      select: { id: true },
+    });
+    if (user) return user.id;
+    const anyUser = await this.prisma.user.findFirst({ select: { id: true } });
+    if (anyUser) return anyUser.id;
+    return '00000000-0000-0000-0000-000000000001';
   }
 }

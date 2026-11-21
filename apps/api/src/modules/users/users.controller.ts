@@ -25,6 +25,7 @@ import { ChangeRoleDto } from './dto/change-role.dto';
 import { TransferAdminDto } from './dto/transfer-admin.dto';
 import { AcceptInvitationDto } from './dto/accept-invitation.dto';
 import { UserQueryDto } from './dto/user-query.dto';
+import { UpdateAccessMatrixDto } from './dto/update-access-matrix.dto';
 import {
   UserResponseDto,
   InviteUserResponseDto,
@@ -53,8 +54,23 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'دریافت ماتریس سطوح دسترسی نقش‌های شش‌گانه سازمان' })
   @ApiResponse({ status: 200, description: 'ماتریس نقش‌ها و دسترسی‌ها' })
-  async getAccessMatrix() {
-    return this.usersService.getAccessMatrix();
+  async getAccessMatrix(@Req() req: any) {
+    const currentUser: CurrentUserPayload = req.user;
+    return this.usersService.getAccessMatrix(currentUser);
+  }
+
+  @Patch('access-matrix')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'بروزرسانی و ذخیره ماتریس سطوح دسترسی سازمان (ویژه ادمین)' })
+  @ApiResponse({ status: 200, description: 'ماتریس دسترسی با موفقیت بروزرسانی شد' })
+  @ApiResponse({ status: 403, description: 'فقط مدیر سازمان مجاز به ویرایش است' })
+  async updateAccessMatrix(
+    @Body() dto: UpdateAccessMatrixDto,
+    @Req() req: any,
+  ) {
+    const currentUser: CurrentUserPayload = req.user;
+    return this.usersService.updateAccessMatrix(dto, currentUser);
   }
 
   @Get('me')

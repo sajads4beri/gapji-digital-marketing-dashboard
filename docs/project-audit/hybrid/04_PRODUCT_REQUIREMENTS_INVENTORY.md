@@ -1,91 +1,155 @@
-# 04 — PRODUCT REQUIREMENTS INVENTORY (شناسنامه جامع نیازمندی‌های محصول)
-## فهرست جامع و ساختاریافته ۳۵۰ نیازمندی استخراج‌شده از سند ۲۹ صفحه‌ای پی‌دی‌اف
+# 04 — Product Requirements Inventory (فهرست جامع نیازمندی‌های محصول)
+## Gapji Digital Marketing Platform Deep Audit
 
 ---
 
-## 1. REQUIREMENT TAXONOMY & CODES (دسته‌بندی و کدگذاری نیازمندی‌ها)
+## 1. Requirements Extraction Methodology (متدولوژی استخراج نیازمندی‌ها)
 
-تمامی الزامات مندرج در سند اختصاصی تیم فرانت‌اند با شناسه‌های یکتای `REQ-001` تا `REQ-350` کدگذاری شده‌اند. دسته‌بندی هر نیازمندی به شرح زیر است:
-- **FR** (Functional Requirement / کارکردی)
-- **UI** (User Interface & Layout / رابط کاربری)
-- **BR** (Business Rule / قواعد محاسباتی و کسب‌وکار)
-- **DR** (Data Requirement / مدل داده و رابطه)
-- **SEC** (Security Requirement / امنیت و سطوح دسترسی)
-- **INT** (Integration Requirement / اتصال به سامانه‌های خارجی)
-- **REP** (Reporting Requirement / گزارش‌گیری و شاخص‌ها)
-- **NFR** (Non-Functional Requirement / کارایی و دسترس‌پذیری)
+کلیه نیازمندی‌های این سند از فایل رسمی مشخصات محصول:
+- **Title:** `marketing-platform-phase1-frontend-pages-1.pdf` (سند اختصاصی تیم فرانت‌اند — فاز اول)
+- **Scope:** 29 Product Pages, Application Shell, Common Primitives, Formatting Standards, and Architecture Rules.
+- **Out of Scope (Phase 1):** رشد‌یار (Roshdyar), هوش مصنوعی (AI), اپلیکیشن موبایل (Mobile Apps), اعلان‌های Push.
+
+هر نیازمندی با یک شناسه یکتا (`REQ-001` تا `REQ-099`) و دسته‌بندی استاندارد مشخص شده است:
+- `FR`: Functional Requirement (نیازمندی عملکردی)
+- `NFR`: Non-Functional Requirement (نیازمندی غیرعملکردی و معماری)
+- `UIX`: UI / UX Requirement (نیازمندی رابط و تجربه کاربری)
+- `BR`: Business Rule (قانون کسب‌وکار)
+- `SEC`: Security & Authorization (امنیت و کنترل دسترسی)
+- `REP`: Reporting & Data Export (گزارش‌گیری و خروجی داده)
 
 ---
 
-## 2. SECTION 1 & 2: SHELL, COMMON COMPONENTS & DISPLAY RULES (پوسته و قواعد نمایش)
+## 2. Requirements Master Catalog (فهرست کامل ۹۹ نیازمندی)
 
-| Req ID | PDF Page | Category | Module | Summary & Technical Specification (شرح نیازمندی) |
+### 2.1 Shell & Layout Primitives (پوسته برنامه و چیدمان - ص ۳)
+
+| Req ID | PDF Page | Category | Title & Module | Hybrid Requirement Description (شرح فنی و محصولی) |
 | :--- | :---: | :---: | :--- | :--- |
-| `REQ-001` | P. 3 | UI/FR | Shell | **Global Header**: نمایش لوگو و نام سازمان فعال با منوی سوئیچ سازمان، جستجوی سراسری لیدها و کمپین‌ها، آیکون زنگوله با شمارنده اعلان، منوی کاربری (نام، نقش، پروفایل، خروج). |
-| `REQ-002` | P. 3 | UI/SEC | Shell | **Sidebar Navigation**: ۳ فضای کاری (عملکرد، فروش و لید، اجرا و دانش) + بخش تنظیمات در پایین؛ فیلتر بر اساس نقش کاربری؛ حالت جمع‌شونده (Icon-only) و کشوی موبایل. |
-| `REQ-003` | P. 3 | UI | Shell | **Breadcrumb Navigation**: مسیر ۳ سطحی در صفحات جزئیات (`فضای کاری ← لیست ← نام آیتم`). |
-| `REQ-004` | P. 3 | UI/UX | Shell | **Page Title Bar**: عنوان صفحه، توضیح کوتاه اختیاری و حداکثر ۱ دکمه عملیات اصلی (Primary). |
-| `REQ-005` | P. 3 | UI/UX | Shell | **Content Constraints**: عرض حداکثر ۱۴۴۰ پیکسل برای داشبوردها و جداول؛ عرض ۸۰۰ پیکسل برای صفحات مطالعه‌ای (SOP، صورتجلسه، آموزش). |
-| `REQ-006` | P. 3 | UI/UX | Shell | **Toast Notifications**: فیدبک عملیات (موفق، هشدار، خطا). بسته شدن خودکار بعد از ۵ ثانیه؛ خطاهای سیستمی تا بستن توسط کاربر باز می‌مانند. |
-| `REQ-007` | P. 3 | UI/FR | Common | **DataTable Component**: پنهان‌سازی ستون‌ها، مرتب‌سازی، صفحه‌بندی سرور (۲۰، ۵۰، ۱۰۰)، انتخاب چندتایی با نوار عملیات گروهی، ردیف جمع، بارگذاری اسکلتی، و حالت خالی. |
-| `REQ-008` | P. 3 | UI/FR | Common | **FilterBar Component**: بازه تاریخ شمسی با گزینه‌های سریع (امروز، ۷ روز، ۳۰ روز، این ماه، ماه قبل)، چندگزینه‌ای، فیلد جستجو، پاک کردن فیلترها و ذخیره در آدرس URL. |
-| `REQ-009` | P. 3 | UI/REP| Common | **KpiCard Component**: عنوان شاخص، عدد اصلی، واحد، درصد تغییر نسبت به دوره قبل با فلش و رنگ، نوار پیشرفت هدف، و راهنمای فرمول با کلیک روی آیکون «؟». |
-| `REQ-010` | P. 3 | UI/REP| Common | **Charts Component**: نمودارهای خطی، ستونی، قیفی با برچسب شناور (Tooltip)، راهنمای کلیک‌پذیر، محور تاریخ شمسی و جدول داده متنی جایگزین برای دسترس‌پذیری. |
-| `REQ-011` | P. 4 | UI/UX | Common | **StatusBadge Component**: ترکیب متن فارسی + رنگ استاندارد + آیکون اختیاری (هرگز نباید تنها از رنگ برای وضعیت استفاده شود). |
-| `REQ-012` | P. 4 | UI/FR | Common | **PersianDatePicker Component**: انتخاب تاریخ تک و بازه، شروع هفته از روز شنبه، تبدیل خودکار به فرمت ISO میلادی هنگام ارسال به سرور. |
-| `REQ-013` | P. 4 | UI/BR | Common | **MoneyInput / MoneyText**: جداکننده سه‌رقمی ارقام، پذیرش اعداد فارسی و انگلیسی، درج پسوند واحد (تومان/ریال، یک واحد در کل سیستم). |
-| `REQ-014` | P. 4 | UI/UX | Common | **Drawer & Modal**: کشوی راست برای ویرایش و مشاهده سریع بدون ترک صفحه؛ مودال برای فرم‌های کوتاه و تاییدها؛ هشدار هنگام خروج از فرم تغییریافته. |
-| `REQ-015` | P. 4 | UI/BR | Common | **FormField Component**: برچسب، ورودی، متن راهنما، پیام خطا زیر فیلد، ستاره فیلد اجباری؛ اعتبارسنجی همزمان با خروج از فیلد و هنگام ارسال. |
-| `REQ-016` | P. 4 | UI/FR | Common | **Wizard Component**: نوار مراحل، ذخیره خودکار پیش‌نویس، بازگشت به مراحل قبل، و صفحه مرور نهایی. |
-| `REQ-017` | P. 4 | UI/FR | Common | **Kanban Board**: ستون‌ها با شمارنده، کارت‌های قابل جابجایی با درگ‌اند‌دراپ، به‌روزرسانی آنی خوش‌بینانه و بازگشت کارت در صورت خطای شبکه. |
-| `REQ-018` | P. 4 | UI/DR | Common | **Timeline Component**: رویدادها با آیکون نوع، عنوان، زمان شمسی و کاربر، مرتب‌شده از جدید به قدیم. |
-| `REQ-019` | P. 4 | UI/UX | Common | **UserSelect / Avatar**: انتخاب کاربر با جستجو و نمایش آواتار با حروف اول نام. |
-| `REQ-020` | P. 4 | UI/UX | Common | **EmptyState & ErrorState**: آیکون، توضیح تک‌جمله‌ای، دکمه عملیات؛ و دکمه «تلاش دوباره» در خطای شبکه. |
-| `REQ-021` | P. 4 | UI/SEC| Common | **ConfirmDialog Component**: برای عملیات پرریسک و غیرقابل بازگشت (حذف، رد لید، ارسال صورتجلسه) با ذکر صریح اثر عملیات. |
-| `REQ-022` | P. 4 | BR/UI | Display | **Currency Formatting**: جداکننده هزارگان، ارقام فارسی، واحد تومان؛ خلاصه شدن اعداد بزرگ در کارت‌ها (مانند ۱۲٫۵ میلیون) و عدد کامل در Tooltip. |
-| `REQ-023` | P. 4 | BR/UI | Display | **Percentage Formatting**: یک رقم اعشار (٪۲۳٫۵) با علامت «+» و «−». |
-| `REQ-024` | P. 4 | BR/UI | Display | **Jalali Date Formatting**: به صورت `۱۴۰۵/۰۸/۰۷` و عبارت‌های «امروز/دیروز» برای رویدادهای نزدیک. |
-| `REQ-025` | P. 5 | SEC/UI | Privacy | **Mobile Number Masking**: فرمت `۰۹۱۲ ۱۲۳ ۴۵۶۷`؛ و برای نقش‌های غیرمجاز به صورت `۰۹۱۲***۴۵۶۷` با دکمه کپی و تماس مستقیم. |
-| `REQ-026` | P. 5 | BR/UI | Display | **Undefined Metrics**: در صورت تقسیم بر صفر نمایش خط تیره «—» با پیام راهنما (هرگز صفر نشان داده نشود). |
-| `REQ-027` | P. 5 | BR/UI | Display | **Lower is Better Rule**: برای CPL و CAC کاهش با رنگ سبز (بهبود) و افزایش با رنگ قرمز نمایش می‌یابد. |
-| `REQ-028` | P. 5 | BR/UI | Taxonomy | **Standard Status Colors**: پیش‌نویس (خاکستری)، برنامه‌ریزی‌شده (آبی)، فعال (سبز)، متوقف (نارنجی)، پایان‌یافته (خنثی)، بایگانی (خاکستری روشن)؛ سلامت کمپین: سالم، نیازمند توجه، ضعیف. |
-| `REQ-029` | P. 5 | NFR/UI | Architecture| **3 Universal States**: طراحی الزامی حالت در حال بارگذاری (Skeleton)، حالت خالی، و حالت خطا با دکمه تلاش مجدد در تمامی صفحات؛ حفظ فیلترها در URL. |
+| `REQ-001` | p. 3 | `FR` | Active Org Switcher (`Header`) | منوی تغییر سازمان فعال در هدر همراه با نام و لوگوی سازمان و قابلیت تغییر سریع سازمان. |
+| `REQ-002` | p. 3 | `FR` | Global Search (`Header`) | کادر جستجوی سراسری هدر برای یافتن Lead (با نام/شماره) و Campaign (با نام). |
+| `REQ-003` | p. 3 | `UIX` | Notification Badge (`Header`) | زنگوله هدر با نشانگر شمارنده اعلان نخوانده (سقف `+99`) و کشوی بازشوی ۱۰ اعلان آخر. |
+| `REQ-004` | p. 3 | `FR` | User Menu (`Header`) | آواتار، نام کاربر، نقش فعال (`Role`), لینک به پروفایل کاربری و دکمه خروج (`Logout`). |
+| `REQ-005` | p. 3 | `UIX` | 3 Workspace Sidebar (`Sidebar`) | منوی کناری شامل ۳ فضای کاری: Performance (عملکرد), Sales & Leads (فروش و لید), Execution & Knowledge (اجرا و دانش) و Settings (تنظیمات). |
+| `REQ-006` | p. 3 | `SEC` | Role-Filtered Navigation | نمایش مشروط آیتم‌های منو بر اساس سطح دسترسی نقش کاربر واردشده. |
+| `REQ-007` | p. 3 | `UIX` | Active Nav Highlighting | برجسته‌سازی آیتم فعال با رنگ متمایز (`accent`) و نوار نشانگر کناری. |
+| `REQ-008` | p. 3 | `UIX` | Sidebar Responsive Modes | حالت جمع‌شده دسکتاپ با تولتیپ شناور و کشوی بازشوی واکنش‌گرا در موبایل. |
+| `REQ-009` | p. 3 | `UIX` | Breadcrumb Navigation | مسیر سلسله‌مراتبی در صفحات جزئیات: `Workspace -> List -> Item Name`. |
+| `REQ-010` | p. 3 | `UIX` | Page Title & Primary CTA | عنوان صفحه، توضیح کوتاه و حداکثر یک دکمه عملیات اصلی (`Primary`) در هر صفحه. |
+| `REQ-011` | p. 3 | `UIX` | Content Max Widths | محدودیت عرض ۱۴۴۰ پیکسل برای داشبوردها و جداول، و ۸۰۰ پیکسل برای صفحات مطالعه‌ای (SOP, Meetings, Learning). |
+| `REQ-012` | p. 3 | `UIX` | Toast Feedback System | اعلان‌های آنی موفقیت، هشدار و خطا. پیام خطا تا بستن توسط کاربر باز می‌ماند؛ بقیه بعد از ۵ ثانیه بسته می‌شوند. |
 
 ---
 
-## 3. SECTION 3: 29 PRODUCT PAGES INVENTORY (صفحات ۲۹ گانه محصول)
+### 2.2 Shared Common UI Components (اجزای مشترک رابط کاربری - ص ۳-۴)
 
-- **صفحه ۱ (`REQ-030` تا `REQ-038`)**: Login & Select Organization (`/login`, `/forgot-password`, `/select-org`).
-- **صفحه ۲ (`REQ-039` تا `REQ-047`)**: Role-based Home Page (`/`).
-- **صفحه ۳ (`REQ-048` تا `REQ-056`)**: Notifications Center & Channels Switch (`/notifications`).
-- **صفحه ۴ (`REQ-057` تا `REQ-067`)**: Executive Performance Dashboard (`/performance/dashboard`).
-- **صفحه ۵ (`REQ-068` تا `REQ-077`)**: Campaigns Management List (`/campaigns`).
-- **صفحه ۶ (`REQ-078` تا `REQ-090`)**: 6-Step Campaign Creation Wizard (`/campaigns/new`, `/:id/edit`).
-- **صفحه ۷ (`REQ-091` تا `REQ-104`)**: 8-Tab Comprehensive Campaign Details (`/campaigns/:id`).
-- **صفحه ۸ (`REQ-105` تا `REQ-113`)**: Ad Platforms & Custom Fields Catalog (`/performance/platforms`).
-- **صفحه ۹ (`REQ-114` تا `REQ-123`)**: Marketing Costs Management (Single & Batch Entry) (`/performance/costs`).
-- **صفحه ۱۰ (`REQ-124` تا `REQ-134`)**: Universal Data Import Engine (Costs, Leads, SMS, Webinars) (`/performance/imports`).
-- **صفحه ۱۱ (`REQ-135` تا `REQ-145`)**: KPI Metrics, Custom Formulas & Sentence Alert Rules (`/performance/kpis`).
-- **صفحه ۱۲ (`REQ-146` تا `REQ-154`)**: Target Audiences & Personas (`/performance/audiences`).
-- **صفحه ۱۳ (`REQ-155` تا `REQ-165`)**: Landing Pages & Live UTM Builder (`/performance/landing`).
-- **صفحه ۱۴ (`REQ-166` تا `REQ-177`)**: Omnichannel Leads Inbox with Masking (`/leads`).
-- **صفحه ۱۵ (`REQ-178` تا `REQ-188`)**: 6-Stage Lead Kanban Pipeline Board (`/leads/board`).
-- **صفحه ۱۶ (`REQ-189` تا `REQ-201`)**: Lead Details, Sticky Quick Call & Journey Timeline (`/leads/:id`).
-- **صفحه ۱۷ (`REQ-202` تا `REQ-211`)**: SMS Dispatches & Recipient Delivery Logs (`/leads/sms`).
-- **صفحه ۱۸ (`REQ-212` تا `REQ-222`)**: Webinars & Attendee Conversion Funnel (`/leads/webinars`).
-- **صفحه ۱۹ (`REQ-223` تا `REQ-234`)**: Task Management (List/Kanban, Grouping, Quick Add, Subtasks) (`/work/tasks`).
-- **صفحه ۲۰ (`REQ-235` تا `REQ-244`)**: Marketing Calendar with Multi-day Campaign Bars (`/work/calendar`).
-- **صفحه ۲۱ (`REQ-245` تا `REQ-253`)**: Studio Equipment Logistics & Shortages View (`/work/equipment`).
-- **صفحه ۲۲ (`REQ-254` تا `REQ-263`)**: Meeting Minutes, Task Conversion & Email Dispatch (`/work/meetings`).
-- **صفحه ۲۳ (`REQ-264` تا `REQ-274`)**: Standard Operating Procedures (SOP) & Print Style (`/work/sops`).
-- **صفحه ۲۴ (`REQ-275` تا `REQ-284`)**: Team Learning Library & Video Player (`/work/learning`).
-- **صفحه ۲۵ (`REQ-285` تا `REQ-294`)**: Growth Ideas Board with One-Click Upvoting (`/work/ideas`).
-- **صفحه ۲۶ (`REQ-295` تا `REQ-303`)**: Activity Report & Real-time Audit Trail (`/work/activity`).
-- **صفحه ۲۷ (`REQ-304` تا `REQ-314`)**: Users Management & 29-Page Access Matrix (`/settings/users`).
-- **صفحه ۲۸ (`REQ-315` تا `REQ-324`)**: Organization Taxonomies with Disable-only Protection (`/settings/organization`).
-- **صفحه ۲۹ (`REQ-325` تا `REQ-335`)**: WordPress & Gravity Forms Webhook Integration (`/settings/wordpress`).
+| Req ID | PDF Page | Category | Title & Module | Hybrid Requirement Description (شرح فنی و محصولی) |
+| :--- | :---: | :---: | :--- | :--- |
+| `REQ-013` | p. 3 | `UIX` | DataTable Column Toggle | امکان پنهان‌سازی و نمایش ستون‌های اختیاری در جدول داده‌ها توسط کاربر. |
+| `REQ-014` | p. 3 | `UIX` | DataTable Header Sorting | مرتب‌سازی صعودی/نزولی ستون‌های جدول با کلیک روی سرستون‌ها. |
+| `REQ-015` | p. 3 | `FR` | Server-Side Pagination | صفحه‌بندی سمت سرور با اندازه‌های صفحه ۲۰، ۵۰ و ۱۰۰ سطر. |
+| `REQ-016` | p. 3 | `FR` | DataTable Multi-Select | انتخاب چندتایی سطرها با چک‌باکس و فعال شدن نوار شناور عملیات گروهی (Batch Actions). |
+| `REQ-017` | p. 3 | `UIX` | DataTable Summary Footer | سطر خلاصه پایین جدول برای جمع مبالغ یا میانگین شاخص‌ها در صورت لزوم. |
+| `REQ-018` | p. 3 | `UIX` | DataTable Density Toggle | سوییچ حالت فشرده (Compact Mode) سطرها با ذخیره در حافظه مرورگر. |
+| `REQ-019` | p. 3 | `UIX` | Clickable Row Navigation | کلیک روی هر سطر جدول به صورت پیش‌فرض صفحه جزئیات آن رکورد را باز می‌کند. |
+| `REQ-020` | p. 3 | `UIX` | Skeleton & Empty States | نمایش سطرهای اسکلتون حین بارگذاری داده‌ها و نمایش پیام استاندارد حالت خالی با دکمه اقدام. |
+| `REQ-021` | p. 3 | `UIX` | FilterBar Shamsi Presets | انتخابگر بازه تاریخ شمسی با گزینه‌های سریع: امروز، ۷ روز، ۳۰ روز، این ماه، ماه قبل. |
+| `REQ-022` | p. 3 | `FR` | FilterBar URL Persistence | هماهنگی کامل پارامترهای فیلتر و جستجو با آدرس مرورگر (URL Query Params) و دکمه پاک کردن فیلترها. |
+| `REQ-023` | p. 3 | `UIX` | KpiCard Visual Standard | کارت شاخص شامل مقدار، واحد، درصد تغییر دوره قبل با رنگ/فلش، نوار پیشرفت و تولتیپ راهنمای فرمول «؟». |
+| `REQ-024` | p. 3 | `UIX` | Recharts Visualizations | نمودارهای خطی، ستونی و قیف با راهنمای تعاملی، محور تاریخ شمسی و جدول جایگزین دسترس‌پذیری. |
+| `REQ-025` | p. 4 | `UIX` | StatusBadge Visual Rules | نشان وضعیت با ترکیب متن، رنگ و آیکون اختیاری (عدم استفاده از رنگ به تنهایی). |
+| `REQ-026` | p. 4 | `FR` | PersianDatePicker Engine | تقویم شمسی تکی یا بازه با شروع هفته از شنبه و تبدیل خودکار به ISO میلادی هنگام ارسال به سرور. |
+| `REQ-027` | p. 4 | `UIX` | MoneyInput Formatter | ورودی مبلغ با ارقام فارسی، جداکننده ۳ رقمی، و پذیرش ریال یا تومان بر اساس تنظیمات سازمان. |
+| `REQ-028` | p. 4 | `UIX` | Drawer & Modal Primitives | کشو برای ویرایش سریع بدون ترک صفحه؛ مودال برای تأییدیه‌ها؛ دیالوگ هشدار خروج در فرم‌های تغییر‌یافته (Dirty Check). |
+| `REQ-029` | p. 4 | `UIX` | FormField Validation | لیبل، اینپوت، متن راهنما، پیام خطای اعتبارسنجی زیر فیلد، و ستاره اجباری فیلدها. |
+| `REQ-030` | p. 4 | `UIX` | Wizard Framework | نوار پیشرفت مراحل، ذخیره خودکار هر ۳۰ ثانیه، بازگشت به قبل، و خلاصه مرور نهایی. |
+| `REQ-031` | p. 4 | `UIX` | Draggable Kanban Board | ستون‌ها با شمارنده، کارت‌های قابل جابجایی با درگ، به‌روزرسانی خوش‌بینانه و بازگشت در خطا. |
+| `REQ-032` | p. 4 | `UIX` | Timeline Component | فید وقایع با آیکون نوع رویداد، عنوان، زمان شمسی، کاربر ثبت‌کننده، مرتب از جدید به قدیم. |
+| `REQ-033` | p. 4 | `UIX` | UserSelect & Avatars | جستجوی پرسنل و نمایش آواتار حروف اول نام کاربر. |
+| `REQ-034` | p. 4 | `UIX` | EmptyState / ErrorState | حالت خالی با آیکون و توضیح و دکمه اقدام؛ حالت خطا با دکمه «تلاش دوباره». |
+| `REQ-035` | p. 4 | `UIX` | ConfirmDialog Modal | مودال تأیید برای عملیات حساس یا غیرقابل بازگشت (حذف، رد لید، ارسال مصوبات) با ذکر نتایج اقدام. |
 
 ---
 
-## 4. SECTION 4 & 5: TECH STACK SPECIFICATIONS (`REQ-336` تا `REQ-350`)
-الزامات معماری پشته فناوری شامل Next.js App Router، Server/Client Components، Middleware، Tailwind RTL، Design Tokens، TanStack Query، Optimistic UI، Axios Client، Zod Schemas، Normalization، TanStack Form، Zustand، Lucide Icons، Framer Motion و @dnd-kit.
+### 2.3 Data Formatting Standards & Lifecycle Rules (قواعد نمایش مقادیر و تعاریف داده‌ای - ص ۴-۵)
+
+| Req ID | PDF Page | Category | Title & Domain | Hybrid Requirement Description (شرح فنی و محصولی) |
+| :--- | :---: | :---: | :--- | :--- |
+| `REQ-036` | p. 4 | `BR` | Monetary Display Standard | جداکننده ۳ رقم، ارقام فارسی و واحد کنار عدد (`۱۲٬۵۰۰٬۰۰۰ تومان`). خلاصه‌سازی مبالغ بزرگ در کارت‌ها با تولتیپ مقدار کامل. |
+| `REQ-037` | p. 4 | `BR` | Percentage Formatting | نمایش با یک رقم اعشار (`۲۳٫۵٪`)، با علامت «+» برای مثبت و «−» برای منفی. |
+| `REQ-038` | p. 4 | `BR` | Shamsi Date Formatting | تاریخ کوتاه (`۱۴۰۵/۰۸/۰۷`) در جداول، تاریخ کامل با ساعت در جزئیات، واژگان «دیروز/امروز» در وقایع اخیر. |
+| `REQ-039` | p. 5 | `SEC` | Mobile Masking & Actions | نمایش استاندارد `۰۹۱۲ ۱۲۳ ۴۵۶۷`؛ برای نقش‌های غیرمجاز ماسک‌شده به صورت `۰۹۱۲***۴۵۶۷` با دکمه کپی و تماس. |
+| `REQ-040` | p. 5 | `BR` | Undefined Metric Dash `—` | در صورت عدم امکان محاسبه یا مخرج صفر، نمایش خط تیره «—» با تولتیپ دلیل (عدم نمایش صفر نادرست). |
+| `REQ-041` | p. 5 | `BR` | "Lower is Better" Rule | برای CPL و CAC، کاهش با رنگ سبز (بهبود) و افزایش با رنگ قرمز نمایش داده می‌شود. |
+| `REQ-042` | p. 5 | `BR` | Campaign Lifecycle States | ۶ وضعیت مصوب: پیش‌نویس (draft), برنامه‌ریزی‌شده (planned), فعال (active), متوقف (paused), پایان‌یافته (completed), بایگانی (archived). |
+| `REQ-043` | p. 5 | `BR` | Campaign Health Badges | ۳ برچسب سلامت: سالم (healthy), نیازمند توجه (needs_attention), ضعیف (weak) با آیکون و رنگ متمایز. |
+| `REQ-044` | p. 5 | `BR` | Lead Status Taxonomy | ۶ مرحله پایپ‌لاین: جدید (new), تماس گرفته شد (contacted), واجد شرایط (qualified), پیشنهاد (proposal), مشتری (won), ردشده (lost). |
+| `REQ-045` | p. 5 | `BR` | Task Statuses & Overdue | وضعیت‌های تسک با برچسب قرمز برای عقب‌افتاده‌ها و درج مدت تأخیر («۲ روز تأخیر»). |
+| `REQ-046` | p. 5 | `BR` | Equipment Statuses | ۳ وضعیت تجهیزات: آماده (ready), ناقص (incomplete), تهیه نشده (not_prepared). |
+| `REQ-047` | p. 5 | `BR` | Idea Lifecycle States | ۵ وضعیت ایده: جدید (new), در بررسی (under_review), تأیید شده (approved), اجرا شده (executed), ردشده (rejected). |
+| `REQ-048` | p. 5 | `UIX` | Universal 3-States Rule | الزام به پیاده‌سازی ۳ وضعیت اسکلتون، خالی و خطا در تمامی صفحات نرم‌افزار. |
+
+---
+
+### 2.4 Product Pages 1 to 29 (صفحات ۲۹ گانه محصول - ص ۶-۲۴)
+
+| Req ID | PDF Page | Category | Page & Route | Hybrid Requirement Description (شرح فنی و محصولی) |
+| :--- | :---: | :---: | :--- | :--- |
+| `REQ-049` | p. 6 | `FR` | Page 1: Auth (`/login`, `/select-org`)| لاگین، فیلد ایمیل/موبایل، دکمه نمایش رمز، انتخاب سازمان، نمایش نقش کاربر، ذخیره آخرین سازمان. |
+| `REQ-050` | p. 6 | `UIX` | Page 2: Role-Based Home (`/`) | شبکه ۱۲ ستونی ویجت‌ها با لودینگ مستقل و پیوند «مشاهده همه» با فیلتر آماده. |
+| `REQ-051` | p. 7 | `FR` | Page 2: Role Home Views | ۵ نمای مجزا برای کارفرما (کارت مالی و روند)، مدیر (هشدار و تسک معوق)، کمپین‌چی (ثبت هزینه و ایمپورت)، فروش (پیگیری و تماس)، محتوا (تسک و تجهیزات). |
+| `REQ-052` | p. 7 | `FR` | Page 3: Notifications (`/notifications`)| کشوی ۱۰ اعلان آخر هدر، صفحه کامل با لیست و تب تنظیمات (ماتریس رویداد × کانال)، خواندن همه، سقف `+99`. |
+| `REQ-053` | p. 8 | `UIX` | Page 4: Dashboard Filters | ردیف ۱: فیلتر تاریخ شمسی، چندگزینه‌ای کمپین و پلتفرم، سوییچ مقایسه دوره قبل. |
+| `REQ-054` | p. 8 | `FR` | Page 4: Dashboard 6 KPIs | ردیف ۲: کارت‌های هزینه کل، تعداد لید، CPL، نرخ تبدیل، CAC، ROAS با درصد تغییر و پیشرفت هدف. |
+| `REQ-055` | p. 8 | `UIX` | Page 4: Dashboard Trend Charts | ردیف ۳: دو نمودار هماهنگ روند هزینه تبلیغات و روند ورود لیدها در طول زمان. |
+| `REQ-056` | p. 8 | `UIX` | Page 4: Funnel & Platform Share | ردیف ۴: قیف تبدیل ۵ مرحله‌ای با درصد ریزش + نمودار سهم پلتفرم‌ها. |
+| `REQ-057` | p. 8 | `FR` | Page 4: Dashboard Campaigns Table| ردیف ۵: جدول کمپین‌ها با نام، وضعیت، هزینه، لید، CPL، نرخ تبدیل و سلامت کمپین. |
+| `REQ-058` | p. 8 | `FR` | Page 4: Dashboard Urgent Alerts | پنل هشدارهای فوری با متن، کمپین مرتبط، شاخص و دکمه میانبر «ساخت تسک». |
+| `REQ-059` | p. 8 | `REP` | Page 4: Dashboard Exports | خروجی اکسل و پی‌دی‌اف؛ کلیک روی هر کارت کاربر را به لیست کمپین‌ها فیلترشده با آن شاخص می‌برد. |
+| `REQ-060` | p. 8-9 | `FR` | Page 5: Campaigns List Table | جدول کمپین‌ها با نوع، وضعیت، بودجه، هزینه واقعی، نوار پیشرفت بودجه، لید، CPL، آواتار مسئول و فیلترها. |
+| `REQ-061` | p. 9 | `FR` | Page 5: Campaign Row Actions | منوی سطر: کپی کمپین، توقف/ادامه، بایگانی، خروجی اکسل، هشدار هزینه بیش از بودجه. |
+| `REQ-062` | p. 9 | `FR` | Page 6: Campaign Wizard (6 Steps)| ویزارد ۶ مرحله‌ای: مشخصات پایه، مخاطب، بودجه پلتفرم‌ها، شاخص‌های هدف، لندینگ و ساخت UTM، مرور نهایی با لینک ویرایش. |
+| `REQ-063` | p. 10 | `FR` | Page 6: Wizard Auto-Save | ذخیره خودکار هر ۳۰ ثانیه؛ نوار پایین ثابت؛ اخطار در صورت فراتر رفتن بودجه پلتفرم‌ها از کل بودجه. |
+| `REQ-064` | p. 10 | `UIX` | Page 7: Campaign Details Header | هدر ثابت شامل نام، وضعیت، بازه، مسئول، دکمه‌های عملیات و ذخیره تب فعال در URL. |
+| `REQ-065` | p. 10 | `FR` | Page 7: Campaign 8 Details Tabs | ۸ تب کامل: خلاصه، پلتفرم‌ها (با دکمه ثبت هزینه)، لیدها، لندینگ، پیامک، تقویم و تجهیزات، تسک‌ها، تحلیل. |
+| `REQ-066` | p. 11 | `FR` | Page 8: Platforms Management | جدول پلتفرم‌ها، روش دریافت داده، کشوی ویرایش با فیلدهای ورودی/خروجی، هشدار استفاده در کمپین‌ها. |
+| `REQ-067` | p. 11 | `FR` | Page 9: Costs Tracking Table | نوار خلاصه بالا، فیلترها، جدول هزینه‌ها با تاریخ، کمپین، پلتفرم، تعداد، مبلغ، منبع، ثبت‌کننده. |
+| `REQ-068` | p. 11-12| `FR` | Page 9: Cost Entry Drawers | کشوی ثبت سریع با پاک شدن خودکار مبلغ؛ جدول ثبت دسته‌ای با امکان Paste از اکسل. |
+| `REQ-069` | p. 12 | `FR` | Page 10: Import History List | جدول تاریخچه ایمپورت با تاریخ، نوع داده، فایل، کاربر، سطرهای موفق و خطا، و نشان وضعیت. |
+| `REQ-070` | p. 12 | `FR` | Page 10: Import 4-Step Wizard | ویزارد ۴ مرحله‌ای: آپلود فایل، جدول نگاشت ستون‌ها به فیلد سیستم، پیش‌نمایش ۲۰ سطر با خلاصه خطاها، نتیجه نهایی. |
+| `REQ-071` | p. 12-13| `FR` | Page 10: Import Actions & Rules | دانلود فایل نمونه، ذخیره نگاشت، دانلود فایل سطرهای خطا، مدیریت تکراری‌ها (نادیده بگیر/به‌روز کن). |
+| `REQ-072` | p. 13 | `FR` | Page 11: KPI & Metrics Engine | تب KPIها، تب شاخص‌ها با فرمول‌ساز تعاملی و پیش‌نمایش روی کمپین، تب قواعد هشدار جمله‌ساز («اگر شاخص...»). |
+| `REQ-073` | p. 13-14| `FR` | Page 12: Target Audiences | لیست کارتی/جدول، مشخصات دموگرافیک با جدول کمپین‌های مصرف‌کننده مخاطب، حذف مشروط به عدم استفاده. |
+| `REQ-074` | p. 14 | `FR` | Page 13: Landing & UTM Builder | جدول لندینگ‌ها با هشدار ۳۰ روز بدون لید، سازنده زنده UTM با پیش‌نمایش، تاریخچه لینک‌ها، راهنمای Google Ads و GA4. |
+| `REQ-075` | p. 14-15| `FR` | Page 14: Leads Inbox Table | جدول لیدها، شماره ماسک‌شده (`۰۹۱۲***۴۵۶۷`) با دکمه تماس، فیلتر بدون پیگیری، ثبت دستی، ایمپورت لید. |
+| `REQ-076` | p. 15 | `FR` | Page 14: Leads Batch & Mobile | نوار تخصیص گروهی، تغییر وضعیت گروهی، هشدار لید جدید ۲۴ ساعته، چک تکراری، نمای کارتی موبایل. |
+| `REQ-077` | p. 15-16| `FR` | Page 15: Lead Follow-up Kanban | ۶ ستون افقی با شمارنده و ارزش کل، کارت‌های قابل جابجایی با درگ، مودال دلیل رد در «ردشده»، مودال مبلغ در «مشتری». |
+| `REQ-078` | p. 16 | `UIX` | Page 16: Lead Journey Header | نوار خلاصه سفر (منبع ← کمپین ← وضعیت ← مشتری/ردشده)، ستون راست مشخصات، ستون چپ خط زمانی. |
+| `REQ-079` | p. 16 | `FR` | Page 16: Lead Quick Call Log | فرم ثابت ثبت تماس بالای خط زمانی (همیشه در دسترس)، افزودن یادداشت، تعیین یادآور، تغییر وضعیت و کارشناس. |
+| `REQ-080` | p. 16-17| `FR` | Page 17: SMS Broadcasts | لیست ارسال‌ها، جزئیات با آمار تحویل/شکست/پاسخ، جدول شماره‌ها با متن پاسخ، ایمپورت نتیجه، تبدیل پاسخ به لید. |
+| `REQ-081` | p. 17-18| `FR` | Page 18: Webinar Lifecycle | لیست وبینارها، جزئیات با ۴ تب (اطلاعات، شرکت‌کنندگان، تجهیزات، تسک‌ها)، قیف کوچک تبدیل، ایمپورت حضور و تبدیل به لید. |
+| `REQ-082` | p. 18 | `FR` | Page 19: Operational Tasks | سوییچ من/تیم، سوییچ لیست/برد، لیست دسته‌بندی‌شده زمانی، فیلد ثبت سریع بالا، کشوی کامل جزئیات با ساب‌تسک و کامنت. |
+| `REQ-083` | p. 18-19| `FR` | Page 20: Shamsi Calendar | تقویم شمسی ماه/هفته با شروع شنبه، کشیدن رویداد برای تغییر تاریخ، کشوی جزئیات و پیوند به وضعیت تجهیزات، نمای روزانه موبایل. |
+| `REQ-084` | p. 19-20| `FR` | Page 21: Equipment Management | دو نما: «کمبودها (پیش‌فرض)» بر اساس تاریخ با هشدار ۳ روز تا رویداد؛ «همه تجهیزات»؛ قالب‌های تجهیزات آماده. |
+| `REQ-085` | p. 20 | `FR` | Page 22: Meeting Minutes | لیست جلسات، صفحه مطالعه با عرض ۸۰۰ پیکسل، فرم جلسه با جدول اقدامات، «تبدیل اقدامات به تسک»، تاریخچه نسخه‌ها. |
+| `REQ-086` | p. 20-21| `FR` | Page 23: SOP Knowledge Base | لیست کارتی، صفحه مطالعه ۸۰۰ پیکسلی، مراحل و چک‌لیست، تاریخچه نسخه‌ها، دکمه «ساخت تسک از روی SOP»، استایل چاپ تمیز. |
+| `REQ-087` | p. 21 | `FR` | Page 24: Learning & LMS Hub | تب‌های کتابخانه، آموزش‌های من، پیشرفت تیم؛ پلیر ویدیو با کنترل سرعت و ذخیره زمان توقف، تخصیص آموزش به پرسنل. |
+| `REQ-088` | p. 21-22| `FR` | Page 25: Ideas Incubator | فیلد ثبت سریع، رأی‌گیری یک‌کلیکی برگشت‌پذیر، تأیید/رد توسط مدیر، تبدیل به تسک، ثبت نتیجه اجرای ایده. |
+| `REQ-089` | p. 22-23| `FR` | Page 26: Activity Report Feed | فیلتر نقش (مدیر همه، پرسنل فقط خود)، کارت‌های شاخص، جدول مقایسه پرسنل، فید زنده فعالیت‌ها با لینک، خروجی اکسل. |
+| `REQ-090` | p. 23 | `FR` | Page 27: Users & RBAC Matrix | جدول کاربران، کشوی دعوت، تغییر نقش، دیالوگ تأیید غیرفعالسازی، تب ماتریس دسترسی نقش‌ها با چک‌باکس. |
+| `REQ-091` | p. 23-24| `FR` | Page 28: Org Settings Taxonomies | تب‌های مدیریت مقادیر پایه (انواع کمپین، منابع لید، وضعیت‌ها با گروه پایپ‌لاین، دلایل رد)، منع حذف مقادیر مصرف‌شده. |
+| `REQ-092` | p. 24 | `FR` | Page 29: WordPress Connection | کارت وضعیت اتصال، تولید کلید API با باطل شدن قبلی، راهنمای راه‌اندازی، جدول نگاشت فیلدها، لاگ ردشده‌ها. |
+
+---
+
+### 2.5 Architecture & Non-Functional Directives (مشخصات فنی و پشته - ص ۲۶-۲۹)
+
+| Req ID | PDF Page | Category | Title & Scope | Hybrid Requirement Description (شرح فنی و محصولی) |
+| :--- | :---: | :---: | :--- | :--- |
+| `REQ-093` | p. 26 | `NFR` | Next.js App Router Structure | ساختار پوشه‌ها با Route Groupهای `(auth)` و `(app)`، محافظت مسیر با `middleware.ts`، فایل‌های `loading.tsx` و `error.tsx` یکپارچه، تگ `<html lang="fa" dir="rtl">` و فونت محلی وزیرمتن. |
+| `REQ-094` | p. 26 | `UIX` | shadcn/ui RTL Tokens | کامپوننت‌های shadcn بازبینی‌شده برای RTL با کلاس‌های منطقی (`ms/me/ps/pe` و `rotate-180:rtl`) و خواندن فواصل و رنگ‌ها از متغیرهای CSS توکن تم روشن. |
+| `REQ-095` | p. 26 | `NFR` | TanStack Query Cache Rules | کوئری‌ها با `useQuery` و جهش‌ها با `useMutation` با کلیدهای کوئری ساختاریافته، ابطال خودکار کش داشبورد و کمپین پس از ثبت هزینه یا لید، به‌روزرسانی خوش‌بینانه بردها با قابلیت Rollback. |
+| `REQ-096` | p. 27 | `NFR` | Axios Centralized API Client | کلاینت مشترک `apiClient` با آدرس نسخه سرور (`/api/v1`)، رهگیری خطای ۴۰۱ با صف تمدید توکن و ارسال کوکی امن، تبدیل خطاهای سرور به فرمت استاندارد، لغو درخواست‌های قدیمی با AbortController. |
+| `REQ-097` | p. 27 | `NFR` | Zod Form Validation Engine | تعریف شمای Zod برای کلیه فرم‌ها با استخراج تایپ TypeScript، پیام‌های خطای فارسی متمرکز، تبدیل ارقام فارسی به انگلیسی در اسکیما، حذف جداکننده ۳ رقمی، بررسی قوانین بیزنس تاریخ و موبایل معتبر. |
+| `REQ-098` | p. 27 | `NFR` | Zustand Client State | استورهای کلاینت صرفاً برای حالت‌های غیرسروری (`authStore`, `uiStore`, `wizardStore`) بدون کپی کردن داده‌های سروری، نگهداری منوی بسته و تب فعال با قابلیت persist. |
+| `REQ-099` | p. 28 | `UIX` | Lucide & Framer Motion | آیکون‌های لوسید با سایز و ضخامت یکنواخت و لیبل صوتی فارسی، معکوس‌سازی جهت فلش‌ها در RTL، ترنزیشن‌های نرم ۱۵۰ تا ۲۵۰ میلی‌ثانیه‌ای Framer Motion با احترام به تنظیمات کاهش حرکت کاربر. |

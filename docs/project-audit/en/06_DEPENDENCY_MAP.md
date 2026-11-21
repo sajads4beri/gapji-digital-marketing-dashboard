@@ -1,131 +1,190 @@
-# 06 — DEPENDENCY MAP & INTERACTION TOPOLOGY
-## Cross-Module Dependency Graph, Data Lineage, and Blast Radius Analysis
+# 06 — Dependency Map
+## Gapji Digital Marketing Platform Deep Audit
 
 ---
 
-## 1. CROSS-MODULE DEPENDENCY GRAPH
+## 1. System Module Dependency Graph
 
-The Gapji platform consists of four primary workspace clusters connected through shared authentication, enterprise settings, and common UI foundations:
+The Gapji Digital Marketing Platform features a structured, layered dependency graph. Foundational modules (Auth, Organization, Users) provide security and multi-tenancy contexts that support core marketing modules (Campaigns, Costs, Leads), which in turn feed aggregated data into Analytics and Workflow subsystems.
 
 ```mermaid
 graph TD
-    subgraph Foundation ["Core Foundation Layer"]
-        AUTH["Auth & Multi-Tenancy (P01)"]
-        USERS["Users & RBAC (P27)"]
-        ORG["Organization & Taxonomy (P28)"]
-        SHELL["App Shell & UI Foundations"]
+    subgraph Foundation["Tier 0: Governance & Security"]
+        Auth["Auth & Sessions Module"]
+        Org["Organization Module (Tenancy & Taxonomies)"]
+        Users["Users & RBAC Module"]
     end
 
-    subgraph Workspace1 ["Workspace 1: Performance & Analytics"]
-        DASH["Executive Dashboard (P04)"]
-        CAMP["Campaigns List, Wizard & Details (P05-P07)"]
-        PLAT["Ad Platforms Catalog (P08)"]
-        COST["Marketing Costs (P09)"]
-        IMP["Universal Import (P10)"]
-        KPI["KPIs & Alert Rules (P11)"]
-        AUD["Target Audiences (P12)"]
-        LAND["Landing Pages & UTMs (P13)"]
+    subgraph CoreBusiness["Tier 1: Core Marketing & CRM"]
+        Platforms["Platforms Module"]
+        Audiences["Audiences Module"]
+        Campaigns["Campaigns Engine"]
+        Costs["Costs Accounting"]
+        Landing["Landing & UTM Engine"]
+        Leads["Leads & CRM Pipeline"]
     end
 
-    subgraph Workspace2 ["Workspace 2: Sales & Leads"]
-        LEADS["Leads Inbox & Board (P14-P15)"]
-        LEAD_DET["Lead Details & Journey (P16)"]
-        SMS["SMS Dispatches (P17)"]
-        WEBINAR["Webinars & Funnel (P18)"]
+    subgraph Operations["Tier 2: Team Operations & Knowledge"]
+        Tasks["Tasks & Subtasks"]
+        Calendar["Calendar & Scheduling"]
+        SMS["SMS Broadcasts"]
+        Webinars["Webinar Lifecycle"]
+        Equipment["Equipment (Planned)"]
+        Meetings["Meeting Minutes (Planned)"]
+        SOP["SOP Engine (Planned)"]
+        Learning["Learning LMS (Planned)"]
+        Ideas["Ideas Incubator (Planned)"]
     end
 
-    subgraph Workspace3 ["Workspace 3: Execution & Knowledge"]
-        TASKS["Task Management (P19)"]
-        CALENDAR["Marketing Calendar (P20)"]
-        EQUIP["Equipment Logistics (P21)"]
-        MEETINGS["Meeting Minutes (P22)"]
-        SOP["SOP Knowledge Base (P23)"]
-        LEARN["Team Training (P24)"]
-        IDEAS["Ideas Board (P25)"]
-        ACT["Activity Report (P26)"]
-        NOTIF["Notifications (P03)"]
+    subgraph Intelligence["Tier 3: Analytics & Cross-Cutting"]
+        Dashboard["Executive Dashboard"]
+        KPIs["KPI & Formula Rules"]
+        Imports["Data Ingestion Pipeline"]
+        Activity["Activity Audit Feed (Planned)"]
+        Notifications["Notifications Hub (Planned)"]
+        WordPress["WordPress Pipeline (Planned)"]
     end
 
-    subgraph Integrations ["External Integrations"]
-        WP["WordPress Webhooks (P29)"]
-    end
+    Auth --> Org
+    Org --> Users
+    Users --> Campaigns
+    Users --> Leads
+    Users --> Tasks
 
-    %% Foundation Bindings
-    AUTH --> USERS
-    AUTH --> ORG
-    SHELL --> AUTH
-    SHELL --> ORG
+    Platforms --> Campaigns
+    Platforms --> Costs
+    Audiences --> Campaigns
+    Campaigns --> Costs
+    Campaigns --> Landing
+    Campaigns --> Leads
+    Landing --> Leads
+    SMS --> Leads
+    Webinars --> Leads
 
-    %% Workspace 1 Bindings
-    CAMP --> PLAT
-    CAMP --> AUD
-    CAMP --> LAND
-    COST --> CAMP
-    COST --> PLAT
-    DASH --> CAMP
-    DASH --> COST
-    DASH --> LEADS
-    IMP --> COST
-    IMP --> LEADS
-    KPI --> DASH
-    KPI --> CAMP
+    Campaigns --> Tasks
+    Leads --> Tasks
+    Webinars --> Tasks
+    Meetings -.-> Tasks
+    SOP -.-> Tasks
+    Ideas -.-> Tasks
 
-    %% Workspace 2 Bindings
-    LEADS --> CAMP
-    LEADS --> LAND
-    LEAD_DET --> LEADS
-    LEAD_DET --> USERS
-    SMS --> CAMP
-    WEBINAR --> CAMP
-    WP --> LEADS
+    Campaigns --> Calendar
+    Webinars --> Calendar
+    Equipment -.-> Calendar
+    Equipment -.-> Campaigns
+    Equipment -.-> Webinars
 
-    %% Workspace 3 Bindings
-    TASKS --> CAMP
-    TASKS --> LEADS
-    TASKS --> USERS
-    TASKS --> SOP
-    CALENDAR --> CAMP
-    CALENDAR --> WEBINAR
-    CALENDAR --> TASKS
-    EQUIP --> WEBINAR
-    EQUIP --> CAMP
-    MEETINGS --> TASKS
-    IDEAS --> TASKS
-    ACT --> TASKS
-    ACT --> LEADS
-    ACT --> COST
-    NOTIF --> TASKS
-    NOTIF --> LEADS
+    Campaigns --> Dashboard
+    Costs --> Dashboard
+    Leads --> Dashboard
+    Platforms --> Dashboard
+    Dashboard --> KPIs
+
+    Imports --> Costs
+    Imports --> Leads
+    Imports --> SMS
+    Imports --> Webinars
+
+    WordPress -.-> Landing
+    WordPress -.-> Leads
+
+    Campaigns -.-> Activity
+    Leads -.-> Activity
+    Tasks -.-> Activity
+    Costs -.-> Activity
+
+    Campaigns -.-> Notifications
+    Tasks -.-> Notifications
+    Leads -.-> Notifications
 ```
 
 ---
 
-## 2. CRITICAL INTEGRATION POINTS & BLAST RADIUS ANALYSIS
+## 2. Database Entity Relationships (Prisma 43-Model Schema)
 
-| Component / Service | Depended Upon By | Blast Radius If Mutated | Mitigation Strategy |
-| :--- | :--- | :---: | :--- |
-| **`auth-context.tsx` / `authStore`** | Every single authenticated page (P01–P29), Sidebar, Header | **Catastrophic (100%)** | Preserve interface signature; use strict TypeScript types; run `test-auth-p0-1.mjs`. |
-| **`permissions.ts` (`can`, `canAccessRoute`)** | Navigation, Action buttons, Phone masking, Access Matrix | **Critical (90%)** | Centralize 29-page permission table; test with `test-permissions-matrix.mjs`. |
-| **`persian-date.ts` & `PersianDatePicker`**| FilterBar, Dashboard, Campaigns, Leads, Tasks, Calendar | **Critical (85%)** | Standardize ISO 8601 boundary conversions; verify leap year tests (`test-persian-date.mjs`). |
-| **`Campaign` Entity & Endpoints** | Dashboard, Costs, Leads, Landing/UTM, Tasks, Calendar | **High (75%)** | Implement backwards-compatible DTOs; keep `/campaigns` and `/campaigns/stats` stable. |
-| **`Lead` Entity & Pipeline Statuses** | Leads Inbox, Kanban Board, Details, Activity Feed, Dashboard | **High (70%)** | Enforce Organization Taxonomy bindings; validate status enum transitions in backend. |
-| **`Organization` Taxonomy Engine** | Costs categories, Lead sources, Loss reasons, Platforms | **High (60%)** | Prevent physical deletion of active taxonomy rows; soft-disable only. |
+The relational schema in `apps/api/prisma/schema.prisma` defines 43 models linked by strict foreign key constraints:
+
+```mermaid
+erDiagram
+    Organization ||--o{ OrganizationMembership : "has members"
+    Organization ||--o{ Campaign : "owns"
+    Organization ||--o{ Lead : "owns"
+    Organization ||--o{ Cost : "owns"
+    Organization ||--o{ Task : "owns"
+    Organization ||--o{ Platform : "configures"
+    Organization ||--o{ TargetAudience : "defines"
+    Organization ||--o{ LandingPage : "hosts"
+    Organization ||--o{ CalendarEvent : "schedules"
+    Organization ||--o{ EquipmentItem : "owns"
+    Organization ||--o{ Meeting : "records"
+    Organization ||--o{ Sop : "documents"
+    Organization ||--o{ LearningResource : "maintains"
+    Organization ||--o{ Idea : "collects"
+    Organization ||--o{ Notification : "broadcasts"
+
+    User ||--o{ OrganizationMembership : "participates"
+    User ||--o{ Session : "authenticates"
+    User ||--o{ RefreshToken : "holds tokens"
+    User ||--o{ Task : "assigned"
+    User ||--o{ Lead : "manages"
+    User ||--o{ UserActivityLog : "triggers"
+
+    Campaign ||--o{ CampaignPlatformAllocation : "budget split"
+    Campaign ||--o{ CampaignAudience : "targets"
+    Campaign ||--o{ UtmLink : "tracks"
+    Campaign ||--o{ Cost : "incurs"
+    Campaign ||--o{ Lead : "generates"
+    Campaign ||--o{ Task : "spawns"
+    Campaign ||--o{ SmsCampaign : "executes"
+    Campaign ||--o{ Webinar : "hosts"
+
+    Lead ||--o{ LeadActivity : "logs events"
+    Lead ||--o{ LeadCall : "records calls"
+    Lead ||--o{ Task : "follow-up tasks"
+
+    Task ||--o{ TaskSubtask : "breaks down into"
+    Task ||--o{ TaskComment : "discusses"
+
+    Meeting ||--o{ MeetingActionItem : "decides"
+    MeetingActionItem }o--|| Task : "converts to"
+
+    Sop ||--o{ SopVersion : "tracks versions"
+    Idea ||--o{ IdeaVote : "community votes"
+    Webinar ||--o{ WebinarAttendee : "registers"
+```
 
 ---
 
-## 3. ARCHITECTURAL INCONSISTENCIES & COUPLING HOTSPOTS
+## 3. API Endpoints Registry & Integration Points
 
-### 3.1 Dual-Branch Monorepo Disconnect
-- **Problem**: `feature/frontend-foundation` and `feature/backend-foundation` are completely decoupled in Git.
-- **Risk**: Frontend assumes API responses that differ slightly in naming from the backend Prisma schema (e.g., `budgetSpendPercentage` vs `spendPercentage`, `leadConversionRate` vs `conversionRate`).
-- **Resolution**: Phase 1 of the roadmap will merge the branches and establish `@gapji/shared` as the single source of truth for TypeScript types.
+| Module | Base Path | Key HTTP Endpoints | Downstream Consumers |
+| :--- | :--- | :--- | :--- |
+| **Auth** | `/api/auth` | `POST /login`, `POST /refresh`, `POST /logout`, `GET /me` | Web Auth Store, App Router Middleware |
+| **Users** | `/api/users` | `GET /`, `POST /invite`, `PATCH /:id/role`, `GET /matrix` | User Management, Team Assignment Dropdowns |
+| **Organization** | `/api/organization` | `GET /general`, `PATCH /general`, `GET/POST /taxonomies/:type` | Org Settings, Lead Statuses, Cost Categories |
+| **Campaigns** | `/api/campaigns` | `GET /`, `POST /`, `GET /:id`, `PATCH /:id`, `GET /stats` | Campaigns List, Wizard, Details, Home Widgets |
+| **Costs** | `/api/costs` | `GET /`, `POST /`, `GET /:id`, `PATCH /:id`, `GET /stats` | Costs Tracking Table, Dashboard Trends |
+| **Dashboard** | `/api/dashboard` | `GET /overview`, `GET /compare` | Executive Dashboard, Role-Based Home Views |
+| **Leads** | `/api/leads` | `GET /`, `POST /`, `GET /:id`, `PATCH /:id/status`, `POST /bulk-assign` | Lead Inbox, Kanban Board, Lead Details |
+| **Platforms** | `/api/platforms` | `GET /`, `POST /`, `GET /templates`, `GET /:id` | Campaign Wizard, Platform Settings, Costs |
+| **Audiences** | `/api/audiences` | `GET /`, `POST /`, `GET /:id`, `PATCH /:id` | Audiences Page, Campaign Wizard Step 2 |
+| **Landing** | `/api/landing` | `GET /pages`, `POST /pages`, `GET/POST /utm`, `POST /utm/preview` | Landing Table, UTM Builder, GA4 Guide |
+| **SMS** | `/api/sms` | `GET /`, `POST /`, `GET /:id`, `POST /import-results` | SMS Broadcasts List, Recipients Table |
+| **Webinars** | `/api/webinars` | `GET /`, `POST /`, `GET /:id`, `POST /:id/attendees/convert` | Webinars List, Attendees Table, Lead Pipeline |
+| **Tasks** | `/api/tasks` | `GET /`, `POST /`, `GET /:id`, `POST /:id/comments`, `POST /:id/subtasks` | Tasks List, Kanban Board, Task Drawer |
+| **Calendar** | `/api/calendar` | `GET /events`, `POST /events`, `PATCH /events/:id` | Shamsi Calendar View, Campaign Schedule Tab |
+| **Imports** | `/api/imports` | `GET /fields`, `POST /inspect`, `POST /validate`, `POST /execute` | Data Import History, 4-Step Wizard |
+| **KPIs** | `/api/kpis` | `GET /`, `POST /`, `POST /metrics`, `POST /validate-formula`, `POST /rules` | KPI Table, Formula Builder, Alert Rules |
 
-### 3.2 Mock Storage State Duplication
-- **Problem**: `apps/web/src/features/*` contains duplicate mock seeds across `costs.mock.ts`, `lead.mock.ts`, `task.mock.ts`, and `users.mock.ts`.
-- **Risk**: Changes to user IDs in `users.mock.ts` cause broken relational joins in `task-storage.ts` and `lead-storage.ts`.
-- **Resolution**: Deprecate and remove mock storage files once real PostgreSQL APIs are connected via TanStack Query.
+---
 
-### 3.3 Circular Dependency Risks
-- **Inspection Finding**: `apps/web/src/features/leads` imports from `apps/web/src/features/campaigns` and vice-versa (Campaign Details tab imports `LeadsTable`; Lead Journey timeline links to Campaign Details).
-- **Current State**: Handled cleanly via shallow barrel imports (`index.ts`), but direct cross-feature deep imports must be avoided to prevent circular webpack bundling cycles.
-- **Rule**: Cross-feature communication must happen either through URL navigation (`router.push`) or via shared contracts in `packages/shared`.
+## 4. Coupling Risks & Architectural Bottlenecks
+
+1. **Dashboard Heavy Aggregation Query Coupling:**
+   `/api/dashboard/overview` aggregates data across Campaigns, Costs, Platforms, and Leads. High data volumes could degrade response times. *Recommendation:* Implement Redis/in-memory caching with event-driven invalidation.
+2. **Sales Agent Lead Assignment Cascades:**
+   When reassigning leads in bulk, related `LeadActivity` and future `Task` deadlines must update atomically in a single PostgreSQL transaction.
+3. **Campaign Deletion Restrictions (`P2003`):**
+   Prisma enforces `Restrict` on campaign deletions if connected Costs or Leads exist. Deletion must present clear error feedback to users rather than generic failures.
+4. **Offline Mock Fallbacks in Web Layer:**
+   Several feature services (e.g. `platforms.api.ts`) contain fallback mock templates if the backend API fails. In production, these should fail gracefully with standard ErrorState rather than disguising backend outages.

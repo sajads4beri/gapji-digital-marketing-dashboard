@@ -52,4 +52,19 @@ export class GetTasksFilterDto {
   @IsString()
   @IsOptional()
   search?: string;
+
+  @ApiPropertyOptional({
+    description: 'فیلتر بر اساس مرحله قیف فروش (OKR)',
+    example: 'awareness',
+  })
+  @IsString()
+  @IsOptional()
+  funnelStageKey?: string;
+
+  @ApiPropertyOptional({
+    description: 'فیلتر بر اساس شناسه کمپین',
+  })
+  @IsString()
+  @IsOptional()
+  campaignId?: string;
 }

@@ -6,15 +6,9 @@ import { AppModule } from './app.module';
 import { PrismaClientExceptionFilter } from './database/prisma-client-exception.filter';
 
 async function bootstrap() {
-  const allowedOrigins = [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
-  ];
-
   const app = await NestFactory.create(AppModule, {
     cors: {
-      origin: allowedOrigins,
+      origin: true,
       credentials: true,
     },
   });

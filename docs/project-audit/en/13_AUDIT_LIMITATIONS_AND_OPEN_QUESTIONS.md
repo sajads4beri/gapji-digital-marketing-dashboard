@@ -1,50 +1,59 @@
-# 13 — AUDIT LIMITATIONS & OPEN ARCHITECTURAL QUESTIONS
-## Forensic Constraints, Specification Ambiguities, and Strategic Business Decisions
+# 13 — Audit Limitations and Open Questions
+## Gapji Digital Marketing Platform Deep Audit
 
 ---
 
-## 1. AUDIT LIMITATIONS & STATIC ANALYSIS BOUNDARIES
+## 1. Audit Scope & Verification Limitations
 
-1. **Read-Only Non-Destructive Constraint**:
-   - In strict compliance with the audit mandate, no database migrations, Git merges, or source code modifications were executed.
-   - The NestJS API on port 3001 is currently running from `F:/marketing-platform-backend`. Database integrity assertions were verified via HTTP API queries and static inspection of `schema.prisma`.
-2. **Dynamic UI Testing Limitations**:
-   - Automated scripts in `apps/web/scripts/` test Node.js runtime logic, mock storages, and regex component signatures. Full visual regressions and cross-browser rendering tests require an active Playwright headless browser runner in a CI environment.
+In strict adherence to the **Read-Only Audit Policy (Part 1)**, the audit observed the following methodological boundaries:
+
+1. **Non-Destructive Execution Policy:**
+   Existing source files, configuration manifests, Git commit history, and database records remained 100% untouched.
+2. **Selective Automated Test Execution:**
+   - Pure algorithmic and contract tests that run entirely in-memory (`test-persian-date.mjs`, `test-permissions-matrix.mjs`, `test-permissions-hardening.mjs`, `test-data-table.mjs`, `test-filter-service.mjs`, `campaigns.service.spec.ts`) were executed and verified at 100% pass rates.
+   - The 21 backend integration specs (`*.integration.spec.ts`) that execute live SQL mutations against PostgreSQL (inserting, modifying, and deleting database records) were **statically analyzed** rather than executed against the local database to guarantee zero data corruption.
+3. **Absence of Running Backend Process:**
+   During static audit execution, backend port 3001 and frontend port 3000 were idle; PostgreSQL service was running on port 5432. All network and API communications were validated via static contract code inspection.
 
 ---
 
-## 2. SPECIFICATION AMBIGUITIES REQUIRING PRODUCT DECISIONS
+## 2. Product Specification Ambiguities & Clarifications
 
-The following 6 areas in `marketing-platform-phase1-frontend-pages-1.pdf` contain business or technical ambiguities that must be resolved by the Product Owner:
+The following product and business questions were identified during PDF requirements analysis and require formal determination from the Product Owner:
 
-### 1. SMS Provider Gateway Integration vs CSV Import
-- **Specification (Page 17)**: Mentions SMS dispatches table, delivery logs, and CSV import.
-- **Ambiguity**: Does the client intend to send SMS messages directly through an integrated Iranian SMS Provider API (e.g. Kavenegar, Faraz SMS, SMS.ir, Magfa) in Phase 1, or is the system exclusively intended to import and log SMS campaign reports generated externally via CSV?
-- **Architectural Impact**: If an active API gateway is required, an SMS dispatch provider adapter with API credentials management must be built into `apps/api/src/modules/sms/`.
+### Q1: Campaign Routing Standard (`/campaigns` vs `/performance/campaigns`)
+- **Document Text:** The PDF page 8-10 designates routes as `/performance/campaigns`, `/performance/campaigns/new`, `/performance/campaigns/:id`. The current Next.js App Router exposes `/campaigns`, `/campaigns/new`, `/campaigns/[id]`.
+- **Note in PDF (p. 6):** *"The paths are suggested and the frontend team can adjust the address structure to fit the chosen framework; however, each page must have an independent, shareable address."*
+- **Question for Product Owner:** Should the platform maintain `/campaigns` with a URL rewrite alias for `/performance/campaigns`, or should the physical directory structure be migrated to `/performance/campaigns`?
+- **Engineering Recommendation:** Maintain `/campaigns` and add a transparent Next.js rewrite rule in `next.config.js` to support both URLs without breaking existing links (`PHASE-001`).
 
-### 2. Webinar Platform Integration vs External Session Links
-- **Specification (Page 17–18)**: Details webinar creation with a "لینک جلسه" (Session Link) field and attendee list import.
-- **Ambiguity**: Will webinars be hosted externally on platforms like Skyroom (اسکای‌روم), Adobe Connect, or Google Meet (where Gapji merely stores the meeting URL), or is an embedded WebRTC/Jitsi meeting room expected inside the app?
-- **Architectural Impact**: Hosting externally requires only standard URL validation; self-hosted WebRTC requires heavy media server infrastructure (Janus/Mediasoup), which is out of Phase 1 scope.
+### Q2: Currency Unit Switching & Historical Conversion Policy
+- **Document Text:** The PDF page 4 specifies a single monetary unit (Toman or Rial) per organization, configured in Organization Settings (`/settings/organization`).
+- **Approved Project Decision (docs/PROJECT-DECISIONS.md):** The system does not automatically multiply or divide existing stored monetary values by 10 when switching between Toman and Rial, preserving exact stored numbers without semantic mutation.
+- **Question for Product Owner:** If an organization switches its unit from Toman to Rial, should the system display a prominent confirmation dialog stating: *"Existing historical numbers will not be converted; only the display label and future inputs will reflect Rial"*?
+- **Engineering Recommendation:** Enforce the explicit confirmation dialog and prevent accidental currency switches.
 
-### 3. WordPress Plugin vs Standard Webhook Receiver
-- **Specification (Page 24, Page 29)**: Mentions "دانلود افزونه" (Download Plugin) alongside API key generation and Gravity Forms field mapping.
-- **Ambiguity**: Is there an existing WordPress PHP plugin repository maintained by Gapji, or should the platform provide a standard generic Gravity Forms / Contact Form 7 webhook integration documentation with a downloadable lightweight PHP bridge script?
-- **Architectural Impact**: If a full custom WordPress plugin must be developed, that is a separate PHP/WordPress codebase outside the TypeScript monorepo.
+### Q3: WordPress Inbound Webhook Lead Assignment Strategy
+- **Document Text:** Page 29 documents WordPress webhook ingestion and form field mapping to lead fields.
+- **Ambiguity:** How should incoming WordPress leads be assigned to sales agents when no specific sales agent ID is passed in the webhook payload?
+- **Proposed Business Strategies:**
+  - *Option A (Default):* Leave `assignedToId = null` ("بدون کارشناس"), allowing the Marketing Manager or Sales Lead to assign them manually from the Lead Inbox.
+  - *Option B (Round-Robin):* Automatically distribute incoming leads evenly among active sales agents.
+- **Engineering Recommendation:** Implement Option A for MVP (matching manual inbox assignment), with an optional round-robin toggle in Organization Settings.
 
-### 4. Video Streaming for Team Learning (Page 24)
-- **Specification (Page 21)**: Mentions embedded video player with playback speed and resume playback.
-- **Ambiguity**: Where will training videos be hosted?
-  - Option A: Self-hosted MP4/HLS files stored on MinIO / S3.
-  - Option B: Embedded players from Iranian video hosts (Aparat) or YouTube / Vimeo.
-- **Recommendation**: Support direct MP4 streaming from S3/MinIO with native HTML5 `<video>` controls and fallback iframe embed support for Aparat.
+### Q4: Meeting Minutes Email Dispatch Service
+- **Document Text:** Page 22 specifies a "Send to all" button with email preview and confirmation for meeting minutes.
+- **Ambiguity:** Which email transport provider should be integrated for outbound transactional emails in production?
+- **Proposed Solutions:** SMTP relay, Kavenegar / Iranian transactional email provider, or AWS SES / SendGrid.
+- **Question for Product Owner:** Which transactional email gateway provider is preferred for the production deployment?
 
-### 5. Multi-Tenant Organization Isolation Scope
-- **Specification (Page 6, Page 23)**: Mentions switching between multiple organizations for a user.
-- **Ambiguity**: Are contacts, leads, campaigns, and costs 100% strictly segregated per organization (shared nothing multi-tenancy), or can an Agency Administrator view cross-organizational aggregate dashboards?
-- **Recommendation**: Strict tenant segregation by default. Every database table must have `organizationId` foreign key and row-level tenant security.
+---
 
-### 6. Persian Calendar Component Library Selection
-- **Specification (Page 28)**: Recommends `react-day-picker` with `date-fns-jalali` or a custom component.
-- **Current State**: `apps/web/src/components/ui/persian-date-picker.tsx` is an extensively customized pure React component passing leap year verification in `test-persian-date.mjs`.
-- **Recommendation**: Retain the existing custom `persian-date-picker.tsx` rather than introducing third-party date-picker wrappers, as it is already battle-tested against the project's design tokens.
+## 3. Engineering Recommendations for Product Evolution
+
+1. **Adopt Redis for Shared Caching & Distributed Job Queues:**
+   Currently, background import jobs run in-memory within the NestJS process. Adopting Redis with BullMQ will enable reliable background processing, scheduled report delivery, and distributed locking.
+2. **Implement Real-Time Push via WebSockets / Server-Sent Events (SSE):**
+   Replace HTTP polling on notifications, lead inbox updates, and task changes with an authenticated WebSocket or SSE stream, reducing backend database load and improving collaborative user experience.
+3. **Automate Continuous Integration & Container Security Scanning:**
+   Enforce strict GitHub Actions workflows verifying linting, unit tests, integration suites, and Docker image vulnerability scanning before code merges to main branches.

@@ -1,12 +1,21 @@
 'use client';
 
 import * as React from 'react';
-import { Calendar, CheckSquare, MessageSquare, Layers, Inbox, Video } from 'lucide-react';
+import { Calendar, CheckSquare, MessageSquare, Layers, Inbox, Video, Target, Filter } from 'lucide-react';
 import type { Task, StoredTaskStatus } from '../types';
 import { TaskPriorityBadge } from './task-priority-badge';
 import { TaskStatusBadge } from './task-status-badge';
 import { isTaskOverdue, getOverdueDays, formatOverdueBadgeText } from '../utils/task-grouping';
 import { isoToJalali, PERSIAN_MONTH_NAMES } from '@/lib/persian-date';
+
+const FUNNEL_STAGE_LABELS: Record<string, string> = {
+  awareness: 'آگاهی',
+  interest: 'علاقه‌مندی',
+  consideration: 'بررسی',
+  intent: 'قصد خرید',
+  evaluation: 'ارزیابی',
+  purchase: 'خرید موفق',
+};
 
 export interface TaskCardProps {
   task: Task;
@@ -103,9 +112,26 @@ export function TaskCard({
       {/* متادیتا: برچسب مرتبط و تاخیر */}
       <div className="flex items-center gap-2 flex-wrap">
         {task.relatedTo && (
-          <span className="inline-flex items-center gap-1 text-[11px] text-slate-300 bg-[#0B1423] border border-[#1F2E45] px-2 py-0.5 rounded-lg max-w-[160px] truncate">
+          <span className="inline-flex items-center gap-1 text-[11px] text-blue-300 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-lg max-w-[160px] truncate">
             {getRelatedIcon(task.relatedTo.type)}
             <span className="truncate">{task.relatedTo.title || task.relatedTo.id}</span>
+          </span>
+        )}
+
+        {task.okr?.stageKey && (
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-purple-300 bg-purple-500/15 border border-purple-500/30 px-2 py-0.5 rounded-md">
+            <Filter className="w-2.5 h-2.5 text-purple-400" />
+            <span>قیف: {FUNNEL_STAGE_LABELS[task.okr.stageKey] || task.okr.stageKey}</span>
+          </span>
+        )}
+
+        {task.okr?.keyResultTitle && (
+          <span
+            className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-md max-w-[140px] truncate"
+            title={task.okr.keyResultTitle}
+          >
+            <Target className="w-2.5 h-2.5 text-emerald-400" />
+            <span className="truncate">KR: {task.okr.keyResultTitle}</span>
           </span>
         )}
 

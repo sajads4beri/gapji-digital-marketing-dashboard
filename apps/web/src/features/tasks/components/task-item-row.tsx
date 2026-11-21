@@ -11,7 +11,18 @@ import {
   Inbox,
   Video,
   Loader2,
+  Filter,
+  Target,
 } from 'lucide-react';
+
+const FUNNEL_STAGE_LABELS: Record<string, string> = {
+  awareness: 'آگاهی',
+  interest: 'علاقه‌مندی',
+  consideration: 'بررسی',
+  intent: 'قصد خرید',
+  evaluation: 'ارزیابی',
+  purchase: 'خرید موفق',
+};
 import type { Task } from '../types';
 import { TaskStatusBadge } from './task-status-badge';
 import { TaskPriorityBadge } from './task-priority-badge';
@@ -135,11 +146,30 @@ export function TaskItemRow({
           <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-400 flex-wrap">
             {/* موجودیت مرتبط (کمپین / لید / وبینار) */}
             {task.relatedTo && (
-              <span className="inline-flex items-center gap-1 text-slate-300 bg-[#18263A] border border-[#1F2E45] px-2 py-0.5 rounded-lg text-[11px]">
+              <span className="inline-flex items-center gap-1 text-blue-300 bg-blue-500/10 border border-blue-500/25 px-2 py-0.5 rounded-lg text-[11px]">
                 {getRelatedIcon(task.relatedTo.type)}
                 <span className="max-w-[140px] truncate">
                   {task.relatedTo.title || task.relatedTo.id}
                 </span>
+              </span>
+            )}
+
+            {/* نشان مرحله قیف فروش */}
+            {task.okr?.stageKey && (
+              <span className="inline-flex items-center gap-1 text-purple-300 bg-purple-500/15 border border-purple-500/30 px-2 py-0.5 rounded-lg text-[11px]">
+                <Filter className="w-3 h-3 text-purple-400" />
+                <span>قیف: {FUNNEL_STAGE_LABELS[task.okr.stageKey] || task.okr.stageKey}</span>
+              </span>
+            )}
+
+            {/* نشان نتیجه کلیدی OKR */}
+            {task.okr?.keyResultTitle && (
+              <span
+                className="inline-flex items-center gap-1 text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-lg text-[11px] max-w-[180px] truncate"
+                title={task.okr.keyResultTitle}
+              >
+                <Target className="w-3 h-3 text-emerald-400" />
+                <span className="truncate">KR: {task.okr.keyResultTitle}</span>
               </span>
             )}
 

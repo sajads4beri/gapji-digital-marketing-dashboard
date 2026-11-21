@@ -287,6 +287,18 @@ export class MockUserService implements IUserService {
   }
 
   /**
+   * بروزرسانی ماتریس دسترسی
+   */
+  async updateAccessMatrix(matrix: Record<string, Record<string, boolean>>): Promise<RoleAccessMatrix> {
+    await this.simulateDelay();
+    return {
+      roles: [...USER_ROLES],
+      operations: [...MOCK_OPERATIONS],
+      matrix: matrix as any,
+    };
+  }
+
+  /**
    * دعوت کاربر جدید با نقش معین
    */
   async inviteUser(input: InviteUserInput): Promise<UserItem> {

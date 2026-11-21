@@ -4,6 +4,14 @@ import {
   UpdateCampaignInput,
   CampaignFilters,
   CampaignStats,
+  CampaignFunnelResponse,
+  CampaignStageLead,
+  CampaignAllOkrResponse,
+  CampaignStageOkrResponse,
+  FunnelKeyResult,
+  CreateKeyResultInput,
+  UpdateKeyResultInput,
+  CreateOkrTaskInput,
 } from '../types';
 
 /**
@@ -31,4 +39,50 @@ export interface ICampaignService {
 
   /** دریافت خلاصه آمارهای داشبورد محاسبه‌شده بر مبنای کمپین‌های موجود (با پشتیبانی از فیلترهای فعال) */
   getStats(filters?: CampaignFilters): Promise<CampaignStats>;
+
+  /** دریافت قیف فروش و مراحل تبدیل سرنخ‌های کمپین */
+  getFunnel(id: string): Promise<CampaignFunnelResponse>;
+
+  /** دریافت لیست لیدهای یک مرحله خاص از قیف کمپین با امکان جستجو */
+  getLeadsByStage(
+    id: string,
+    params?: { statusKey?: string; statusConfigId?: string; search?: string },
+  ): Promise<CampaignStageLead[]>;
+
+  /** دریافت نمای کلی و تمام اهداف و نتایج کلیدی قیف فروش کمپین */
+  getFunnelAllOkr(campaignId: string): Promise<CampaignAllOkrResponse>;
+
+  /** دریافت OKR یک مرحله خاص از قیف */
+  getStageOkr(campaignId: string, stageKey: string): Promise<CampaignStageOkrResponse>;
+
+  /** ثبت یا ویرایش عنوان و توضیحات هدف مرحله */
+  upsertStageObjective(
+    campaignId: string,
+    stageKey: string,
+    data: { title: string; description?: string },
+  ): Promise<any>;
+
+  /** ایجاد نتیجه کلیدی جدید در یک مرحله */
+  createKeyResult(
+    campaignId: string,
+    stageKey: string,
+    data: CreateKeyResultInput,
+  ): Promise<FunnelKeyResult>;
+
+  /** ویرایش نتیجه کلیدی */
+  updateKeyResult(
+    campaignId: string,
+    krId: string,
+    data: UpdateKeyResultInput,
+  ): Promise<FunnelKeyResult>;
+
+  /** حذف نتیجه کلیدی */
+  deleteKeyResult(campaignId: string, krId: string): Promise<{ success: boolean }>;
+
+  /** تعریف تسک جدید متصل به نتیجه کلیدی */
+  createTaskUnderKeyResult(
+    campaignId: string,
+    krId: string,
+    data: CreateOkrTaskInput,
+  ): Promise<any>;
 }

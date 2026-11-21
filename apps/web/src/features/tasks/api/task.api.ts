@@ -68,6 +68,12 @@ export class RealTaskService implements ITaskService {
       if (filters?.search && filters.search.trim()) {
         params.search = filters.search.trim();
       }
+      if (filters?.funnelStageKey) {
+        params.funnelStageKey = filters.funnelStageKey;
+      }
+      if (filters?.campaignId) {
+        params.campaignId = filters.campaignId;
+      }
 
       const { data } = await api.get<Task[]>('/tasks', { params });
       return data;

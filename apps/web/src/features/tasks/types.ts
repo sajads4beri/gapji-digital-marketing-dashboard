@@ -118,6 +118,18 @@ export interface Task {
   status: StoredTaskStatus; // فقط وضعیت‌های ذخیره‌پذیر
   relatedTo?: TaskRelatedTo;
   sop?: TaskSop;
+  okr?: {
+    keyResultId: string;
+    keyResultTitle: string;
+    currentValue?: number;
+    targetValue?: number;
+    unit?: string;
+    objectiveId?: string;
+    objectiveTitle?: string;
+    stageKey?: string;
+    campaignId?: string;
+    campaignName?: string;
+  };
   subtasks: SubTask[];
   comments: TaskComment[];
   history: TaskHistoryEvent[];
@@ -203,6 +215,8 @@ export interface TaskFilters {
   relatedId?: string;
   includeArchived?: boolean; // پیش‌فرض: false
   search?: string; // جستجو در عنوان و توضیحات
+  funnelStageKey?: string; // فیلتر مرحله قیف فروش
+  campaignId?: string; // فیلتر شناسه کمپین
 }
 
 /**

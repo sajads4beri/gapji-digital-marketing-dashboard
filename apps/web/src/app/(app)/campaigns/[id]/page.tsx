@@ -11,6 +11,7 @@ import { StatusBadge } from '@/components/common/status-badge';
 import { EmptyState } from '@/components/common/empty-state';
 import { useToast } from '@/components/common';
 import { Breadcrumb } from '@/components/layout/breadcrumb';
+import { CampaignSalesFunnel } from '@/features/campaigns/components';
 import {
   ArrowRight,
   Calendar,
@@ -267,7 +268,13 @@ export default function CampaignDetailsPage() {
           </div>
         </div>
 
-        {/* ۲. کارت اطلاعات پایه و زمان‌بندی */}
+        {/* ۲. قیف فروش و پایپ‌لاین سرنخ‌های ورودی این کمپین */}
+        <CampaignSalesFunnel
+          campaignId={campaign.id}
+          campaignName={campaign.name}
+        />
+
+        {/* ۳. کارت اطلاعات پایه و زمان‌بندی */}
         <div className="bg-[#111D2E]/80 backdrop-blur-md rounded-3xl border border-[#1F2E45] p-6 shadow-xl space-y-4">
           <div className="flex items-center gap-2 pb-3 border-b border-[#1F2E45] font-bold text-slate-100 text-sm font-display">
             <Calendar size={18} className="text-[#719BDF]" />

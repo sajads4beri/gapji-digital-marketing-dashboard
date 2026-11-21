@@ -701,8 +701,8 @@ export class UsersService {
   /**
    * ماتریس رسمی سطوح دسترسی نقش‌های شش‌گانه (منطبق بر صفحه ۲۳ سند محصول)
    */
-  getAccessMatrix() {
-    return {
+  async getAccessMatrix(currentUser?: CurrentUserPayload) {
+    const base = {
       roles: [
         Role.admin,
         Role.marketing_manager,
@@ -824,5 +824,70 @@ export class UsersService {
         },
       },
     };
+
+    if (currentUser?.organizationId) {
+      try {
+        const customTaxonomy = await this.prisma.organizationTaxonomy.findFirst({
+          where: {
+            organizationId: currentUser.organizationId,
+            taxonomyType: 'permissions_matrix',
+            key: 'custom_matrix',
+          },
+        });
+        if (customTaxonomy && customTaxonomy.label) {
+          const parsed = JSON.parse(customTaxonomy.label);
+          base.matrix = {
+            ...base.matrix,
+            ...parsed,
+          };
+        }
+      } catch (e) {
+        // بازگشت به ماتریس پیش‌فرض در صورت خطای پارس
+      }
+    }
+
+    return base;
+  }
+
+  /**
+   * بروزرسانی و ذخیره ماتریس دسترسی سازمان (ویژه ادمین)
+   */
+  async updateAccessMatrix(
+    dto: { matrix: Record<string, Record<string, boolean>> },
+    currentUser: CurrentUserPayload,
+  ) {
+    this.assertAdminAccess(currentUser);
+    const orgId = currentUser.organizationId || DEFAULT_ORGANIZATION_ID;
+
+    // ادمین نمی‌تواند دسترسی مدیریت کاربران یا تنظیمات خود را لغو کند
+    if (dto.matrix?.admin) {
+      dto.matrix.admin.users_manage = true;
+      dto.matrix.admin.settings_manage = true;
+    }
+
+    const jsonString = JSON.stringify(dto.matrix);
+
+    await this.prisma.organizationTaxonomy.upsert({
+      where: {
+        organizationId_taxonomyType_key: {
+          organizationId: orgId,
+          taxonomyType: 'permissions_matrix',
+          key: 'custom_matrix',
+        },
+      },
+      update: {
+        label: jsonString,
+        isActive: true,
+      },
+      create: {
+        organizationId: orgId,
+        taxonomyType: 'permissions_matrix',
+        key: 'custom_matrix',
+        label: jsonString,
+        isSystem: true,
+      },
+    });
+
+    return this.getAccessMatrix(currentUser);
   }
 }

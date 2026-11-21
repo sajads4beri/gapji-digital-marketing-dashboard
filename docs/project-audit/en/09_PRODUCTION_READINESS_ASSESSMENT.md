@@ -1,86 +1,119 @@
-# 09 — PRODUCTION READINESS & INFRASTRUCTURE ASSESSMENT
-## Operational Readiness, DevOps Topology, and Production Gap Analysis
+# 09 — Production Readiness Assessment
+## Gapji Digital Marketing Platform Deep Audit
 
 ---
 
-## 1. PRODUCTION READINESS SCORECARD
+## 1. Overall Production Readiness Score: 68 / 100
 
+```mermaid
+pie title Production Readiness Breakdown (Score: 68/100)
+    "Architecture & Security (25/25)" : 25
+    "Data Layer & Migrations (20/20)" : 20
+    "Application Code Quality (15/20)" : 15
+    "DevOps & Containerization (5/15)" : 5
+    "Observability & Monitoring (3/10)" : 3
+    "CI/CD & Automated Testing (0/10)" : 0
 ```
-+-------------------------------------------------------------------------------+
-|                       PRODUCTION READINESS AUDIT SCORES                       |
-+------------------------------------+---------------+--------------------------+
-| Category                           | Score (0-100) | Current Status           |
-+------------------------------------+---------------+--------------------------+
-| Backend & API Integration          | 30 / 100      | ⚠️ Mock layer active     |
-| Database & Schema Migrations       | 40 / 100      | ⚠️ 48 models unmerged    |
-| Authentication & Multi-Tenancy     | 65 / 100      | ⚠️ Frontend-only fallback|
-| Error Handling & Fault Tolerance   | 50 / 100      | ⚠️ Ad-hoc console logs   |
-| Logging & Observability            | 15 / 100      | 🛑 Missing Sentry/Pino   |
-| Performance & Caching              | 35 / 100      | ⚠️ No Redis / QueryCache |
-| File Storage & Ingestion Pipeline  | 25 / 100      | ⚠️ Client-side CSV parse |
-| Containerization & Deployment      | 45 / 100      | ⚠️ Local docker-compose  |
-| CI/CD & Automated Quality Gates    | 20 / 100      | 🛑 No GitHub Actions CI  |
-| Security & Secret Management       | 60 / 100      | ⚠️ Default .env passwords|
-+------------------------------------+---------------+--------------------------+
-| OVERALL PRODUCTION READINESS SCORE | 38.5% (NOT READY FOR PRODUCTION)         |
-+------------------------------------+---------------+--------------------------+
+
+While the core application architecture, database schema, authentication security, and frontend design systems are of **exceptional enterprise quality**, the project currently exhibits critical deficits in **DevOps infrastructure, CI/CD automation, and production observability** that prevent immediate live deployment.
+
+---
+
+## 2. Production Dimension Evaluation Matrix
+
+| Production Dimension | Current State | Target Production Requirement | Gap Severity | Action Required in Roadmap |
+| :--- | :--- | :--- | :---: | :--- |
+| **Containerization** | `docker-compose.yml` for local Postgres only. No app container. | Multi-stage Dockerfiles for NestJS and Next.js with non-root users. | `High` | Create `Dockerfile.api` and `Dockerfile.web` (`PHASE-010`). |
+| **Database Migrations** | 6 sequential migrations in Prisma; local Postgres verified. | Automated migration runner in deployment pipeline (`prisma migrate deploy`). | `Low` | Add deployment migration step in CI/CD pipeline (`PHASE-010`). |
+| **Connection Pooling** | Direct Prisma connection to PostgreSQL. | Connection pooler (PgBouncer or Supabase pooler) for high concurrent traffic. | `Medium` | Configure connection pooling URL in production `.env` (`PHASE-010`). |
+| **Database Indexing** | Primary keys and explicit unique constraints indexed. | Composite indexes on `[organizationId, createdAt]`, `[assignedToId, status]`. | `Medium` | Add composite indexes to Prisma schema for high-volume queries (`PHASE-010`). |
+| **Disaster Recovery** | Manual PostgreSQL dumps. No automated backup configuration. | Automated daily WAL-E / pg_dump snapshots to S3/Cloud Storage with retention. | `High` | Draft backup script and recovery runbook (`PHASE-010`). |
+| **Application Logging** | Console logging (`console.log`, default NestJS Logger). | Structured JSON logging (Pino/Winston) with correlation IDs for distributed tracing. | `Medium` | Implement `PinoLogger` middleware in NestJS (`PHASE-010`). |
+| **Metrics & Monitoring** | None. | Prometheus metrics endpoint (`/metrics`) and Sentry error tracking in API and Web. | `Medium` | Add Prometheus metrics and Sentry SDK (`PHASE-010`). |
+| **Health Checks** | Standard NestJS bootstrap. No dedicated health endpoint. | `@nestjs/terminus` health checks for database, memory, and disk at `/health`. | `Medium` | Add HealthModule with Prisma ping check (`PHASE-010`). |
+| **Secret Management** | Local `.env` files with sample defaults. | Vault / AWS Secrets Manager / Kubernetes Sealed Secrets in production. | `High` | Establish production secrets configuration runbook (`PHASE-010`). |
+| **CI/CD Pipeline** | None. Manual git pushes. | GitHub Actions pipeline running lint, typecheck, unit tests, build, and Docker publish. | `High` | Add `.github/workflows/ci.yml` (`PHASE-010`). |
+| **Security Headers** | Basic Express defaults. | Helmet security headers (CSP, HSTS, X-Content-Type-Options, Frameguard). | `Medium` | Add `helmet()` middleware in `main.ts` (`PHASE-010`). |
+| **Rate Limiting** | None. | IP-based rate limiting on `/api/auth/login` and `/api/auth/refresh`. | `Medium` | Add `@nestjs/throttler` in `app.module.ts` (`PHASE-010`). |
+
+---
+
+## 3. Database Integrity & Indexing Optimization Plan
+
+To support enterprise workloads (hundreds of thousands of leads and costs), the following composite database indexes are recommended for `schema.prisma`:
+
+```prisma
+// Recommended additions to apps/api/prisma/schema.prisma:
+
+model Lead {
+  // Existing fields...
+  @@index([organizationId, status])
+  @@index([organizationId, assignedToId])
+  @@index([organizationId, createdAt(sort: Desc)])
+}
+
+model Cost {
+  // Existing fields...
+  @@index([organizationId, campaignId])
+  @@index([organizationId, platformId])
+  @@index([organizationId, date(sort: Desc)])
+}
+
+model Task {
+  // Existing fields...
+  @@index([organizationId, assigneeId, status])
+  @@index([organizationId, dueDate(sort: Asc)])
+}
 ```
 
 ---
 
-## 2. PRODUCTION PREREQUISITES GAP ANALYSIS
+## 4. Production Deployment Topology
 
-### 2.1 Database & Schema Migration Management
-- **Current State**:
-  - `apps/api` in the active worktree uses TypeORM with `synchronize: true` configured in `app.module.ts`. This is hazardous for production because entity changes can silently drop production columns.
-  - The backend branch (`F:/marketing-platform-backend`) uses **Prisma ORM** with a comprehensive 48-model schema.
-- **Production Requirement**:
-  - Disable TypeORM `synchronize: true` completely.
-  - Standardize on Prisma ORM across the entire monorepo.
-  - Enforce versioned, immutable SQL migrations via `pnpm exec prisma migrate deploy` in the deployment pipeline.
+The recommended production deployment topology separates stateless application containers from managed persistence:
 
-### 2.2 Background Job Queueing (BullMQ & Redis)
-- **Current State**:
-  - Data import (Page 10) parses files in the client browser. If a user uploads a 50,000-row lead CSV, the browser thread freezes, and the request risks timing out.
-  - SMS campaign dispatching (Page 17) lacks an asynchronous queue.
-- **Production Requirement**:
-  - Deploy Redis container.
-  - Integrate **BullMQ** into NestJS (`@nestjs/bullmq`).
-  - Offload CSV/Excel parsing, UTM generation, and webhook ingestion to background workers.
+```mermaid
+graph TB
+    subgraph Ingress["Edge & Load Balancing"]
+        DNS["Domain & Cloudflare WAF"]
+        Nginx["Reverse Proxy / Nginx / Traefik (SSL Termination)"]
+    end
 
-### 2.3 Centralized Logging & Telemetry
-- **Current State**:
-  - Both frontend and backend use `console.log` and `console.error`. Logs lack correlation IDs, tenant contexts, and stack trace metadata.
-- **Production Requirement**:
-  - Implement **Pino** or **Winston** structured JSON logging in NestJS with request correlation IDs (`x-request-id`).
-  - Integrate **Sentry** SDK for frontend client-side error capturing and backend exception tracking.
-  - Expose `/metrics` endpoint using `prom-client` for Prometheus/Grafana infrastructure monitoring.
+    subgraph AppCluster["Stateless Container Cluster (Docker / Kubernetes)"]
+        NextJS["Next.js SSR Pods (Port 3000)"]
+        NestJS["NestJS API Pods (Port 3001)"]
+    end
 
-### 2.4 File Uploads & Object Storage
-- **Current State**:
-  - File imports use browser memory.
-  - SOP attachments and Webinar slides have no persistent object store.
-- **Production Requirement**:
-  - Deploy **MinIO** (S3-compatible) container or AWS S3 adapter.
-  - Generate pre-signed upload URLs for secure, direct file uploads from the client.
+    subgraph ManagedData["Managed Persistent Infrastructure"]
+        PgBouncer["PgBouncer Connection Pooler"]
+        PostgresPrimary["PostgreSQL 16 Primary Database"]
+        PostgresReplica["PostgreSQL Read Replica"]
+        Redis["Redis Cache & Token Revocation Store"]
+        S3["Object Storage (CSV Imports, Exports, Logos)"]
+    end
 
-### 2.5 Containerization & Multi-Stage Builds
-- **Current State**:
-  - `docker-compose.yml` runs only PostgreSQL.
-  - There are no Dockerfiles for `apps/web` or `apps/api`.
-- **Production Requirement**:
-  - Create optimized multi-stage Dockerfiles:
-    - `apps/web/Dockerfile`: Next.js standalone output with unprivileged `nodejs` user.
-    - `apps/api/Dockerfile`: Node alpine container compiling NestJS TypeScript.
-  - Production `docker-compose.prod.yml` running Next.js, NestJS, PostgreSQL 15, Redis 7, and Nginx reverse proxy with SSL termination.
+    DNS --> Nginx
+    Nginx --> NextJS
+    Nginx --> NestJS
+    NextJS --> NestJS
+    NestJS --> PgBouncer
+    PgBouncer --> PostgresPrimary
+    PostgresPrimary -.-> PostgresReplica
+    NestJS --> Redis
+    NestJS --> S3
+```
 
-### 2.6 Automated CI/CD Pipeline
-- **Current State**:
-  - No `.github/workflows/` directory exists. Commits are not automatically tested or linted.
-- **Production Requirement**:
-  - Setup GitHub Actions workflow:
-    1. Lint check (`pnpm lint`).
-    2. Type check (`pnpm exec tsc --noEmit`).
-    3. Automated test suite execution (`pnpm test`).
-    4. Production build verification (`pnpm build`).
-    5. Docker image build and container registry push.
+---
+
+## 5. Production Readiness Sign-Off Checklist
+
+Before the Gapji Digital Marketing Platform is certified for production traffic, the following operational requirements must be satisfied:
+
+- [ ] All 10 Master Completion Roadmap phases completed and verified.
+- [ ] Multi-stage production Docker images built and scanned for CVE vulnerabilities.
+- [ ] Production `.env` configured with high-entropy cryptographic keys (> 64 characters).
+- [ ] Database automated snapshot backups verified via test restore drill.
+- [ ] Rate limiting active on authentication endpoints.
+- [ ] Sentry error reporting active on both frontend and backend.
+- [ ] Zero build warnings or TypeScript compilation errors during `pnpm build`.
+- [ ] SSL/TLS grade A+ verified via SSL Labs.

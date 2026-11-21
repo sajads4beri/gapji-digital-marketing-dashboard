@@ -106,7 +106,27 @@ export class TasksService {
         ? {
             type: task.relatedType,
             id: task.relatedId,
-            title: task.relatedTitle || undefined,
+            title: task.relatedTitle || task.okrKeyResult?.objective?.campaign?.name || undefined,
+          }
+        : undefined,
+      okr: task.okrKeyResult
+        ? {
+            keyResultId: task.okrKeyResult.id,
+            keyResultTitle: task.okrKeyResult.title,
+            currentValue:
+              task.okrKeyResult.currentValue !== undefined && task.okrKeyResult.currentValue !== null
+                ? Number(task.okrKeyResult.currentValue)
+                : undefined,
+            targetValue:
+              task.okrKeyResult.targetValue !== undefined && task.okrKeyResult.targetValue !== null
+                ? Number(task.okrKeyResult.targetValue)
+                : undefined,
+            unit: task.okrKeyResult.unit || undefined,
+            objectiveId: task.okrKeyResult.objective?.id,
+            objectiveTitle: task.okrKeyResult.objective?.title,
+            stageKey: task.okrKeyResult.objective?.stageKey,
+            campaignId: task.okrKeyResult.objective?.campaignId,
+            campaignName: task.okrKeyResult.objective?.campaign?.name,
           }
         : undefined,
       sop: task.sop
@@ -208,6 +228,15 @@ export class TasksService {
       where.relatedId = query.relatedId;
     }
 
+    // فیلتر مرحله قیف فروش (OKR)
+    if ((query as any).funnelStageKey) {
+      where.okrKeyResult = {
+        objective: {
+          stageKey: (query as any).funnelStageKey,
+        },
+      };
+    }
+
     // جستجوی متنی
     if (query.search && query.search.trim()) {
       const searchTerm = query.search.trim();
@@ -271,6 +300,26 @@ export class TasksService {
                 id: true,
                 email: true,
                 fullName: true,
+              },
+            },
+          },
+        },
+        okrKeyResult: {
+          select: {
+            id: true,
+            title: true,
+            currentValue: true,
+            targetValue: true,
+            unit: true,
+            objective: {
+              select: {
+                id: true,
+                title: true,
+                stageKey: true,
+                campaignId: true,
+                campaign: {
+                  select: { id: true, name: true },
+                },
               },
             },
           },
@@ -382,6 +431,26 @@ export class TasksService {
                 id: true,
                 email: true,
                 fullName: true,
+              },
+            },
+          },
+        },
+        okrKeyResult: {
+          select: {
+            id: true,
+            title: true,
+            currentValue: true,
+            targetValue: true,
+            unit: true,
+            objective: {
+              select: {
+                id: true,
+                title: true,
+                stageKey: true,
+                campaignId: true,
+                campaign: {
+                  select: { id: true, name: true },
+                },
               },
             },
           },
@@ -575,6 +644,26 @@ export class TasksService {
           orderBy: { createdAt: 'desc' },
           include: {
             authorUser: true,
+          },
+        },
+        okrKeyResult: {
+          select: {
+            id: true,
+            title: true,
+            currentValue: true,
+            targetValue: true,
+            unit: true,
+            objective: {
+              select: {
+                id: true,
+                title: true,
+                stageKey: true,
+                campaignId: true,
+                campaign: {
+                  select: { id: true, name: true },
+                },
+              },
+            },
           },
         },
       },

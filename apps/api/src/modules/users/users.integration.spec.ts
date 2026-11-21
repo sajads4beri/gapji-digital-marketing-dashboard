@@ -113,7 +113,7 @@ async function runTests() {
   });
 
   await test('1.5: Access Matrix returns complete 6-role permission mapping', async () => {
-    const matrix = usersService.getAccessMatrix();
+    const matrix = await usersService.getAccessMatrix();
     assert.strictEqual(matrix.roles.length, 6);
     assert.strictEqual(matrix.matrix.admin.users_manage, true);
     assert.strictEqual(matrix.matrix.sales_agent.users_manage, false);

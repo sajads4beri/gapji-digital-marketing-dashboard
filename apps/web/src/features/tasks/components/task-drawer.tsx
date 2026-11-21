@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import {
   Calendar,
   Check,
@@ -17,7 +18,19 @@ import {
   MessageSquare,
   History,
   RotateCcw,
+  Target,
+  Filter,
+  ArrowUpRight,
 } from 'lucide-react';
+
+const FUNNEL_STAGE_LABELS: Record<string, string> = {
+  awareness: 'آگاهی',
+  interest: 'علاقه‌مندی',
+  consideration: 'بررسی و تعامل',
+  intent: 'قصد خرید',
+  evaluation: 'ارزیابی نهایی',
+  purchase: 'خرید موفق',
+};
 import { Drawer } from '@/components/common/drawer';
 import { ConfirmModal } from '@/components/common/confirm-modal';
 import { Timeline } from '@/components/common/timeline';
@@ -272,7 +285,10 @@ export function TaskDrawer({
   const isDone = task.status === 'done';
   const isOverdue = isTaskOverdue(task);
   const overdueDays = isOverdue ? getOverdueDays(task) : 0;
-  const timelineEvents = mapTaskHistoryToTimelineEvents(task.history);
+  const safeSubtasks = Array.isArray(task.subtasks) ? task.subtasks : [];
+  const safeComments = Array.isArray(task.comments) ? task.comments : [];
+  const safeHistory = Array.isArray(task.history) ? task.history : [];
+  const timelineEvents = mapTaskHistoryToTimelineEvents(safeHistory);
 
   return (
     <>
@@ -343,6 +359,23 @@ export function TaskDrawer({
                     <Video className="w-3 h-3 text-purple-500" />
                   )}
                   <span>{task.relatedTo.title || task.relatedTo.id}</span>
+                </span>
+              )}
+
+              {task.okr?.stageKey && (
+                <span className="inline-flex items-center gap-1 text-xs text-purple-300 bg-purple-500/15 border border-purple-500/30 px-2.5 py-0.5 rounded-full">
+                  <Filter className="w-3 h-3 text-purple-400" />
+                  <span>قیف: {FUNNEL_STAGE_LABELS[task.okr.stageKey] || task.okr.stageKey}</span>
+                </span>
+              )}
+
+              {task.okr?.keyResultTitle && (
+                <span
+                  className="inline-flex items-center gap-1 text-xs text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 rounded-full max-w-[200px] truncate"
+                  title={task.okr.keyResultTitle}
+                >
+                  <Target className="w-3 h-3 text-emerald-400" />
+                  <span className="truncate">KR: {task.okr.keyResultTitle}</span>
                 </span>
               )}
 
@@ -463,6 +496,62 @@ export function TaskDrawer({
                 />
               </div>
             </div>
+
+            {/* جایگاه تسک در قیف فروش و OKR کمپین */}
+            {task.okr && (
+              <div className="bg-[#0B1423] border border-blue-500/30 rounded-xl p-3.5 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-bold text-blue-400">
+                    <Target className="w-4 h-4 text-blue-400" />
+                    <span>انتساب به OKR و قیف فروش کمپین</span>
+                  </div>
+                  {task.okr.campaignId && (
+                    <Link
+                      href={`/campaigns/${task.okr.campaignId}`}
+                      className="text-[11px] text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
+                    >
+                      <span>مشاهده در صفحه کمپین</span>
+                      <ArrowUpRight className="w-3 h-3" />
+                    </Link>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                  <div className="bg-[#111D2E] p-2.5 rounded-lg border border-[#1F2E45]">
+                    <span className="text-[10px] text-slate-400 block mb-0.5">کمپین:</span>
+                    <span className="font-semibold text-slate-200 truncate block">
+                      {task.okr.campaignName || task.relatedTo?.title || 'کمپین'}
+                    </span>
+                  </div>
+
+                  <div className="bg-[#111D2E] p-2.5 rounded-lg border border-[#1F2E45]">
+                    <span className="text-[10px] text-slate-400 block mb-0.5">مرحله قیف فروش:</span>
+                    <span className="font-semibold text-purple-300 truncate block">
+                      {FUNNEL_STAGE_LABELS[task.okr.stageKey || ''] || task.okr.stageKey || '—'}
+                    </span>
+                  </div>
+
+                  <div className="bg-[#111D2E] p-2.5 rounded-lg border border-[#1F2E45]">
+                    <span className="text-[10px] text-slate-400 block mb-0.5">نتیجه کلیدی (KR):</span>
+                    <span
+                      className="font-semibold text-emerald-300 truncate block"
+                      title={task.okr.keyResultTitle}
+                    >
+                      {task.okr.keyResultTitle || '—'}
+                    </span>
+                  </div>
+                </div>
+
+                {task.okr.objectiveTitle && (
+                  <div className="text-[11px] text-slate-400 pt-2 border-t border-[#1F2E45] flex items-center gap-1.5">
+                    <span className="text-slate-500 font-semibold">هدف مرتبط (O):</span>
+                    <span className="text-slate-200 font-medium truncate">
+                      {task.okr.objectiveTitle}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* تب‌های بخش‌های تکمیلی: زیرتسک‌ها، دیدگاه‌ها، تاریخچه */}
@@ -478,7 +567,7 @@ export function TaskDrawer({
                 }`}
               >
                 <CheckSquare className="w-3.5 h-3.5" />
-                <span>زیرتسک‌ها ({task.subtasks.length})</span>
+                <span>زیرتسک‌ها ({safeSubtasks.length})</span>
               </button>
 
               <button
@@ -491,7 +580,7 @@ export function TaskDrawer({
                 }`}
               >
                 <MessageSquare className="w-3.5 h-3.5" />
-                <span>دیدگاه‌ها ({task.comments.length})</span>
+                <span>دیدگاه‌ها ({safeComments.length})</span>
               </button>
 
               <button
@@ -504,7 +593,7 @@ export function TaskDrawer({
                 }`}
               >
                 <History className="w-3.5 h-3.5" />
-                <span>تاریخچه تغییرات ({task.history.length})</span>
+                <span>تاریخچه تغییرات ({safeHistory.length})</span>
               </button>
             </div>
 
@@ -530,13 +619,13 @@ export function TaskDrawer({
                   </button>
                 </form>
 
-                {task.subtasks.length === 0 ? (
+                {safeSubtasks.length === 0 ? (
                   <p className="text-xs text-slate-500 py-3 text-center">
                     هیچ زیرتسکی ثبت نشده است.
                   </p>
                 ) : (
                   <div className="space-y-1.5">
-                    {task.subtasks.map((sub) => (
+                    {safeSubtasks.map((sub) => (
                       <div
                         key={sub.id}
                         onClick={() => handleToggleSubtask(sub.id, sub.completed)}
@@ -589,13 +678,13 @@ export function TaskDrawer({
                   </div>
                 </form>
 
-                {task.comments.length === 0 ? (
+                {safeComments.length === 0 ? (
                   <p className="text-xs text-slate-500 py-3 text-center">
                     هنوز دیدگاهی برای این تسک ثبت نشده است.
                   </p>
                 ) : (
                   <div className="space-y-2.5">
-                    {task.comments.map((comm) => (
+                    {safeComments.map((comm) => (
                       <div
                         key={comm.id}
                         className="p-3 bg-[#18263A] border border-[#1F2E45] rounded-xl space-y-1.5"

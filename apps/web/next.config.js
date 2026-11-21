@@ -21,7 +21,15 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/:path*`,
+        destination: `${process.env.INTERNAL_API_URL || 'http://localhost:3001/api'}/:path*`,
+      },
+      {
+        source: '/performance/campaigns',
+        destination: '/campaigns',
+      },
+      {
+        source: '/performance/campaigns/:path*',
+        destination: '/campaigns/:path*',
       },
       {
         source: '/audiences',

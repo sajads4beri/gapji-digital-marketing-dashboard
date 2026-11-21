@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   ExtendedCampaign,
   CampaignStatusType,
@@ -43,6 +44,7 @@ export function CampaignsTable({
   onUpdateStatus,
   onRefresh,
 }: CampaignsTableProps) {
+  const router = useRouter();
   const { toast } = useToast();
 
   // وضعیت‌های مربوط به حذف تکی
@@ -408,6 +410,7 @@ export function CampaignsTable({
         columns={columns}
         keyExtractor={(item) => item.id}
         loading={loading}
+        onRowClick={(row) => router.push(`/campaigns/${row.id}`)}
         enableRowSelection
         selectedRowIds={selectedRowIds}
         onRowSelectionChange={setSelectedRowIds}

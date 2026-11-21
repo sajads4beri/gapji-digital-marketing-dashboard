@@ -211,4 +211,149 @@ export interface CampaignFilters {
   to?: string;
 }
 
+/**
+ * ساختار هر مرحله از قیف فروش کمپین
+ */
+export interface CampaignFunnelStage {
+  id: string;
+  key: string;
+  label: string;
+  group: 'open' | 'won' | 'lost';
+  color: string;
+  sortOrder: number;
+  count: number;
+  percentageOfTotal: number;
+  conversionRate: number;
+}
+
+/**
+ * پاسخ کامل اندپوینت آمار قیف فروش کمپین
+ */
+export interface CampaignFunnelResponse {
+  campaignId: string;
+  campaignName: string;
+  totalLeads: number;
+  stages: CampaignFunnelStage[];
+}
+
+/**
+ * ساختار هر سرنخ در پنجره کشویی لیدهای یک مرحله از قیف
+ */
+export interface CampaignStageLead {
+  id: string;
+  fullName: string;
+  mobile: string;
+  email?: string | null;
+  statusKey: string;
+  statusLabel: string;
+  statusColor: string;
+  assignedTo?: {
+    id: string;
+    fullName: string;
+    email: string;
+  } | null;
+  createdAt: string;
+}
+
+/**
+ * تسک مرتبط با OKR یک مرحله از قیف
+ */
+export interface FunnelStageTask {
+  id: string;
+  title: string;
+  status: 'todo' | 'in_progress' | 'waiting' | 'done';
+  priority: 'urgent' | 'high' | 'medium' | 'low';
+  dueDate?: string | null;
+  assignee?: {
+    id: string;
+    fullName?: string;
+    email: string;
+  } | null;
+}
+
+/**
+ * ساختار نتیجه کلیدی (KR) در قیف فروش
+ */
+export interface FunnelKeyResult {
+  id: string;
+  objectiveId?: string;
+  stageKey?: string;
+  title: string;
+  currentValue: number;
+  targetValue: number;
+  unit: string;
+  progressPercent: number;
+  tasksCount?: number;
+  completedTasksCount?: number;
+  tasks: FunnelStageTask[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * ساختار هدف (Objective) مرحله قیف
+ */
+export interface FunnelObjective {
+  id: string;
+  stageKey: string;
+  title: string;
+  description?: string | null;
+  keyResults: FunnelKeyResult[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * پاسخ OKR برای یک مرحله خاص
+ */
+export interface CampaignStageOkrResponse {
+  campaignId: string;
+  campaignName: string;
+  stageKey: string;
+  objective: {
+    id: string;
+    title: string;
+    description?: string | null;
+    createdAt?: string;
+    updatedAt?: string;
+  } | null;
+  keyResults: FunnelKeyResult[];
+}
+
+/**
+ * پاسخ نمای جامع OKR قیف فروش کمپین
+ */
+export interface CampaignAllOkrResponse {
+  campaignId: string;
+  campaignName: string;
+  totalObjectives: number;
+  totalKeyResults: number;
+  averageProgress: number;
+  totalTasks: number;
+  completedTasks: number;
+  objectives: FunnelObjective[];
+}
+
+export interface CreateKeyResultInput {
+  title: string;
+  targetValue: number;
+  currentValue?: number;
+  unit?: string;
+}
+
+export interface UpdateKeyResultInput {
+  title?: string;
+  targetValue?: number;
+  currentValue?: number;
+  unit?: string;
+}
+
+export interface CreateOkrTaskInput {
+  title: string;
+  description?: string;
+  priority?: 'urgent' | 'high' | 'medium' | 'low';
+  dueDate?: string;
+  assigneeId?: string;
+}
+
 export type { Campaign, CampaignStats, CampaignStatus };

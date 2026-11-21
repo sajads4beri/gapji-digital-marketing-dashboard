@@ -6,6 +6,14 @@ import type {
   CampaignFilters,
   CampaignStats,
   CampaignStatusType,
+  CampaignFunnelResponse,
+  CampaignStageLead,
+  CampaignAllOkrResponse,
+  CampaignStageOkrResponse,
+  FunnelKeyResult,
+  CreateKeyResultInput,
+  UpdateKeyResultInput,
+  CreateOkrTaskInput,
 } from '../types';
 import { ICampaignService } from './campaign.contract';
 import axios from 'axios';
@@ -228,5 +236,123 @@ export const campaignApi: ICampaignService = {
         totalConversions: all.reduce((sum, c) => sum + (c.conversions || 0), 0),
       };
     }
+  },
+
+  /**
+   * دریافت قیف فروش و نرخ تبدیل لیدهای کمپین
+   */
+  async getFunnel(id: string): Promise<CampaignFunnelResponse> {
+    checkSimulatedError();
+    const { data } = await api.get<CampaignFunnelResponse>(`/campaigns/${id}/funnel`);
+    return data;
+  },
+
+  /**
+   * دریافت لیست لیدهای یک مرحله خاص از قیف با جستجوی اختیاری
+   */
+  async getLeadsByStage(
+    id: string,
+    params?: { statusKey?: string; statusConfigId?: string; search?: string },
+  ): Promise<CampaignStageLead[]> {
+    checkSimulatedError();
+    const { data } = await api.get<CampaignStageLead[]>(`/campaigns/${id}/leads`, {
+      params,
+    });
+    return data;
+  },
+
+  /**
+   * دریافت نمای کلی و تمام اهداف و نتایج کلیدی قیف فروش کمپین
+   */
+  async getFunnelAllOkr(campaignId: string): Promise<CampaignAllOkrResponse> {
+    checkSimulatedError();
+    const { data } = await api.get<CampaignAllOkrResponse>(`/campaigns/${campaignId}/funnel/okr`);
+    return data;
+  },
+
+  /**
+   * دریافت OKR یک مرحله خاص از قیف
+   */
+  async getStageOkr(campaignId: string, stageKey: string): Promise<CampaignStageOkrResponse> {
+    checkSimulatedError();
+    const { data } = await api.get<CampaignStageOkrResponse>(
+      `/campaigns/${campaignId}/funnel/stages/${stageKey}/okr`,
+    );
+    return data;
+  },
+
+  /**
+   * ثبت یا ویرایش عنوان و توضیحات هدف مرحله
+   */
+  async upsertStageObjective(
+    campaignId: string,
+    stageKey: string,
+    payload: { title: string; description?: string },
+  ): Promise<any> {
+    checkSimulatedError();
+    const { data } = await api.put(
+      `/campaigns/${campaignId}/funnel/stages/${stageKey}/objective`,
+      payload,
+    );
+    return data;
+  },
+
+  /**
+   * ایجاد نتیجه کلیدی جدید در یک مرحله
+   */
+  async createKeyResult(
+    campaignId: string,
+    stageKey: string,
+    payload: CreateKeyResultInput,
+  ): Promise<FunnelKeyResult> {
+    checkSimulatedError();
+    const { data } = await api.post<FunnelKeyResult>(
+      `/campaigns/${campaignId}/funnel/stages/${stageKey}/key-results`,
+      payload,
+    );
+    return data;
+  },
+
+  /**
+   * ویرایش نتیجه کلیدی
+   */
+  async updateKeyResult(
+    campaignId: string,
+    krId: string,
+    payload: UpdateKeyResultInput,
+  ): Promise<FunnelKeyResult> {
+    checkSimulatedError();
+    const { data } = await api.put<FunnelKeyResult>(
+      `/campaigns/${campaignId}/funnel/key-results/${krId}`,
+      payload,
+    );
+    return data;
+  },
+
+  /**
+   * حذف نتیجه کلیدی
+   */
+  async deleteKeyResult(campaignId: string, krId: string): Promise<{ success: boolean }> {
+    checkSimulatedError();
+    const { data } = await api.delete<{ success: boolean }>(
+      `/campaigns/${campaignId}/funnel/key-results/${krId}`,
+    );
+    return data;
+  },
+
+  /**
+   * تعریف تسک جدید متصل به نتیجه کلیدی
+   */
+  async createTaskUnderKeyResult(
+    campaignId: string,
+    krId: string,
+    payload: CreateOkrTaskInput,
+  ): Promise<any> {
+    checkSimulatedError();
+    const { data } = await api.post(
+      `/campaigns/${campaignId}/funnel/key-results/${krId}/tasks`,
+      payload,
+    );
+    return data;
   },
 };
