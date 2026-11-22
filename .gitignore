@@ -1,87 +1,36 @@
-# ============ Dependencies ============
+# Dependencies
 node_modules/
-.pnp
-.pnp.js
 .pnpm-store/
-jspm_packages/
 
-# ============ Build outputs ============
+# Production builds
 dist/
 build/
-out/
-release/
-*.tsbuildinfo
-next-env.d.ts
-
-# ============ Next.js ============
 .next/
-.vercel/
-.netlify/
-.swc/
+out/
 
-# ============ Testing ============
-coverage/
-.nyc_output/
-*.lcov
-lib-cov/
-
-# ============ Environment & secrets ============
+# Environment variables
 .env
-.env.*
-!.env.example
-*.pem
-*.key
-*.p12
-*.pfx
-id_rsa*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# ============ Databases & local infra ============
-*.db
-*.sqlite
-*.db-journal
-postgres-data/
-pgdata/
-docker-compose.override.yml
-
-# ============ Uploads / runtime data ============
-public/uploads/
-storage/app/public/
-tmp/
-temp/
-*.tmp
-*.bak
-*.swp
-*.swo
-*~
-
-# ============ Logs ============
-logs/
-*.log
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
+*.log
 
-# ============ Caches / tooling ============
-.cache/
-.parcel-cache/
-.turbo/
-.eslintcache
-.stylelintcache
-node-compile-cache/
-
-# ============ IDE / editor ============
+# Editor / IDE
+.vscode/
 .idea/
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-*.sublime-workspace
+*.swp
+*.swo
 
-# ============ OS ============
+# OS files
 .DS_Store
-.Spotlight-V100
-.Trashes
 Thumbs.db
 desktop.ini
 $RECYCLE.BIN/
+scratch/

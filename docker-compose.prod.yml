@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: gapji-prod-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-gapji_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gapji_secure_password}
+      POSTGRES_DB: ${POSTGRES_DB:-gapji_marketing}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - gapji_prod_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gapji_user} -d ${POSTGRES_DB:-gapji_marketing}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gapji-internal
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: gapji-prod-api
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-gapji_user}:${POSTGRES_PASSWORD:-gapji_secure_password}@postgres:5432/${POSTGRES_DB:-gapji_marketing}?schema=public
+      JWT_SECRET: ${JWT_SECRET:-gapji_super_secure_jwt_secret_key_prod_2026}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-1d}
+    ports:
+      - "3001:3001"
+    networks:
+      - gapji-internal
+      - gapji-public
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: gapji-prod-web
+    restart: always
+    depends_on:
+      api:
+        condition: service_started
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+    ports:
+      - "3000:3000"
+    networks:
+      - gapji-public
+
+volumes:
+  gapji_prod_pgdata:
+    name: gapji_prod_pgdata
+
+networks:
+  gapji-internal:
+    internal: true
+  gapji-public:
+    driver: bridge

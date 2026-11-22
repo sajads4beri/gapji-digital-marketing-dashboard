@@ -1,0 +1,1613 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ==============================================================================
+// ENUMS
+// ==============================================================================
+
+/// Approved technical roles for user memberships within organizations (6 approved roles)
+/// Source: docs/PROJECT-DECISIONS.md §3, Product Document p. 23 §27
+enum Role {
+  admin             @map("admin") // مدیر ارشد سازمان / سیستم
+  marketing_manager @map("marketing_manager") // مدیر مارکتینگ
+  campaign_manager  @map("campaign_manager") // کمپین‌چی
+  sales_agent       @map("sales_agent") // کارشناس فروش
+  content_creator   @map("content_creator") // تولید محتوا و وبینار
+  client            @map("client") // کارفرما (فقط خواندنی)
+}
+
+enum TokenStatus {
+  ACTIVE   @map("ACTIVE")
+  CONSUMED @map("CONSUMED")
+  REVOKED  @map("REVOKED")
+  EXPIRED  @map("EXPIRED")
+}
+
+/// Approved organization monetary units
+/// Source: docs/PROJECT-DECISIONS.md §3, Product Document p. 4 §1-2, p. 24 §28
+enum Currency {
+  TOMAN @map("toman") // تومان (Default)
+  RIAL  @map("rial") // ریال
+}
+
+/// Organization membership status
+/// Source: Product Document p. 23 §27
+enum MembershipStatus {
+  active   @map("active") // فعال
+  invited  @map("invited") // دعوت‌شده
+  inactive @map("inactive") // غیرفعال
+}
+
+/// Campaign lifecycle state
+/// Source: Product Document p. 5 §3-2, p. 9 §6
+enum CampaignStatus {
+  draft     @map("draft") // پیش‌نویس
+  planned   @map("planned") // برنامه‌ریزی‌شده
+  active    @map("active") // فعال
+  paused    @map("paused") // متوقف
+  completed @map("completed") // تکمیل‌شده
+  archived  @map("archived") // آرشیوشده
+}
+
+/// Campaign health indicator badge
+/// Source: Product Document p. 5 §3-2, p. 8 §4, p. 9 §6
+enum CampaignHealth {
+  healthy         @map("healthy") // سالم (سبز)
+  needs_attention @map("needs_attention") // نیازمند توجه (زرد)
+  critical        @map("critical") // ضعیف / بحرانی (قرمز)
+}
+
+/// Lead status group for customizable pipeline stages (Audit MAJ-02)
+/// Source: Product Document p. 23 §28 (ستون «گروه»: باز/برنده/بازنده)
+enum LeadStatusGroup {
+  open @map("open") // باز
+  won  @map("won") // برنده (مشتری)
+  lost @map("lost") // بازنده (ردشده)
+}
+
+/// Lead customer journey activity type
+/// Source: Product Document p. 16 §16
+enum LeadActivityType {
+  ad_click      @map("ad_click") // کلیک روی تبلیغ
+  landing_visit @map("landing_visit") // بازدید از لندینگ
+  form_submit   @map("form_submit") // ثبت فرم
+  call          @map("call") // تماس تلفنی
+  note          @map("note") // یادداشت داخلی
+  status_change @map("status_change") // تغییر وضعیت لید
+  assignment    @map("assignment") // ارجاع به کارشناس
+  purchase      @map("purchase") // خرید نهایی
+  rejection     @map("rejection") // رد شدن لید
+}
+
+/// Telephony call log outcome
+/// Source: Product Document p. 16 §17
+enum LeadCallStatus {
+  successful  @map("successful") // موفق
+  no_answer   @map("no_answer") // عدم پاسخگویی
+  busy        @map("busy") // اشغال
+  rescheduled @map("rescheduled") // تعیین زمان مجدد
+}
+
+/// Task execution state
+/// Source: Product Document p. 5 §3-2, p. 18 §19
+enum TaskStatus {
+  todo        @map("todo") // انجام نشده
+  in_progress @map("in_progress") // در حال انجام
+  waiting     @map("waiting") // در انتظار
+  done        @map("done") // انجام شده
+  overdue     @map("overdue") // به تعویق افتاده / منقضی
+}
+
+/// Task urgency priority
+/// Source: Product Document p. 18 §19
+enum TaskPriority {
+  low    @map("low") // کم
+  medium @map("medium") // متوسط
+  high   @map("high") // بالا
+  urgent @map("urgent") // اضطراری
+}
+
+/// Polymorphic target relation type for tasks
+/// Source: Product Document p. 18 §19, p. 20 §22
+enum TaskRelatedType {
+  campaign  @map("campaign")
+  webinar   @map("webinar")
+  lead      @map("lead")
+  sop       @map("sop")
+  equipment @map("equipment")
+  meeting   @map("meeting")
+}
+
+/// Source mechanism of financial cost entry
+/// Source: Product Document p. 11 §9, p. 12 §9
+enum CostSource {
+  manual @map("manual") // ثبت دستی
+  import @map("import") // ایمپورت از فایل
+}
+
+/// Platform data retrieval method (Audit MIN-01)
+/// Source: Product Document p. 11 §8
+enum PlatformRetrievalMethod {
+  manual @map("manual") // دستی
+  api    @map("api") // API
+  import @map("import") // Import
+}
+
+/// Equipment readiness state for campaign/webinar gear (Audit CRIT-03)
+/// Source: Product Document p. 5 §3-2, p. 19 §21
+enum EquipmentReadinessStatus {
+  ready        @map("ready") // آماده (سبز)
+  incomplete   @map("incomplete") // ناقص (زرد)
+  not_procured @map("not_procured") // تهیه نشده (قرمز)
+}
+
+/// Webinar lifecycle state
+/// Source: Product Document p. 17 §18
+enum WebinarStatus {
+  draft     @map("draft") // پیش‌نویس
+  scheduled @map("scheduled") // برنامه‌ریزی‌شده
+  live      @map("live") // در حال برگزاری
+  completed @map("completed") // به پایان رسیده / برگزارشده
+  cancelled @map("cancelled") // لغو شده
+}
+
+/// SMS campaign delivery state
+/// Source: Product Document p. 16 §16, p. 17 §17
+enum SmsStatus {
+  draft     @map("draft") // پیش‌نویس
+  scheduled @map("scheduled") // زمان‌بندی‌شده
+  sending   @map("sending") // در حال ارسال
+  sent      @map("sent") // ارسال‌شده
+  failed    @map("failed") // با خطا مواجه شده
+}
+
+/// Individual SMS recipient delivery status (Audit MAJ-01)
+/// Source: Product Document p. 17 §17
+enum SmsDeliveryStatus {
+  pending   @map("pending") // در انتظار ارسال
+  delivered @map("delivered") // تحویل داده شده
+  failed    @map("failed") // ناموفق
+}
+
+/// Standard operating procedure workflow state
+/// Source: Product Document p. 20 §23
+enum SopStatus {
+  draft    @map("draft") // پیش‌نویس
+  active   @map("active") // معتبر / فعال
+  archived @map("archived") // بایگانی‌شده
+}
+
+/// Creative idea evaluation stage
+/// Source: Product Document p. 21 §25, p. 22 §25
+enum IdeaStatus {
+  submitted   @map("submitted") // ثبت‌شده
+  reviewing   @map("reviewing") // در حال بررسی
+  approved    @map("approved") // تاییدشده
+  rejected    @map("rejected") // ردشده
+  implemented @map("implemented") // اجراشده
+}
+
+/// User voting on ideas
+/// Source: Product Document p. 22 §25
+enum VoteType {
+  upvote   @map("upvote") // موافق
+  downvote @map("downvote") // مخالف
+}
+
+/// Metric optimization direction (Audit MAJ-04)
+/// Source: Product Document p. 5 §3-2, p. 13 §11
+enum MetricDirection {
+  higher_is_better @map("higher_is_better") // بالاتر بهتر (پیش‌فرض)
+  lower_is_better  @map("lower_is_better") // کمتر بهتر (CPL, CAC)
+}
+
+/// File import target entity type
+/// Source: Product Document p. 12 §10, p. 13 §10
+enum ImportDataType {
+  leads    @map("leads")
+  costs    @map("costs")
+  contacts @map("contacts")
+}
+
+/// File import asynchronous execution state
+/// Source: Product Document p. 12 §10
+enum ImportStatus {
+  pending    @map("pending")
+  processing @map("processing")
+  completed  @map("completed")
+  failed     @map("failed")
+}
+
+/// System and user alert notification category
+/// Source: Product Document p. 7 §3
+enum NotificationType {
+  info    @map("info")
+  success @map("success")
+  warning @map("warning")
+  alert   @map("alert")
+}
+
+// ==============================================================================
+// 1. IDENTITY & ACCESS MANAGEMENT (IAM) & TENANCY ROOT
+// ==============================================================================
+
+/// Global user identity across organizations
+/// Source: Product Document p. 6 §1, p. 23 §27
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  email        String?   @unique @db.VarChar(255)
+  mobile       String?   @unique @db.VarChar(20)
+  passwordHash String    @db.VarChar(255)
+  fullName     String    @db.VarChar(255)
+  avatarUrl    String?   @db.VarChar(500)
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Tenant memberships
+  memberships             OrganizationMembership[]
+  sessions                Session[]
+  refreshTokens           RefreshToken[]
+  notificationPreferences NotificationPreference[]
+
+  // Owned or created entities
+  ownedCampaigns         Campaign[]             @relation("CampaignOwner")
+  assignedLeads          Lead[]                 @relation("LeadAssignee")
+  createdCosts           Cost[]                 @relation("CostCreator")
+  createdTasks           Task[]                 @relation("TaskCreator")
+  assignedTasks          Task[]                 @relation("TaskAssignee")
+  taskComments           TaskComment[]
+  leadActivities         LeadActivity[]         @relation("LeadActivityActor")
+  leadCalls              LeadCall[]             @relation("LeadCallCaller")
+  authoredSops           Sop[]                  @relation("SopAuthor")
+  approvedSops           Sop[]                  @relation("SopApprover")
+  sopVersions            SopVersion[]           @relation("SopVersionCreator")
+  ideas                  Idea[]                 @relation("IdeaAuthor")
+  ideaVotes              IdeaVote[]
+  learningProgress       UserLearningProgress[]
+  createdMeetings        Meeting[]              @relation("MeetingCreator")
+  assignedActionItems    MeetingActionItem[]    @relation("MeetingActionItemAssignee")
+  responsibleEquipments  EventEquipment[]       @relation("EquipmentResponsible")
+  calendarEvents         CalendarEvent[]        @relation("CalendarEventCreator")
+  assignedCalendarEvents CalendarEvent[]        @relation("CalendarEventAssignee")
+  importJobs             ImportJob[]            @relation("ImportJobCreator")
+  notifications          Notification[]
+  activityLogs           UserActivityLog[]
+
+  @@map("users")
+}
+
+/// Tenant isolation root representing an organization or business unit
+/// Source: Product Document p. 6 §1, p. 24 §28; docs/PROJECT-DECISIONS.md §3
+model Organization {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(255)
+  slug      String   @unique @db.VarChar(100)
+  logoUrl   String?  @db.VarChar(500)
+  currency  Currency @default(TOMAN)
+  timezone  String   @default("Asia/Tehran") @db.VarChar(50)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Multi-tenant relational scope
+  memberships             OrganizationMembership[]
+  sessions                Session[]
+  taxonomies              OrganizationTaxonomy[]
+  notificationPreferences NotificationPreference[]
+  campaigns               Campaign[]
+  platforms               Platform[]
+  platformAllocations     CampaignPlatformAllocation[]
+  targetAudiences         TargetAudience[]
+  campaignAudiences       CampaignAudience[]
+  landingPages            LandingPage[]
+  utmLinks                UtmLink[]
+  costs                   Cost[]
+  costCategories          CostCategory[]
+  leadStatusConfigs       LeadStatusConfig[]
+  leads                   Lead[]
+  leadActivities          LeadActivity[]
+  leadCalls               LeadCall[]
+  smsCampaigns            SmsCampaign[]
+  smsRecipients           SmsRecipient[]
+  webinars                Webinar[]
+  webinarAttendees        WebinarAttendee[]
+  tasks                   Task[]
+  taskSubtasks            TaskSubtask[]
+  taskComments            TaskComment[]
+  calendarEvents          CalendarEvent[]
+  equipmentItems          EquipmentItem[]
+  equipmentTemplates      EquipmentTemplate[]
+  equipmentTemplateItems  EquipmentTemplateItem[]
+  eventEquipments         EventEquipment[]
+  meetings                Meeting[]
+  meetingActionItems      MeetingActionItem[]
+  sops                    Sop[]
+  sopVersions             SopVersion[]
+  learningResources       LearningResource[]
+  userLearningProgress    UserLearningProgress[]
+  ideas                   Idea[]
+  ideaVotes               IdeaVote[]
+  kpiMetrics              KpiMetric[]
+  customMetrics           CustomMetric[]
+  kpiAlertRules           KpiAlertRule[]
+  importJobs              ImportJob[]
+  notifications           Notification[]
+  activityLogs            UserActivityLog[]
+  wordpressIntegrations   WordpressIntegration[]
+  wordpressWebhookLogs    WordpressWebhookLog[]
+  funnelObjectives        CampaignFunnelObjective[]
+  funnelKeyResults        CampaignFunnelKeyResult[]
+
+  @@map("organizations")
+}
+
+/// Associative join defining user role and membership within an organization
+/// Source: Product Document p. 6 §1, p. 23 §27
+model OrganizationMembership {
+  id                  String           @id @default(uuid()) @db.Uuid
+  organizationId      String           @db.Uuid
+  userId              String           @db.Uuid
+  role                Role             @default(campaign_manager)
+  status              MembershipStatus @default(active)
+  invitationTokenHash String?          @unique @db.VarChar(64)
+  invitationExpiresAt DateTime?
+  invitedAt           DateTime?
+  joinedAt            DateTime?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@index([organizationId, role])
+  @@map("organization_memberships")
+}
+
+/// User authentication session and active organization context
+/// Source: Product Document p. 6 §1; Implementation Decision
+model Session {
+  id             String    @id @default(uuid()) @db.Uuid
+  userId         String    @db.Uuid
+  organizationId String?   @db.Uuid
+  isRevoked      Boolean   @default(false)
+  revokedAt      DateTime?
+  revokedReason  String?   @db.VarChar(255)
+  userAgent      String?   @db.VarChar(500)
+  ipAddress      String?   @db.VarChar(45)
+  expiresAt      DateTime
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization  Organization?  @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  refreshTokens RefreshToken[]
+
+  @@unique([id, userId])
+  @@index([userId])
+  @@index([organizationId])
+  @@index([isRevoked])
+  @@map("sessions")
+}
+
+/// Cryptographic refresh token instances and rotation history
+/// Source: docs/PROJECT-DECISIONS.md §4 DEC-AUTH-01; B2.3.2.3 & B2.3.2.4
+model RefreshToken {
+  id                String      @id @default(uuid()) @db.Uuid
+  sessionId         String      @db.Uuid
+  userId            String      @db.Uuid
+  tokenHash         String      @unique @db.VarChar(64)
+  status            TokenStatus @default(ACTIVE)
+  replacedByTokenId String?     @unique @db.Uuid
+  expiresAt         DateTime
+  createdAt         DateTime    @default(now())
+  consumedAt        DateTime?
+  revokedAt         DateTime?
+
+  session         Session        @relation(fields: [sessionId, userId], references: [id, userId], onDelete: Cascade)
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  replacedByToken RefreshToken?  @relation("TokenReplacementChain", fields: [replacedByTokenId], references: [id], onDelete: SetNull)
+  previousTokens  RefreshToken[] @relation("TokenReplacementChain")
+
+  @@index([sessionId])
+  @@index([userId, status])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+/// Dynamic tenant-configurable taxonomies for dropdowns and categories
+/// Source: Product Document p. 23 §27, p. 24 §28
+model OrganizationTaxonomy {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  taxonomyType   String   @db.VarChar(100) // e.g. campaign_type, campaign_objective, lead_source, lost_reason
+  key            String   @db.VarChar(100)
+  label          String   @db.VarChar(255)
+  isSystem       Boolean  @default(false)
+  sortOrder      Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, taxonomyType, key])
+  @@index([organizationId, taxonomyType])
+  @@map("organization_taxonomies")
+}
+
+/// User notification preferences matrix per event type and delivery channel (Audit MAJ-03)
+/// Source: Product Document p. 7 §3 (جدول نوع رویداد × کانال درون‌برنامه‌ای، ایمیل با سوئیچ)
+model NotificationPreference {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  userId         String   @db.Uuid
+  eventType      String   @db.VarChar(100) // e.g. lead_assigned, task_due, campaign_alert, cost_threshold
+  inAppEnabled   Boolean  @default(true)
+  emailEnabled   Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId, eventType])
+  @@index([organizationId, userId])
+  @@map("notification_preferences")
+}
+
+// ==============================================================================
+// 2. PERFORMANCE & MARKETING DOMAIN (WORKSPACE 1)
+// ==============================================================================
+
+/// Core marketing campaign tracking budget, spend, status, and health
+/// Source: Product Document p. 8 §4, p. 9 §6, p. 10 §7; docs/PROJECT-DECISIONS.md
+model Campaign {
+  id             String         @id @default(uuid()) @db.Uuid
+  organizationId String         @db.Uuid
+  name           String         @db.VarChar(255)
+  description    String?        @db.Text
+  type           String         @default("digital") @db.VarChar(100) // Configurable taxonomy
+  objective      String         @default("lead") @db.VarChar(100) // Configurable taxonomy
+  channel        String         @db.VarChar(100) // Legacy compatibility channel
+  status         CampaignStatus @default(draft)
+  health         CampaignHealth @default(healthy)
+  budget         Decimal        @default(0) @db.Decimal(12, 2) // Monetary non-negative integer Toman/Rial
+  spend          Decimal        @default(0) @db.Decimal(12, 2) // Aggregated expense in Toman/Rial
+  startDate      DateTime?      @db.Date
+  endDate        DateTime?      @db.Date
+  ownerId        String?        @db.Uuid
+  targetLeads    Int?
+  targetSales    Decimal?       @db.Decimal(12, 2)
+  impressions    Int            @default(0)
+  clicks         Int            @default(0)
+  conversions    Int            @default(0)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // Tenant and owner relations
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  owner        User?        @relation("CampaignOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+
+  // Sub-allocations and marketing assets (Compound Foreign Key Targets: CRIT-01)
+  platformAllocations CampaignPlatformAllocation[]
+  campaignAudiences   CampaignAudience[]
+  landingPages        LandingPage[]
+  utmLinks            UtmLink[]
+  costs               Cost[]
+  leads               Lead[]
+  smsCampaigns        SmsCampaign[]
+  webinars            Webinar[]
+  eventEquipments     EventEquipment[]
+  meetings            Meeting[]
+  ideas               Idea[]
+  kpiMetrics          KpiMetric[]
+  funnelObjectives    CampaignFunnelObjective[]
+
+  @@unique([id, organizationId]) // Enforces multi-tenant composite isolation (CRIT-01)
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@index([organizationId, health])
+  @@index([organizationId, ownerId])
+  @@map("campaigns")
+}
+
+/// Advertising platform/channel master catalogue
+/// Source: Product Document p. 8 §4, p. 11 §8
+model Platform {
+  id              String                  @id @default(uuid()) @db.Uuid
+  organizationId  String                  @db.Uuid
+  name            String                  @db.VarChar(100)
+  code            String                  @db.VarChar(50)
+  category        String                  @db.VarChar(50) // digital, sms, social, ad_network
+  retrievalMethod PlatformRetrievalMethod @default(manual) // دستی / API / Import (Audit MIN-01)
+  icon            String?                 @db.VarChar(100)
+  isActive        Boolean                 @default(true)
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
+  organization Organization                 @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  allocations  CampaignPlatformAllocation[]
+  costs        Cost[]
+  leads        Lead[]
+  utmLinks     UtmLink[]
+
+  @@unique([id, organizationId]) // Compound Foreign Key Target (CRIT-01)
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@map("platforms")
+}
+
+/// Budget and target volume sub-allocation per advertising platform (Audit CRIT-01)
+/// Source: Product Document p. 9 §6 (Step 3), p. 10 §7
+model CampaignPlatformAllocation {
+  id              String   @id @default(uuid()) @db.Uuid
+  organizationId  String   @db.Uuid
+  campaignId      String   @db.Uuid
+  platformId      String   @db.Uuid
+  allocatedBudget Decimal  @default(0) @db.Decimal(12, 2)
+  targetCount     Int?
+  actualSpend     Decimal  @default(0) @db.Decimal(12, 2)
+  actualCount     Int      @default(0)
+  notes           String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign     Campaign     @relation(fields: [campaignId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  platform     Platform     @relation(fields: [platformId, organizationId], references: [id, organizationId], onDelete: Cascade)
+
+  @@unique([campaignId, platformId])
+  @@index([organizationId])
+  @@index([campaignId])
+  @@index([platformId])
+  @@map("campaign_platform_allocations")
+}
+
+/// Objective (O) for a specific sales funnel stage of a campaign
+model CampaignFunnelObjective {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  campaignId     String   @db.Uuid
+  stageKey       String   @db.VarChar(50)
+  title          String   @db.VarChar(255)
+  description    String?  @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign     Campaign                  @relation(fields: [campaignId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  keyResults   CampaignFunnelKeyResult[]
+
+  @@unique([id, organizationId])
+  @@unique([campaignId, stageKey, organizationId])
+  @@index([organizationId])
+  @@index([campaignId])
+  @@index([campaignId, stageKey])
+  @@map("campaign_funnel_objectives")
+}
+
+/// Key Result (KR) measured under an Objective for a funnel stage
+model CampaignFunnelKeyResult {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  objectiveId    String   @db.Uuid
+  title          String   @db.VarChar(255)
+  currentValue   Decimal  @default(0) @db.Decimal(12, 2)
+  targetValue    Decimal  @default(100) @db.Decimal(12, 2)
+  unit           String   @default("عدد") @db.VarChar(50)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  objective    CampaignFunnelObjective @relation(fields: [objectiveId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  tasks        Task[]
+
+  @@unique([id, organizationId])
+  @@index([organizationId])
+  @@index([objectiveId])
+  @@map("campaign_funnel_key_results")
+}
+
+/// Target audience demographic and psychographic profiles (Audit CRIT-02: Reusable M:N)
+/// Source: Product Document p. 9 §6, p. 13 §11, p. 14 §11
+model TargetAudience {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  name           String   @db.VarChar(255)
+  description    String?  @db.Text
+  ageMin         Int?
+  ageMax         Int?
+  gender         String?  @db.VarChar(20)
+  interests      String?  @db.Text
+  location       String?  @db.VarChar(255)
+  channel        String?  @db.VarChar(100) // کانال مناسب (PRD p. 14)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaigns    CampaignAudience[]
+
+  @@unique([id, organizationId]) // Compound Foreign Key Target (CRIT-01)
+  @@index([organizationId])
+  @@map("target_audiences")
+}
+
+/// Associative join table establishing Many-to-Many Campaign-Audience reuse (Audit CRIT-02)
+/// Source: Product Document p. 9 §6 (Step 2) & p. 14 §11 (کمپین‌هایی که از این مخاطب استفاده کرده‌اند)
+model CampaignAudience {
+  id               String   @id @default(uuid()) @db.Uuid
+  organizationId   String   @db.Uuid
+  campaignId       String   @db.Uuid
+  targetAudienceId String   @db.Uuid
+  createdAt        DateTime @default(now())
+
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign       Campaign       @relation(fields: [campaignId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  targetAudience TargetAudience @relation(fields: [targetAudienceId, organizationId], references: [id, organizationId], onDelete: Cascade)
+
+  @@unique([campaignId, targetAudienceId])
+  @@index([organizationId])
+  @@index([campaignId])
+  @@index([targetAudienceId])
+  @@map("campaign_audiences")
+}
+
+/// Destination marketing landing pages (Audit CRIT-01)
+/// Source: Product Document p. 9 §6, p. 14 §12
+model LandingPage {
+  id               String   @id @default(uuid()) @db.Uuid
+  organizationId   String   @db.Uuid
+  campaignId       String?  @db.Uuid
+  title            String   @db.VarChar(255)
+  url              String   @db.VarChar(500)
+  slug             String?  @db.VarChar(200)
+  template         String?  @db.VarChar(100)
+  viewsCount       Int      @default(0)
+  leadsCount       Int      @default(0)
+  conversionRate   Decimal  @default(0) @db.Decimal(5, 2)
+  connectionStatus Boolean  @default(true) // وضعیت اتصال (p. 14)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign     Campaign?    @relation(fields: [campaignId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  utmLinks     UtmLink[]
+
+  @@unique([id, organizationId]) // Compound Foreign Key Target (CRIT-01)
+  @@index([organizationId])
+  @@index([campaignId])
+  @@map("landing_pages")
+}
+
+/// Generated UTM campaign tracking links (Audit CRIT-01)
+/// Source: Product Document p. 9 §6, p. 14 §13
+model UtmLink {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  campaignId     String?  @db.Uuid
+  landingPageId  String?  @db.Uuid
+  platformId     String?  @db.Uuid
+  originalUrl    String   @db.VarChar(1000)
+  utmSource      String   @db.VarChar(100)
+  utmMedium      String   @db.VarChar(100)
+  utmCampaign    String   @db.VarChar(100)
+  utmTerm        String?  @db.VarChar(100)
+  utmContent     String?  @db.VarChar(100)
+  finalUrl       String   @db.VarChar(1500)
+  clicksCount    Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign     Campaign?    @relation(fields: [campaignId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  landingPage  LandingPage? @relation(fields: [landingPageId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  platform     Platform?    @relation(fields: [platformId, organizationId], references: [id, organizationId], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([campaignId])
+  @@index([landingPageId])
+  @@index([platformId])
+  @@map("utm_links")
+}
+
+/// Configurable taxonomy category for marketing expenditures
+/// Source: Product Document p. 23 §27, p. 24 §28
+model CostCategory {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  name           String   @db.VarChar(100)
+  code           String   @db.VarChar(50)
+  description    String?  @db.Text
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  costs        Cost[]
+
+  @@unique([id, organizationId]) // Compound Foreign Key Target (CRIT-01)
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@map("cost_categories")
+}
+
+/// Granular expense transaction record attributed to campaign, platform, and date (Audit CRIT-01)
+/// Source: Product Document p. 8 §4, p. 11 §9, p. 12 §9; docs/PROJECT-DECISIONS.md
+model Cost {
+  id             String     @id @default(uuid()) @db.Uuid
+  organizationId String     @db.Uuid
+  campaignId     String?    @db.Uuid
+  platformId     String?    @db.Uuid
+  categoryId     String?    @db.Uuid
+  date           DateTime   @db.Date
+  amount         Decimal    @default(0) @db.Decimal(12, 2) // Non-negative integer Toman/Rial
+  count          Int?
+  source         CostSource @default(manual)
+  createdById    String?    @db.Uuid
+  importJobId    String?    @db.Uuid
+  notes          String?    @db.Text
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign     Campaign?     @relation(fields: [campaignId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  platform     Platform?     @relation(fields: [platformId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  category     CostCategory? @relation(fields: [categoryId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  createdBy    User?         @relation("CostCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  importJob    ImportJob?    @relation(fields: [importJobId, organizationId], references: [id, organizationId], onDelete: Restrict)
+
+  @@index([organizationId])
+  @@index([organizationId, date])
+  @@index([campaignId])
+  @@index([platformId])
+  @@index([categoryId])
+  @@index([importJobId])
+  @@map("costs")
+}
+
+// ==============================================================================
+// 3. LEADS & SALES DOMAIN (WORKSPACE 2)
+// ==============================================================================
+
+/// Organization-configurable lead status with open/won/lost grouping (Audit MAJ-02)
+/// Source: Product Document p. 23 §28 (وضعیت‌های لید: ستون «گروه» باز/برنده/بازنده)
+model LeadStatusConfig {
+  id             String          @id @default(uuid()) @db.Uuid
+  organizationId String          @db.Uuid
+  key            String          @db.VarChar(100) // new, contacted, qualified, proposal, customer, lost
+  label          String          @db.VarChar(255) // جدید، تماس‌گرفته، واجد شرایط، ارسال پروپوزال، مشتری، ردشده
+  group          LeadStatusGroup @default(open) // باز، برنده، بازنده
+  color          String?         @db.VarChar(50)
+  sortOrder      Int             @default(0)
+  isSystem       Boolean         @default(false)
+  isActive       Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  leads        Lead[]
+
+  @@unique([id, organizationId]) // Compound Foreign Key Target (CRIT-01)
+  @@unique([organizationId, key])
+  @@index([organizationId])
+  @@map("lead_status_configs")
+}
+
+/// Customer sales opportunity and contact details (Audit CRIT-01, MAJ-02)
+/// Source: Product Document p. 8 §4, p. 14 §14, p. 15 §14, p. 16 §15
+model Lead {
+  id               String    @id @default(uuid()) @db.Uuid
+  organizationId   String    @db.Uuid
+  fullName         String    @db.VarChar(255)
+  mobile           String    @db.VarChar(20)
+  email            String?   @db.VarChar(255)
+  city             String?   @db.VarChar(100)
+  source           String    @default("manual") @db.VarChar(100)
+  campaignId       String?   @db.Uuid
+  platformId       String?   @db.Uuid
+  utmSource        String?   @db.VarChar(100)
+  utmMedium        String?   @db.VarChar(100)
+  utmCampaign      String?   @db.VarChar(100)
+  utmTerm          String?   @db.VarChar(100)
+  utmContent       String?   @db.VarChar(100)
+  statusKey        String    @default("new") @db.VarChar(100) // Configurable status (MAJ-02)
+  statusConfigId   String?   @db.Uuid
+  assignedToId     String?   @db.Uuid
+  salesValue       Decimal?  @db.Decimal(12, 2) // Closed deal value in Toman/Rial
+  lostReason       String?   @db.VarChar(255)
+  nextFollowUpAt   DateTime?
+  nextFollowUpNote String?   @db.VarChar(500)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign     Campaign?         @relation(fields: [campaignId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  platform     Platform?         @relation(fields: [platformId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  statusConfig LeadStatusConfig? @relation(fields: [statusConfigId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  assignedTo   User?             @relation("LeadAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  activities        LeadActivity[]
+  calls             LeadCall[]
+  webinarAttendance WebinarAttendee[]
+  convertedSmsLogs  SmsRecipient[]    @relation("SmsReplierLead")
+
+  @@unique([id, organizationId]) // Enforces multi-tenant composite isolation (CRIT-01)
+  @@index([organizationId])
+  @@index([organizationId, statusKey])
+  @@index([organizationId, assignedToId])
+  @@index([organizationId, mobile])
+  @@index([campaignId])
+  @@map("leads")
+}
+
+/// Immutable event logging customer journey touchpoints and sales state transitions (Audit CRIT-01)
+/// Source: Product Document p. 16 §16
+model LeadActivity {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @db.Uuid
+  leadId         String           @db.Uuid
+  type           LeadActivityType
+  title          String           @db.VarChar(255)
+  details        String?          @db.Text
+  actorUserId    String?          @db.Uuid
+  createdAt      DateTime         @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  lead         Lead         @relation(fields: [leadId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  actorUser    User?        @relation("LeadActivityActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([leadId])
+  @@index([leadId, createdAt])
+  @@map("lead_activities")
+}
+
+/// Sales agent phone call log and outcome (Audit CRIT-01)
+/// Source: Product Document p. 16 §17
+model LeadCall {
+  id              String         @id @default(uuid()) @db.Uuid
+  organizationId  String         @db.Uuid
+  leadId          String         @db.Uuid
+  callerUserId    String         @db.Uuid
+  status          LeadCallStatus @default(successful)
+  durationSeconds Int            @default(0)
+  note            String?        @db.Text
+  recordingUrl    String?        @db.VarChar(500)
+  callDate        DateTime       @default(now())
+  createdAt       DateTime       @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  lead         Lead         @relation(fields: [leadId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  callerUser   User         @relation("LeadCallCaller", fields: [callerUserId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId])
+  @@index([leadId])
+  @@index([callerUserId])
+  @@map("lead_calls")
+}
+
+/// Outbound SMS delivery batch execution and delivery reporting (Audit CRIT-01)
+/// Source: Product Document p. 10 §7, p. 16 §16, p. 17 §17
+model SmsCampaign {
+  id             String    @id @default(uuid()) @db.Uuid
+  organizationId String    @db.Uuid
+  campaignId     String?   @db.Uuid
+  name           String    @db.VarChar(255)
+  senderNumber   String    @db.VarChar(50)
+  messageText    String    @db.Text
+  recipientCount Int       @default(0)
+  deliveredCount Int       @default(0)
+  failedCount    Int       @default(0)
+  costAmount     Decimal   @default(0) @db.Decimal(12, 2)
+  scheduledAt    DateTime?
+  sentAt         DateTime?
+  status         SmsStatus @default(draft)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign     Campaign?      @relation(fields: [campaignId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  recipients   SmsRecipient[]
+
+  @@unique([id, organizationId]) // Compound Foreign Key Target (CRIT-01)
+  @@index([organizationId])
+  @@index([campaignId])
+  @@map("sms_campaigns")
+}
+
+/// Individual SMS recipient delivery status and incoming replies (Audit MAJ-01, CRIT-01)
+/// Source: Product Document p. 17 §17 (جدول شماره‌ها: شماره ماسک‌شده، وضعیت، زمان، پاسخ؛ ساخت لید از پاسخ‌دهندگان)
+model SmsRecipient {
+  id              String            @id @default(uuid()) @db.Uuid
+  organizationId  String            @db.Uuid
+  smsCampaignId   String            @db.Uuid
+  mobile          String            @db.VarChar(20)
+  status          SmsDeliveryStatus @default(pending)
+  deliveredAt     DateTime?
+  replyText       String?           @db.Text
+  repliedAt       DateTime?
+  convertedLeadId String?           @db.Uuid
+  createdAt       DateTime          @default(now())
+
+  organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  smsCampaign   SmsCampaign  @relation(fields: [smsCampaignId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  convertedLead Lead?        @relation("SmsReplierLead", fields: [convertedLeadId, organizationId], references: [id, organizationId], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([smsCampaignId])
+  @@index([mobile])
+  @@index([convertedLeadId])
+  @@map("sms_recipients")
+}
+
+/// Educational or promotional online webinar event (Audit CRIT-01)
+/// Source: Product Document p. 17 §18, p. 18 §18
+model Webinar {
+  id              String        @id @default(uuid()) @db.Uuid
+  organizationId  String        @db.Uuid
+  campaignId      String?       @db.Uuid
+  title           String        @db.VarChar(255)
+  description     String?       @db.Text
+  presenterName   String        @db.VarChar(255)
+  platform        String        @db.VarChar(100)
+  webinarDate     DateTime
+  durationMinutes Int           @default(60)
+  registrationUrl String?       @db.VarChar(500)
+  bannerUrl       String?       @db.VarChar(500)
+  status          WebinarStatus @default(draft)
+  capacity        Int?
+  registeredCount Int           @default(0)
+  attendedCount   Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  organization    Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign        Campaign?         @relation(fields: [campaignId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  attendees       WebinarAttendee[]
+  eventEquipments EventEquipment[]
+
+  @@unique([id, organizationId]) // Compound Foreign Key Target (CRIT-01)
+  @@index([organizationId])
+  @@index([campaignId])
+  @@map("webinars")
+}
+
+/// Registrant and attendance tracking for webinars (Audit CRIT-01)
+/// Source: Product Document p. 17 §18, p. 18 §18
+model WebinarAttendee {
+  id             String    @id @default(uuid()) @db.Uuid
+  organizationId String    @db.Uuid
+  webinarId      String    @db.Uuid
+  leadId         String?   @db.Uuid
+  fullName       String    @db.VarChar(255)
+  mobile         String    @db.VarChar(20)
+  email          String?   @db.VarChar(255)
+  attended       Boolean   @default(false)
+  joinedAt       DateTime?
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  webinar      Webinar      @relation(fields: [webinarId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  lead         Lead?        @relation(fields: [leadId, organizationId], references: [id, organizationId], onDelete: Cascade)
+
+  @@unique([webinarId, mobile])
+  @@index([organizationId])
+  @@index([webinarId])
+  @@index([leadId])
+  @@map("webinar_attendees")
+}
+
+// ==============================================================================
+// 4. TASKS & EXECUTION DOMAIN (WORKSPACE 3)
+// ==============================================================================
+
+/// Operational task, action item, or SOP checklist assigned to team members (Audit CRIT-01)
+/// Source: Product Document p. 8 §4, p. 18 §19, p. 19 §19
+model Task {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @db.Uuid
+  title          String           @db.VarChar(255)
+  description    String?          @db.Text
+  status         TaskStatus       @default(todo)
+  priority       TaskPriority     @default(medium)
+  dueDate        DateTime?        @db.Date
+  assigneeId     String?          @db.Uuid
+  createdById    String           @db.Uuid
+  relatedType    TaskRelatedType?
+  relatedId      String?          @db.Uuid
+  sopId          String?          @db.Uuid // Explicit link to SOP (p. 18)
+  okrKeyResultId String?          @db.Uuid
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  organization Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assignee     User?                    @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  createdBy    User                     @relation("TaskCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  sop          Sop?                     @relation("TaskSopSource", fields: [sopId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  okrKeyResult CampaignFunnelKeyResult? @relation(fields: [okrKeyResultId], references: [id], onDelete: SetNull)
+
+  subtasks           TaskSubtask[]
+  comments           TaskComment[]
+  meetingActionItems MeetingActionItem[]
+  generatedFromIdeas Idea[]              @relation("IdeaCreatedTask")
+
+  @@unique([id, organizationId]) // Enforces multi-tenant composite isolation (CRIT-01)
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@index([organizationId, assigneeId])
+  @@index([relatedType, relatedId])
+  @@index([sopId])
+  @@index([okrKeyResultId])
+  @@map("tasks")
+}
+
+/// Checklist subtask item within a parent task (Audit CRIT-01)
+/// Source: Product Document p. 18 §19
+model TaskSubtask {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  taskId         String   @db.Uuid
+  title          String   @db.VarChar(255)
+  isCompleted    Boolean  @default(false)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  task         Task         @relation(fields: [taskId, organizationId], references: [id, organizationId], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([taskId])
+  @@map("task_subtasks")
+}
+
+/// Discussion comments and collaboration on tasks (Audit CRIT-01)
+/// Source: Product Document p. 18 §19
+model TaskComment {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  taskId         String   @db.Uuid
+  authorUserId   String   @db.Uuid
+  content        String   @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  task         Task         @relation(fields: [taskId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  authorUser   User         @relation(fields: [authorUserId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId])
+  @@index([taskId])
+  @@map("task_comments")
+}
+
+/// Scheduled timeline event or multi-day campaign milestone
+/// Source: Product Document p. 19 §20
+model CalendarEvent {
+  id              String                    @id @default(uuid()) @db.Uuid
+  organizationId  String                    @db.Uuid
+  title           String                    @db.VarChar(255)
+  description     String?                   @db.Text
+  startDate       DateTime
+  endDate         DateTime
+  isAllDay        Boolean                   @default(false)
+  startTime       String?                   @db.VarChar(10)
+  endTime         String?                   @db.VarChar(10)
+  color           String?                   @db.VarChar(50)
+  eventType       String                    @default("meeting") @db.VarChar(50)
+  relatedType     TaskRelatedType?
+  relatedId       String?                   @db.Uuid
+  createdById     String                    @db.Uuid
+  assigneeId      String?                   @db.Uuid
+  equipmentStatus EquipmentReadinessStatus?
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("CalendarEventCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  assignee     User?        @relation("CalendarEventAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([organizationId, startDate, endDate])
+  @@index([organizationId, eventType])
+  @@map("calendar_events")
+}
+
+// ==============================================================================
+// 5. EQUIPMENT & EVENT READINESS DOMAIN (WORKSPACE 3 - Audit CRIT-03)
+// ==============================================================================
+
+/// Reusable equipment catalog item (Audit CRIT-03)
+/// Source: Product Document p. 19 §21
+model EquipmentItem {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  name           String   @db.VarChar(255) // نام تجهیز: میکروفون یقه ای، وبکم 4K، رینگ لایت...
+  category       String   @db.VarChar(100) // صوت، تصویر، نور، استریم
+  description    String?  @db.Text
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization   Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  eventInstances EventEquipment[]
+  templateItems  EquipmentTemplateItem[]
+
+  @@unique([id, organizationId]) // Compound Foreign Key Target (CRIT-01)
+  @@index([organizationId])
+  @@map("equipment_items")
+}
+
+/// Predefined equipment checklists/templates applied to events (Audit CRIT-03)
+/// Source: Product Document p. 19 §21 (قالب‌های تجهیزات — لیست آماده، اعمال قالب روی کمپین/وبینار)
+model EquipmentTemplate {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  name           String   @db.VarChar(255) // e.g. قالب تجهیزات وبینار، قالب ضبط استودیویی
+  description    String?  @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  items        EquipmentTemplateItem[]
+
+  @@unique([id, organizationId]) // Compound Foreign Key Target (CRIT-01)
+  @@index([organizationId])
+  @@map("equipment_templates")
+}
+
+/// Items contained within a predefined equipment template (Audit CRIT-03, CRIT-01)
+/// Source: Product Document p. 19 §21
+model EquipmentTemplateItem {
+  id              String @id @default(uuid()) @db.Uuid
+  organizationId  String @db.Uuid
+  templateId      String @db.Uuid
+  equipmentItemId String @db.Uuid
+  quantity        Int    @default(1)
+
+  organization  Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  template      EquipmentTemplate @relation(fields: [templateId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  equipmentItem EquipmentItem     @relation(fields: [equipmentItemId, organizationId], references: [id, organizationId], onDelete: Cascade)
+
+  @@unique([templateId, equipmentItemId])
+  @@index([organizationId])
+  @@map("equipment_template_items")
+}
+
+/// Operational gear readiness instance tied to a campaign or webinar (Audit CRIT-03, CRIT-01)
+/// Source: Product Document p. 10 §7, p. 17 §18, p. 19 §21 (کمبودها بر اساس تاریخ اجرا، مسئول تهیه، مهلت، آماده/ناقص/تهیه نشده)
+model EventEquipment {
+  id              String                   @id @default(uuid()) @db.Uuid
+  organizationId  String                   @db.Uuid
+  equipmentItemId String                   @db.Uuid
+  campaignId      String?                  @db.Uuid
+  webinarId       String?                  @db.Uuid
+  status          EquipmentReadinessStatus @default(not_procured) // آماده · ناقص · تهیه نشده (p. 5)
+  responsibleId   String?                  @db.Uuid // مسئول تهیه (p. 19)
+  dueDate         DateTime?                @db.Date // مهلت تهیه (p. 19)
+  notes           String?                  @db.Text
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+
+  organization  Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  equipmentItem EquipmentItem @relation(fields: [equipmentItemId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  campaign      Campaign?     @relation(fields: [campaignId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  webinar       Webinar?      @relation(fields: [webinarId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  responsible   User?         @relation("EquipmentResponsible", fields: [responsibleId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@index([campaignId])
+  @@index([webinarId])
+  @@index([dueDate])
+  @@map("event_equipments")
+}
+
+// ==============================================================================
+// 6. KNOWLEDGE & COLLABORATION DOMAIN (WORKSPACE 3)
+// ==============================================================================
+
+/// Formal meeting minutes (صورتجلسات) and decisions (Audit CRIT-01)
+/// Source: Product Document p. 20 §22
+model Meeting {
+  id               String   @id @default(uuid()) @db.Uuid
+  organizationId   String   @db.Uuid
+  campaignId       String?  @db.Uuid
+  title            String   @db.VarChar(255)
+  meetingDate      DateTime
+  location         String?  @db.VarChar(255)
+  attendeesSummary String?  @db.VarChar(500)
+  summary          String?  @db.Text
+  notes            String?  @db.Text
+  versionNumber    Int      @default(1) // شماره نسخه برای ویرایش پس از ارسال (p. 20)
+  createdById      String   @db.Uuid
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  organization Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign     Campaign?           @relation(fields: [campaignId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  createdBy    User                @relation("MeetingCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  actionItems  MeetingActionItem[]
+
+  @@unique([id, organizationId]) // Compound Foreign Key Target (CRIT-01)
+  @@index([organizationId])
+  @@index([campaignId])
+  @@map("meetings")
+}
+
+/// Decision converted to an actionable task from meeting minutes (Audit CRIT-01)
+/// Source: Product Document p. 20 §22
+model MeetingActionItem {
+  id             String    @id @default(uuid()) @db.Uuid
+  organizationId String    @db.Uuid
+  meetingId      String    @db.Uuid
+  taskId         String?   @db.Uuid
+  description    String    @db.Text
+  assigneeId     String?   @db.Uuid
+  dueDate        DateTime? @db.Date
+  isCompleted    Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  meeting      Meeting      @relation(fields: [meetingId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  task         Task?        @relation(fields: [taskId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  assignee     User?        @relation("MeetingActionItemAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([meetingId])
+  @@index([taskId])
+  @@map("meeting_action_items")
+}
+
+/// Standard operating procedure document (Audit CRIT-01)
+/// Source: Product Document p. 20 §23, p. 21 §23
+model Sop {
+  id             String    @id @default(uuid()) @db.Uuid
+  organizationId String    @db.Uuid
+  title          String    @db.VarChar(255)
+  code           String    @db.VarChar(100)
+  category       String    @db.VarChar(100) // Configurable taxonomy
+  currentVersion String    @default("1.0") @db.VarChar(20)
+  status         SopStatus @default(draft)
+  authorId       String    @db.Uuid
+  approverId     String?   @db.Uuid
+  content        String    @db.Text
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  author        User         @relation("SopAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  approver      User?        @relation("SopApprover", fields: [approverId], references: [id], onDelete: SetNull)
+  versions      SopVersion[]
+  tasksUsingSop Task[]       @relation("TaskSopSource")
+
+  @@unique([id, organizationId]) // Compound Foreign Key Target (CRIT-01)
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@map("sops")
+}
+
+/// Historical version archive for standard operating procedures (Audit CRIT-01)
+/// Source: Product Document p. 20 §23, p. 21 §23
+model SopVersion {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  sopId          String   @db.Uuid
+  versionNumber  String   @db.VarChar(20)
+  changeSummary  String?  @db.VarChar(500)
+  content        String   @db.Text
+  createdById    String   @db.Uuid
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  sop          Sop          @relation(fields: [sopId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  createdBy    User         @relation("SopVersionCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@unique([sopId, versionNumber])
+  @@index([organizationId])
+  @@index([sopId])
+  @@map("sop_versions")
+}
+
+/// Training resources and professional development content (Audit CRIT-01)
+/// Source: Product Document p. 21 §24
+model LearningResource {
+  id              String   @id @default(uuid()) @db.Uuid
+  organizationId  String   @db.Uuid
+  title           String   @db.VarChar(255)
+  category        String   @db.VarChar(100)
+  software        String?  @db.VarChar(100) // فیلتر نرم‌افزار (p. 21)
+  type            String   @db.VarChar(50) // video, article, book, link
+  url             String?  @db.VarChar(1000)
+  durationMinutes Int?
+  description     String?  @db.Text
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userProgress UserLearningProgress[]
+
+  @@unique([id, organizationId]) // Compound Foreign Key Target (CRIT-01)
+  @@index([organizationId])
+  @@index([organizationId, category])
+  @@map("learning_resources")
+}
+
+/// User completion and rating for training materials (Audit CRIT-01)
+/// Source: Product Document p. 21 §24 (جدول کاربر × آموزش با وضعیت)
+model UserLearningProgress {
+  id             String    @id @default(uuid()) @db.Uuid
+  organizationId String    @db.Uuid
+  userId         String    @db.Uuid
+  resourceId     String    @db.Uuid
+  isCompleted    Boolean   @default(false)
+  completedAt    DateTime?
+  rating         Int?
+  notes          String?   @db.Text
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resource     LearningResource @relation(fields: [resourceId, organizationId], references: [id, organizationId], onDelete: Cascade)
+
+  @@unique([userId, resourceId])
+  @@index([organizationId])
+  @@index([userId])
+  @@map("user_learning_progress")
+}
+
+/// Creative marketing brainstorming proposal and voting item (Audit CRIT-01, MAJ-05)
+/// Source: Product Document p. 21 §25, p. 22 §25
+model Idea {
+  id             String     @id @default(uuid()) @db.Uuid
+  organizationId String     @db.Uuid
+  campaignId     String?    @db.Uuid
+  taskId         String?    @db.Uuid // لینک تسک ساخته‌شده (Audit MAJ-05, p. 22)
+  title          String     @db.VarChar(255)
+  description    String     @db.Text
+  category       String     @db.VarChar(100)
+  status         IdeaStatus @default(submitted)
+  outcomeNotes   String?    @db.Text // ثبت نتیجه ایده اجراشده (Audit MAJ-05, p. 22)
+  authorId       String     @db.Uuid
+  votesCount     Int        @default(0)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign     Campaign?    @relation(fields: [campaignId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  task         Task?        @relation("IdeaCreatedTask", fields: [taskId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  author       User         @relation("IdeaAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  votes        IdeaVote[]
+
+  @@unique([id, organizationId]) // Compound Foreign Key Target (CRIT-01)
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@index([campaignId])
+  @@index([taskId])
+  @@map("ideas")
+}
+
+/// User vote on creative proposals (Audit CRIT-01)
+/// Source: Product Document p. 22 §25
+model IdeaVote {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  ideaId         String   @db.Uuid
+  userId         String   @db.Uuid
+  voteType       VoteType @default(upvote)
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  idea         Idea         @relation(fields: [ideaId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([ideaId, userId])
+  @@index([organizationId])
+  @@index([ideaId])
+  @@map("idea_votes")
+}
+
+// ==============================================================================
+// 7. METRICS, ALERTS, IMPORTS & SYSTEM OPERATIONS
+// ==============================================================================
+
+/// Target KPI metric definition and historical actual tracking (Audit CRIT-01, MAJ-04)
+/// Source: Product Document p. 8 §4, p. 13 §11
+model KpiMetric {
+  id             String          @id @default(uuid()) @db.Uuid
+  organizationId String          @db.Uuid
+  campaignId     String?         @db.Uuid
+  name           String          @db.VarChar(100)
+  code           String          @db.VarChar(50)
+  formula        String?         @db.Text // فرمول سفارشی ساز (Audit MAJ-04, p. 13)
+  direction      MetricDirection @default(higher_is_better) // بالاتر/پایین‌تر بهتر (Audit MAJ-04, p. 13)
+  targetValue    Decimal         @db.Decimal(12, 2)
+  actualValue    Decimal         @default(0) @db.Decimal(12, 2)
+  unit           String          @db.VarChar(50)
+  period         String          @db.VarChar(50)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign     Campaign?      @relation(fields: [campaignId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  alertRules   KpiAlertRule[]
+
+  @@unique([id, organizationId]) // Compound Foreign Key Target (CRIT-01)
+  @@index([organizationId])
+  @@index([campaignId])
+  @@map("kpi_metrics")
+}
+
+/// Custom metric definitions for formula builder (Source: Product Document p. 13 §11)
+model CustomMetric {
+  id             String          @id @default(uuid()) @db.Uuid
+  organizationId String          @db.Uuid
+  name           String          @db.VarChar(100)
+  code           String          @db.VarChar(50)
+  description    String?         @db.Text
+  formula        String          @db.Text
+  direction      MetricDirection @default(higher_is_better)
+  unit           String          @default("تومان") @db.VarChar(50)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@map("custom_metrics")
+}
+
+/// Alert trigger threshold for campaign KPI deviance (Audit CRIT-01, MAJ-04)
+/// Source: Product Document p. 8 §4, p. 13 §11
+model KpiAlertRule {
+  id              String   @id @default(uuid()) @db.Uuid
+  organizationId  String   @db.Uuid
+  kpiMetricId     String?  @db.Uuid
+  metricName      String   @db.VarChar(100)
+  condition       String   @db.VarChar(20) // gt, lt, eq, gte, lte
+  thresholdValue  Decimal  @db.Decimal(12, 2)
+  severity        String   @default("warning") @db.VarChar(50)
+  message         String   @db.VarChar(500) // پیام هشدار (Audit MAJ-04, p. 13)
+  suggestedAction String?  @db.VarChar(500) // اقدام پیشنهادی (Audit MAJ-04, p. 13)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  kpiMetric    KpiMetric?   @relation(fields: [kpiMetricId, organizationId], references: [id, organizationId], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([kpiMetricId])
+  @@map("kpi_alert_rules")
+}
+
+/// Batch file data import job execution history and reporting (Audit MIN-02)
+/// Source: Product Document p. 12 §10, p. 13 §10
+model ImportJob {
+  id                String         @id @default(uuid()) @db.Uuid
+  organizationId    String         @db.Uuid
+  dataType          ImportDataType
+  fileName          String         @db.VarChar(255)
+  fieldMapping      String?        @db.Text // نگاشت ذخیره‌شده ستون‌ها (Audit MIN-02, p. 12)
+  duplicateHandling String?        @db.VarChar(50) // رفتار تکراری: نادیده بگیر / به‌روز کن (Audit MIN-02, p. 13)
+  totalRows         Int            @default(0)
+  successfulRows    Int            @default(0)
+  failedRows        Int            @default(0)
+  status            ImportStatus   @default(pending)
+  createdById       String         @db.Uuid
+  errorLog          String?        @db.Text
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("ImportJobCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  costs        Cost[]
+
+  @@unique([id, organizationId]) // Compound Foreign Key Target (MAJ-A)
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@map("import_jobs")
+}
+
+/// In-app notifications and system alerts for users
+/// Source: Product Document p. 7 §3
+model Notification {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String?          @db.Uuid
+  userId         String           @db.Uuid
+  title          String           @db.VarChar(255)
+  message        String           @db.Text
+  type           NotificationType @default(info)
+  isRead         Boolean          @default(false)
+  linkUrl        String?          @db.VarChar(500)
+  createdAt      DateTime         @default(now())
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([organizationId])
+  @@map("notifications")
+}
+
+/// Immutable system security and user activity audit trail
+/// Source: Product Document p. 22 §26, p. 23 §26
+model UserActivityLog {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @db.Uuid
+  userId         String?  @db.Uuid
+  action         String   @db.VarChar(100)
+  entityType     String   @db.VarChar(100)
+  entityId       String?  @db.Uuid
+  details        String?  @db.Text
+  ipAddress      String?  @db.VarChar(45)
+  userAgent      String?  @db.VarChar(500)
+  createdAt      DateTime @default(now())
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("user_activity_logs")
+}
+
+/// WordPress integration configuration and lead webhook mapping (Audit CRIT-01)
+/// Source: Product Document p. 24 §29
+model WordpressIntegration {
+  id                String    @id @default(uuid()) @db.Uuid
+  organizationId    String    @db.Uuid
+  siteUrl           String    @db.VarChar(500)
+  apiKeyHash        String    @db.VarChar(255)
+  webhookSecret     String    @db.VarChar(255)
+  leadMappingConfig String    @db.Text // JSON mapping configuration
+  isActive          Boolean   @default(true)
+  lastSyncAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  organization Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  webhookLogs  WordpressWebhookLog[]
+
+  @@unique([id, organizationId]) // Compound Foreign Key Target (CRIT-01)
+  @@unique([organizationId, siteUrl])
+  @@index([organizationId])
+  @@map("wordpress_integrations")
+}
+
+/// WordPress webhook incoming request and failure log (Audit MIN-03, CRIT-01)
+/// Source: Product Document p. 24 §29 (لاگ درخواست‌های ردشده: زمان، علت)
+model WordpressWebhookLog {
+  id                     String   @id @default(uuid()) @db.Uuid
+  organizationId         String   @db.Uuid
+  wordpressIntegrationId String   @db.Uuid
+  status                 String   @db.VarChar(50) // success, rejected, error
+  reason                 String?  @db.Text // علت رد شدن
+  payloadSummary         String?  @db.Text // خلاصه لاگ بدون اطلاعات حساس
+  ipAddress              String?  @db.VarChar(45)
+  receivedAt             DateTime @default(now())
+
+  organization         Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  wordpressIntegration WordpressIntegration @relation(fields: [wordpressIntegrationId, organizationId], references: [id, organizationId], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([wordpressIntegrationId])
+  @@index([receivedAt])
+  @@map("wordpress_webhook_logs")
+}

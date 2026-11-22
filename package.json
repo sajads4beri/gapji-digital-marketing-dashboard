@@ -9,22 +9,24 @@
     "packages/shared"
   ],
   "scripts": {
-    "dev:api": "pnpm run dev --workspace=apps/api",
-    "dev:web": "pnpm run dev --workspace=apps/web",
+    "dev:api": "pnpm --filter @gapji/api dev",
+    "dev:web": "pnpm --filter @gapji/web dev",
     "dev": "concurrently \"pnpm:dev:api\" \"pnpm:dev:web\"",
-    "build:api": "pnpm run build --workspace=apps/api",
-    "build:web": "pnpm run build --workspace=apps/web",
-    "build": "pnpm run build:api && pnpm run build:web",
-    "start:api": "pnpm run start:prod --workspace=apps/api",
-    "start:web": "pnpm run start --workspace=apps/web",
+    "build:shared": "pnpm --filter @gapji/shared build",
+    "build:api": "pnpm --filter @gapji/api build",
+    "build:web": "pnpm --filter @gapji/web build",
+    "build": "pnpm --filter @gapji/shared build && pnpm --filter @gapji/api build && pnpm --filter @gapji/web build",
+    "start:api": "pnpm --filter @gapji/api start:prod",
+    "start:web": "pnpm --filter @gapji/web start",
     "db:up": "docker-compose up -d postgres",
     "db:down": "docker-compose down",
-    "db:studio": "pnpm exec prisma studio --workspace=apps/api 2>/dev/null || echo 'Prisma not configured, using raw TypeORM'"
+    "db:studio": "pnpm --filter @gapji/api prisma:studio"
   },
   "devDependencies": {
     "concurrently": "^10.0.6",
-    "typescript": "^7.0.2"
+    "typescript": "^5.4.5"
   },
+  "packageManager": "pnpm@9.15.4",
   "engines": {
     "node": ">=18.0.0"
   }

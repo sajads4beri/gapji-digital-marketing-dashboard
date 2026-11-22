@@ -1,17 +1,20 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import { PrismaClientExceptionFilter } from './database/prisma-client-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: {
-      origin: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
+      origin: true,
       credentials: true,
     },
   });
 
   app.setGlobalPrefix(process.env.API_PREFIX || 'api');
+  app.use(cookieParser());
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -23,6 +26,8 @@ async function bootstrap() {
       },
     }),
   );
+
+  app.useGlobalFilters(new PrismaClientExceptionFilter());
 
   const config = new DocumentBuilder()
     .setTitle('Gapji Digital Marketing API')
