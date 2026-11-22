@@ -28,6 +28,7 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+ENV INTERNAL_API_URL="http://api.railway.internal:3001/api"
 
 # Build shared package first
 RUN pnpm --filter @gapji/shared build
