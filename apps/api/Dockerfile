@@ -30,7 +30,7 @@ COPY . .
 RUN pnpm --filter @gapji/shared build
 
 # Generate Prisma Client
-RUN pnpm --filter @gapji/api prisma generate
+RUN pnpm --filter @gapji/api run prisma:generate
 
 # Build NestJS Application
 RUN pnpm --filter @gapji/api build
