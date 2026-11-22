@@ -43,6 +43,9 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV NEXT_TELEMETRY_DISABLED=1
 
+RUN apk add --no-cache libc6-compat
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
@@ -51,11 +54,13 @@ COPY --chown=nextjs:nodejs --from=builder /app/node_modules ./node_modules
 COPY --chown=nextjs:nodejs --from=builder /app/packages/shared ./packages/shared
 COPY --chown=nextjs:nodejs --from=builder /app/apps/web ./apps/web
 COPY --chown=nextjs:nodejs --from=builder /app/package.json ./package.json
+COPY --chown=nextjs:nodejs --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --chown=nextjs:nodejs --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 
 USER nextjs
 
-WORKDIR /app/apps/web
+WORKDIR /app
 EXPOSE 3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "../../node_modules/next/dist/bin/next", "start", "-p", "3000"]
+CMD ["pnpm", "--filter", "@gapji/web", "start"]
