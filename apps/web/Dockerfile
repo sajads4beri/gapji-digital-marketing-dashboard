@@ -46,18 +46,16 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy built artifacts and dependencies
-COPY --from=builder /app/apps/web/public ./public
-COPY --from=builder /app/apps/web/.next ./.next
-COPY --from=builder /app/apps/web/node_modules ./node_modules
-COPY --from=builder /app/node_modules ./node_modules_root
-COPY --from=builder /app/packages/shared ./packages/shared
-COPY --from=builder /app/apps/web/package.json ./package.json
+# Copy root node_modules and monorepo structure to preserve all pnpm dependencies
+COPY --chown=nextjs:nodejs --from=builder /app/node_modules ./node_modules
+COPY --chown=nextjs:nodejs --from=builder /app/packages/shared ./packages/shared
+COPY --chown=nextjs:nodejs --from=builder /app/apps/web ./apps/web
+COPY --chown=nextjs:nodejs --from=builder /app/package.json ./package.json
 
 USER nextjs
 
+WORKDIR /app/apps/web
 EXPOSE 3000
-
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node_modules/.bin/next", "start", "-p", "3000"]
+CMD ["node", "../../node_modules/next/dist/bin/next", "start", "-p", "3000"]

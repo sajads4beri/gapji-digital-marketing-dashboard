@@ -47,16 +47,17 @@ RUN apk add --no-cache dumb-init openssl
 # Security: run as non-root user
 USER node
 
-COPY --chown=node:node --from=builder /app/apps/api/dist ./dist
-COPY --chown=node:node --from=builder /app/apps/api/node_modules ./node_modules
-COPY --chown=node:node --from=builder /app/node_modules ./node_modules_root
-COPY --chown=node:node --from=builder /app/apps/api/package.json ./package.json
-COPY --chown=node:node --from=builder /app/apps/api/prisma ./prisma
+# Copy root node_modules and monorepo structure to preserve all pnpm dependencies
+COPY --chown=node:node --from=builder /app/node_modules ./node_modules
+COPY --chown=node:node --from=builder /app/packages/shared ./packages/shared
+COPY --chown=node:node --from=builder /app/apps/api ./apps/api
+COPY --chown=node:node --from=builder /app/package.json ./package.json
 
+WORKDIR /app/apps/api
 EXPOSE 3001
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3001/api/health || exit 1
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-CMD ["node", "dist/main.js"]
+CMD ["node", "-e", "const fs = require('fs'); const entry = fs.existsSync('dist/src/main.js') ? 'dist/src/main.js' : 'dist/main.js'; require('./' + entry);"]
