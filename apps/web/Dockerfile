@@ -14,7 +14,7 @@ COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps/web/package.json ./apps/web/
 COPY packages/shared/package.json* ./packages/shared/
 
-RUN pnpm install --frozen-lockfile --filter @gapji/web...
+RUN pnpm install --frozen-lockfile
 
 # Stage 2: Builder
 FROM node:20-alpine AS builder
@@ -29,6 +29,10 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
+# Build shared package first
+RUN pnpm --filter @gapji/shared build
+
+# Build Web Application
 RUN pnpm --filter @gapji/web build
 
 # Stage 3: Runner
@@ -42,14 +46,18 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy built artifacts
+# Copy built artifacts and dependencies
 COPY --from=builder /app/apps/web/public ./public
 COPY --from=builder /app/apps/web/.next ./.next
 COPY --from=builder /app/apps/web/node_modules ./node_modules
+COPY --from=builder /app/node_modules ./node_modules_root
+COPY --from=builder /app/packages/shared ./packages/shared
 COPY --from=builder /app/apps/web/package.json ./package.json
 
 USER nextjs
 
 EXPOSE 3000
 
-CMD ["node_modules/.bin/next", "start"]
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node_modules/.bin/next", "start", "-p", "3000"]

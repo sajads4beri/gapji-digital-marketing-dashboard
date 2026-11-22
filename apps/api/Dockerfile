@@ -14,7 +14,7 @@ COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps/api/package.json ./apps/api/
 COPY packages/shared/package.json* ./packages/shared/
 
-RUN pnpm install --frozen-lockfile --filter @gapji/api...
+RUN pnpm install --frozen-lockfile
 
 # Stage 2: Builder
 FROM node:20-alpine AS builder
@@ -26,8 +26,11 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
 COPY . .
 
+# Build shared package
+RUN pnpm --filter @gapji/shared build
+
 # Generate Prisma Client
-RUN cd apps/api && pnpx prisma generate
+RUN pnpm --filter @gapji/api prisma generate
 
 # Build NestJS Application
 RUN pnpm --filter @gapji/api build
@@ -46,13 +49,14 @@ USER node
 
 COPY --chown=node:node --from=builder /app/apps/api/dist ./dist
 COPY --chown=node:node --from=builder /app/apps/api/node_modules ./node_modules
+COPY --chown=node:node --from=builder /app/node_modules ./node_modules_root
 COPY --chown=node:node --from=builder /app/apps/api/package.json ./package.json
 COPY --chown=node:node --from=builder /app/apps/api/prisma ./prisma
 
 EXPOSE 3001
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3001/api/health || exit 1
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["node", "dist/main.js"]
