@@ -63,4 +63,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3001/api/health || exit 1
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-CMD ["sh", "-c", "npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma || true; node -e \"const fs = require('fs'); const entry = fs.existsSync('apps/api/dist/src/main.js') ? 'apps/api/dist/src/main.js' : 'apps/api/dist/main.js'; require('./' + entry);\""]
+CMD ["node", "-e", "const fs = require('fs'); const entry = fs.existsSync('apps/api/dist/src/main.js') ? 'apps/api/dist/src/main.js' : 'apps/api/dist/main.js'; require('./' + entry);"]
